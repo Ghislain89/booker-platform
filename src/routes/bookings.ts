@@ -4,6 +4,7 @@ import { authenticate, authorizeAdmin } from "../middleware/auth";
 import { asyncHandler, HttpError } from "../lib/http";
 import { hasFlag } from "../lib/flags";
 import { asBody, Validator } from "../lib/validation";
+import { EXTRAS, Extra } from "../lib/pricing";
 import { BOOKING_STATUSES } from "../types";
 
 const router = express.Router();
@@ -28,6 +29,12 @@ router.post("/", authenticate, asyncHandler(async (req, res) => {
   const roomId = v.string("roomId");
   const checkIn = v.date("checkIn");
   const checkOut = v.date("checkOut");
+  const adults = v.number("adults", { required: false, min: 1, max: 10, integer: true });
+  const children = v.number("children", { required: false, min: 0, max: 10, integer: true });
+  const extras = v.stringArray("extras");
+  if (extras?.some((extra) => !(EXTRAS as readonly string[]).includes(extra))) {
+    v.error("extras", `extras may only contain ${EXTRAS.join(", ")}`);
+  }
   v.assertValid();
 
   if (hasFlag(req, "flaky-booking") && Math.random() < 0.3) {
@@ -35,7 +42,7 @@ router.post("/", authenticate, asyncHandler(async (req, res) => {
   }
 
   const booking = await bookingsController.create(
-    { roomId: roomId!, checkIn: checkIn!, checkOut: checkOut! },
+    { roomId: roomId!, checkIn: checkIn!, checkOut: checkOut!, adults, children, extras: extras as Extra[] | undefined },
     req.user!.userId,
   );
   res.status(201).json({ success: true, data: booking });

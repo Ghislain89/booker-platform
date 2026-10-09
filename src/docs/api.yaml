@@ -113,7 +113,7 @@ components:
               $ref: "#/components/schemas/User"
     Room:
       type: object
-      required: [id, number, type, price, capacity, amenities, status, createdAt, updatedAt]
+      required: [id, number, type, price, capacity, amenities, status, featured, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -138,12 +138,54 @@ components:
         status:
           type: string
           enum: [AVAILABLE, OCCUPIED, MAINTENANCE]
+        featured:
+          type: boolean
+          description: Shown on the home page
         createdAt:
           type: string
           format: date-time
         updatedAt:
           type: string
           format: date-time
+    PublicRoom:
+      allOf:
+        - $ref: "#/components/schemas/Room"
+        - type: object
+          required: [bookedPeriods]
+          properties:
+            bookedPeriods:
+              type: array
+              description: Pending and confirmed bookings that have not ended yet
+              items:
+                type: object
+                required: [checkIn, checkOut]
+                properties:
+                  checkIn:
+                    type: string
+                    format: date-time
+                  checkOut:
+                    type: string
+                    format: date-time
+    PageMeta:
+      type: object
+      required: [page, pageSize, total, totalPages]
+      properties:
+        page:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 6
+        total:
+          type: integer
+          example: 12
+        totalPages:
+          type: integer
+          example: 2
+    Extra:
+      type: string
+      enum: [BREAKFAST, PARKING, LATE_CHECKOUT]
+      description: "Breakfast: € 15 per guest per night · Parking: € 12 per night · Late check-out: € 25 per stay"
     RoomInput:
       type: object
       properties:
@@ -171,9 +213,11 @@ components:
         status:
           type: string
           enum: [AVAILABLE, OCCUPIED, MAINTENANCE]
+        featured:
+          type: boolean
     Booking:
       type: object
-      required: [id, userId, roomId, checkIn, checkOut, status, createdAt, updatedAt]
+      required: [id, userId, roomId, checkIn, checkOut, status, adults, children, extras, nights, totalPrice, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -190,6 +234,24 @@ components:
         status:
           type: string
           enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED]
+        adults:
+          type: integer
+          example: 2
+        children:
+          type: integer
+          example: 0
+        extras:
+          type: array
+          items:
+            $ref: "#/components/schemas/Extra"
+        nights:
+          type: integer
+          description: Computed from checkIn and checkOut
+          example: 3
+        totalPrice:
+          type: number
+          description: Computed; nights × room price + extras
+          example: 285
         createdAt:
           type: string
           format: date-time
@@ -310,6 +372,22 @@ components:
         updatedAt:
           type: string
           format: date-time
+    PublicBranding:
+      type: object
+      required: [name, logoUrl, description, contact, map, theme]
+      properties:
+        name:
+          type: string
+        logoUrl:
+          type: string
+        description:
+          type: string
+        contact:
+          $ref: "#/components/schemas/BrandingContact"
+        map:
+          $ref: "#/components/schemas/BrandingMap"
+        theme:
+          $ref: "#/components/schemas/BrandingTheme"
     BrandingInput:
       type: object
       description: Every field is optional; nested objects are merged with the current branding.
@@ -331,6 +409,8 @@ components:
           $ref: "#/components/schemas/BrandingTheme"
 
 tags:
+  - name: Public
+    description: No token needed; used by the web UI
   - name: Auth
   - name: Rooms
   - name: Bookings
@@ -340,6 +420,143 @@ tags:
   - name: Branding
 
 paths:
+  /api/public/rooms:
+    get:
+      summary: Search rooms (no token needed)
+      description: |
+        Filters can be combined. Passing `checkIn` and `checkOut` only returns rooms that are available
+        for the whole period (not in maintenance, no overlapping pending or confirmed booking).
+      tags: [Public]
+      security: []
+      parameters:
+        - in: query
+          name: type
+          description: One or more room types, comma separated or repeated
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [STANDARD, DELUXE, SUITE]
+          style: form
+          explode: false
+        - in: query
+          name: minPrice
+          schema:
+            type: number
+            minimum: 0
+        - in: query
+          name: maxPrice
+          schema:
+            type: number
+            minimum: 0
+        - in: query
+          name: capacity
+          description: Minimum number of guests
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: featured
+          schema:
+            type: boolean
+        - in: query
+          name: checkIn
+          schema:
+            type: string
+            format: date
+          example: "2030-06-01"
+        - in: query
+          name: checkOut
+          schema:
+            type: string
+            format: date
+          example: "2030-06-03"
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [number, price, -price, capacity, -capacity]
+            default: number
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 6
+      responses:
+        "200":
+          description: One page of rooms
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data, meta]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Room"
+                  meta:
+                    $ref: "#/components/schemas/PageMeta"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/public/rooms/{id}:
+    get:
+      summary: Get a room by id or room number (no token needed)
+      tags: [Public]
+      security: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Room id or room number, for example `101`
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The room and the periods it is booked
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/PublicRoom"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/public/branding:
+    get:
+      summary: Get the hotel branding (no token needed)
+      tags: [Public]
+      security: []
+      responses:
+        "200":
+          description: The branding
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/PublicBranding"
+
   /api/auth/login:
     post:
       summary: Log in
@@ -615,6 +832,8 @@ paths:
         - The room must exist (404) and not be in MAINTENANCE (409).
         - The dates may not overlap a PENDING or CONFIRMED booking for the same room (409 `Room not available`).
           Checking out on the day the next guest checks in is fine.
+        - `adults` (default 1) + `children` (default 0) may not exceed the room capacity (400, `details.guests`).
+        - `nights` and `totalPrice` are computed by the server.
       tags: [Bookings]
       requestBody:
         required: true
@@ -634,6 +853,20 @@ paths:
                   type: string
                   format: date-time
                   example: "2030-04-05T00:00:00.000Z"
+                adults:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                  default: 1
+                children:
+                  type: integer
+                  minimum: 0
+                  maximum: 10
+                  default: 0
+                extras:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Extra"
       responses:
         "201":
           description: Booking created

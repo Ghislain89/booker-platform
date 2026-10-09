@@ -25,6 +25,7 @@ export const getApiRoomsResponse = zod.object({
   "capacity": zod.number(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
+  "featured": zod.boolean().describe('Shown on the home page'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 }))
@@ -44,7 +45,8 @@ export const postApiRoomsBody = zod.object({
   "price": zod.number().min(postApiRoomsBodyPriceMin).optional(),
   "capacity": zod.number().min(1).max(postApiRoomsBodyCapacityMax).optional(),
   "amenities": zod.array(zod.string()).optional(),
-  "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']).optional()
+  "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']).optional(),
+  "featured": zod.boolean().optional()
 }).and(zod.object({
 
 }))
@@ -62,6 +64,7 @@ export const getApiRoomsIdResponse = zod.object({
   "capacity": zod.number(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
+  "featured": zod.boolean().describe('Shown on the home page'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 })
@@ -82,7 +85,8 @@ export const putApiRoomsIdBody = zod.object({
   "price": zod.number().min(putApiRoomsIdBodyPriceMin).optional(),
   "capacity": zod.number().min(1).max(putApiRoomsIdBodyCapacityMax).optional(),
   "amenities": zod.array(zod.string()).optional(),
-  "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']).optional()
+  "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']).optional(),
+  "featured": zod.boolean().optional()
 })
 
 export const putApiRoomsIdResponse = zod.object({
@@ -95,6 +99,7 @@ export const putApiRoomsIdResponse = zod.object({
   "capacity": zod.number(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
+  "featured": zod.boolean().describe('Shown on the home page'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 })

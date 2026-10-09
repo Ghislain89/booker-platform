@@ -7,6 +7,7 @@ import { resetDatabase } from "../lib/seed";
 import { asBody, Validator } from "../lib/validation";
 import { issueToken } from "../services/auth";
 import { toRoom } from "../services/rooms";
+import { bookingInclude, toBooking } from "../services/bookings";
 import { BOOKING_STATUSES, ROOM_STATUSES, ROOM_TYPES } from "../types";
 
 // Test-support endpoints. Only mounted when TEST_API_ENABLED (see src/config/env.ts).
@@ -123,7 +124,7 @@ router.post("/seed", asyncHandler(async (req, res) => {
       });
     }
     bookings.push(
-      await prisma.booking.create({
+      toBooking(await prisma.booking.create({
         data: {
           userId: user.id,
           roomId: room.id,
@@ -131,7 +132,8 @@ router.post("/seed", asyncHandler(async (req, res) => {
           checkOut: input.checkOut!,
           status: input.status,
         },
-      }),
+        include: bookingInclude,
+      })),
     );
   }
 

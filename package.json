@@ -1,19 +1,21 @@
 {
   "name": "booker-platform",
   "version": "1.0.0",
-  "description": "Booker Platform: a local hotel booking app (API, UI coming soon) used as test object for Playwright trainings",
+  "description": "Booker Platform: a local hotel booking app (web UI + REST API) used as test object for Playwright trainings",
   "main": "dist/server.js",
   "scripts": {
     "setup": "prisma migrate reset --force",
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "dev": "ts-node-dev --respawn --transpile-only --ignore-watch web src/server.ts",
+    "build": "vite build --config web/vite.config.ts",
+    "start": "ts-node --transpile-only src/server.ts --static",
+    "test": "playwright test",
+    "lint": "eslint playwright",
+    "typecheck": "tsc && tsc -p web",
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:reset": "npx prisma migrate reset --force",
-    "test": "playwright test",
     "codegen": "orval --config orval.config.ts",
     "schema:generation": "typed-openapi ./playwright/support/zod/swagger.json -r zod --output ./playwright/support/zod/api-schema.zod.ts",
-    "lint": "eslint playwright",
-    "swagger:export": "ts-node scripts/export-swagger.ts",
-    "typecheck": "tsc"
+    "swagger:export": "ts-node scripts/export-swagger.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -34,16 +36,21 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@faker-js/faker": "^9.5.1",
     "@playwright/test": "^1.64.0",
+    "@tanstack/react-query": "^5.104.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20.11.24",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
+    "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^8.57.0",
     "eslint-plugin-playwright": "^1.8.3",
     "jest": "^29.7.0",
@@ -51,12 +58,16 @@
     "orval": "^7.7.0",
     "prettier": "3.5.2",
     "prisma": "^5.10.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^7.18.4",
     "swagger-cli": "^4.0.4",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typed-openapi": "^0.10.1",
     "typescript": "^5.3.3",
+    "vite": "^6.4.4",
     "zod": "^3.24.2"
   },
   "overrides": {

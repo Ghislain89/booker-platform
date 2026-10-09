@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { BookingStatus } from './bookingStatus';
+import type { Extra } from './extra';
 import type { UserSummary } from './userSummary';
 import type { Room } from './room';
 
@@ -16,6 +17,13 @@ export interface Booking {
   checkIn: string;
   checkOut: string;
   status: BookingStatus;
+  adults: number;
+  children: number;
+  extras: Extra[];
+  /** Computed from checkIn and checkOut */
+  nights: number;
+  /** Computed; nights × room price + extras */
+  totalPrice: number;
   createdAt: string;
   updatedAt: string;
   user?: UserSummary;

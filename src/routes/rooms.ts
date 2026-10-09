@@ -17,6 +17,7 @@ const readRoom = (body: unknown, required: boolean): Partial<RoomInput> => {
     capacity: v.number("capacity", { required, min: 1, max: 10, integer: true }),
     amenities: v.stringArray("amenities"),
     status: v.oneOf("status", ROOM_STATUSES, { required: false }),
+    featured: v.boolean("featured"),
   };
   v.assertValid();
   return Object.fromEntries(Object.entries(room).filter(([, value]) => value !== undefined));
