@@ -1,30 +1,30 @@
-import { Booking } from '../types';
-import { bookingsService } from '../services/bookings';
+import { AuthUser, Booking, BookingInput, BookingStatus } from "../types";
+import { bookingsService } from "../services/bookings";
 
 class BookingsController {
-  async getAll(): Promise<Booking[]> {
+  getAll(): Promise<Booking[]> {
     return bookingsService.getAll();
   }
 
-  async getUserBookings(userId: string): Promise<Booking[]> {
+  getUserBookings(userId: string): Promise<Booking[]> {
     return bookingsService.getUserBookings(userId);
   }
 
-  async getById(id: string): Promise<Booking | null> {
-    return bookingsService.getById(id);
+  getById(id: string, requester: AuthUser): Promise<Booking> {
+    return bookingsService.getById(id, requester);
   }
 
-  async create(booking: Omit<Booking, 'id' | 'createdAt' | 'updatedAt'>): Promise<Booking> {
-    return bookingsService.create(booking);
+  create(booking: BookingInput, userId: string): Promise<Booking> {
+    return bookingsService.create(booking, userId);
   }
 
-  async updateStatus(id: string, status: Booking['status']): Promise<Booking | null> {
+  updateStatus(id: string, status: BookingStatus): Promise<Booking> {
     return bookingsService.updateStatus(id, status);
   }
 
-  async cancelBooking(id: string, userId: string): Promise<Booking | null> {
-    return bookingsService.cancelBooking(id, userId);
+  cancel(id: string, requester: AuthUser): Promise<Booking> {
+    return bookingsService.cancel(id, requester);
   }
 }
 
-export const bookingsController = new BookingsController(); 
+export const bookingsController = new BookingsController();

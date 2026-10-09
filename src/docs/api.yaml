@@ -1,0 +1,1126 @@
+# OpenAPI definitions for the Booker API, loaded by src/config/swagger.ts.
+# Keep this file in sync with src/routes/*.ts, then run `npm run swagger:export`.
+
+components:
+  responses:
+    BadRequest:
+      description: Validation failed. `details` maps each invalid field to a message.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationError"
+    Unauthorized:
+      description: No token was sent.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: The token is invalid or expired, or the user may not access this resource.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: The resource does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  parameters:
+    Id:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+  schemas:
+    Error:
+      type: object
+      required: [success, error]
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+    ValidationError:
+      type: object
+      required: [success, error, details]
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: Validation failed
+        details:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            checkIn: checkIn must not be in the past
+    SuccessMessage:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+    User:
+      type: object
+      required: [id, username, email, role, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [ROLE_USER, ROLE_ADMIN]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    UserSummary:
+      type: object
+      required: [id, username, email]
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+    AuthResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          required: [token, user]
+          properties:
+            token:
+              type: string
+            user:
+              $ref: "#/components/schemas/User"
+    Room:
+      type: object
+      required: [id, number, type, price, capacity, amenities, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        number:
+          type: string
+          example: "101"
+        type:
+          type: string
+          enum: [STANDARD, DELUXE, SUITE]
+        price:
+          type: number
+          description: Price per night
+          example: 100
+        capacity:
+          type: integer
+          example: 2
+        amenities:
+          type: array
+          items:
+            type: string
+          example: [WiFi, TV]
+        status:
+          type: string
+          enum: [AVAILABLE, OCCUPIED, MAINTENANCE]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    RoomInput:
+      type: object
+      properties:
+        number:
+          type: string
+          maxLength: 20
+          example: "105"
+        type:
+          type: string
+          enum: [STANDARD, DELUXE, SUITE]
+        price:
+          type: number
+          minimum: 0
+          example: 120
+        capacity:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 2
+        amenities:
+          type: array
+          items:
+            type: string
+          example: [WiFi, TV]
+        status:
+          type: string
+          enum: [AVAILABLE, OCCUPIED, MAINTENANCE]
+    Booking:
+      type: object
+      required: [id, userId, roomId, checkIn, checkOut, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        roomId:
+          type: string
+        checkIn:
+          type: string
+          format: date-time
+        checkOut:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        user:
+          $ref: "#/components/schemas/UserSummary"
+        room:
+          $ref: "#/components/schemas/Room"
+    Message:
+      type: object
+      required: [id, userId, subject, content, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        subject:
+          type: string
+        content:
+          type: string
+        status:
+          type: string
+          enum: [UNREAD, READ, ARCHIVED]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        user:
+          $ref: "#/components/schemas/UserSummary"
+    Report:
+      type: object
+      required: [id, type, data, period, generatedAt]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [OCCUPANCY, REVENUE, CUSTOMER_SATISFACTION]
+        data:
+          type: object
+          additionalProperties: true
+          description: Report figures; the shape depends on the report type.
+        period:
+          type: object
+          required: [start, end]
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+        generatedAt:
+          type: string
+          format: date-time
+    BrandingContact:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        address:
+          type: string
+          maxLength: 200
+        phone:
+          type: string
+          maxLength: 50
+        email:
+          type: string
+          maxLength: 254
+    BrandingMap:
+      type: object
+      properties:
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+    BrandingTheme:
+      type: object
+      properties:
+        primaryColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+          example: "#2E7D32"
+        secondaryColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+          example: "#D84315"
+    Branding:
+      type: object
+      required: [id, name, logoUrl, description, contact, map, theme, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        logoUrl:
+          type: string
+        description:
+          type: string
+        contact:
+          $ref: "#/components/schemas/BrandingContact"
+        map:
+          $ref: "#/components/schemas/BrandingMap"
+        theme:
+          $ref: "#/components/schemas/BrandingTheme"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    BrandingInput:
+      type: object
+      description: Every field is optional; nested objects are merged with the current branding.
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        logoUrl:
+          type: string
+          maxLength: 500
+        description:
+          type: string
+          maxLength: 1000
+        contact:
+          $ref: "#/components/schemas/BrandingContact"
+        map:
+          $ref: "#/components/schemas/BrandingMap"
+        theme:
+          $ref: "#/components/schemas/BrandingTheme"
+
+tags:
+  - name: Auth
+  - name: Rooms
+  - name: Bookings
+  - name: Messages
+  - name: Reports
+    description: Admin only
+  - name: Branding
+
+paths:
+  /api/auth/login:
+    post:
+      summary: Log in
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                  example: admin
+                password:
+                  type: string
+                  example: password123
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      description: New users always get ROLE_USER. The response contains a token, so the user is logged in straight away.
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 50
+                  pattern: "^[A-Za-z0-9_.-]+$"
+                  example: newuser
+                email:
+                  type: string
+                  format: email
+                  example: newuser@example.com
+                password:
+                  type: string
+                  minLength: 8
+                  maxLength: 100
+                  example: password123
+      responses:
+        "201":
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: "`Username already exists` or `Email already exists`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/auth/logout:
+    post:
+      summary: Log out
+      description: Tokens are stateless JWTs, so logging out only tells the client to forget its token.
+      tags: [Auth]
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success]
+                properties:
+                  success:
+                    type: boolean
+
+  /api/rooms:
+    get:
+      summary: List all rooms
+      description: Sorted by room number.
+      tags: [Rooms]
+      responses:
+        "200":
+          description: All rooms
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Room"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      summary: Create a room (admin only)
+      tags: [Rooms]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/RoomInput"
+                - type: object
+                  required: [number, type, price, capacity]
+      responses:
+        "201":
+          description: Room created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Room"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: A room with this number already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/rooms/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      summary: Get a room
+      tags: [Rooms]
+      responses:
+        "200":
+          description: The room
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Room"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Update a room (admin only)
+      description: Partial update; only the fields you send are changed.
+      tags: [Rooms]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoomInput"
+      responses:
+        "200":
+          description: Room updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Room"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Another room already has this number
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Delete a room (admin only)
+      tags: [Rooms]
+      responses:
+        "200":
+          description: "`Room deleted successfully`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: The room still has bookings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/bookings:
+    get:
+      summary: List all bookings (admin only)
+      tags: [Bookings]
+      responses:
+        "200":
+          description: All bookings, sorted by check-in date
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Booking"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      summary: Book a room
+      description: |
+        Creates a PENDING booking for the logged-in user.
+        - `checkIn` may not be in the past and `checkOut` must be after `checkIn` (400).
+        - The room must exist (404) and not be in MAINTENANCE (409).
+        - The dates may not overlap a PENDING or CONFIRMED booking for the same room (409 `Room not available`).
+          Checking out on the day the next guest checks in is fine.
+      tags: [Bookings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roomId, checkIn, checkOut]
+              properties:
+                roomId:
+                  type: string
+                checkIn:
+                  type: string
+                  format: date-time
+                  example: "2030-04-01T00:00:00.000Z"
+                checkOut:
+                  type: string
+                  format: date-time
+                  example: "2030-04-05T00:00:00.000Z"
+      responses:
+        "201":
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Room not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: The room is under maintenance or not available for these dates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/bookings/my-bookings:
+    get:
+      summary: List the bookings of the logged-in user
+      tags: [Bookings]
+      responses:
+        "200":
+          description: Your bookings, sorted by check-in date
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Booking"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/bookings/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      summary: Get a booking
+      description: Only the owner of the booking or an admin may read it.
+      tags: [Bookings]
+      responses:
+        "200":
+          description: The booking
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Change the status of a booking (admin only)
+      tags: [Bookings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED]
+                  example: CONFIRMED
+      responses:
+        "200":
+          description: Booking updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      summary: Cancel a booking
+      description: Sets the status to CANCELLED. Only the owner of the booking or an admin may cancel it.
+      tags: [Bookings]
+      responses:
+        "200":
+          description: "`Booking cancelled successfully`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/messages:
+    get:
+      summary: List all messages (admin only)
+      tags: [Messages]
+      responses:
+        "200":
+          description: All messages, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Message"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      summary: Send a message to the hotel
+      tags: [Messages]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject, content]
+              properties:
+                subject:
+                  type: string
+                  maxLength: 200
+                  example: Late check-in
+                content:
+                  type: string
+                  maxLength: 5000
+                  example: We will arrive around 23:00.
+      responses:
+        "201":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Message"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/messages/my-messages:
+    get:
+      summary: List the messages of the logged-in user
+      tags: [Messages]
+      responses:
+        "200":
+          description: Your messages, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Message"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/messages/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      summary: Get a message
+      description: Only the sender or an admin may read it.
+      tags: [Messages]
+      responses:
+        "200":
+          description: The message
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Message"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Change the status of a message (admin only)
+      tags: [Messages]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [UNREAD, READ, ARCHIVED]
+                  example: READ
+      responses:
+        "200":
+          description: Message updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Message"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      summary: Delete a message (admin only)
+      tags: [Messages]
+      responses:
+        "200":
+          description: "`Message deleted successfully`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/reports:
+    get:
+      summary: List all reports (admin only)
+      tags: [Reports]
+      responses:
+        "200":
+          description: All reports, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Report"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/reports/generate:
+    post:
+      summary: Generate a report (admin only)
+      description: The report figures are sample data.
+      tags: [Reports]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, period]
+              properties:
+                type:
+                  type: string
+                  enum: [OCCUPANCY, REVENUE, CUSTOMER_SATISFACTION]
+                period:
+                  type: object
+                  required: [start, end]
+                  properties:
+                    start:
+                      type: string
+                      format: date-time
+                      example: "2030-01-01T00:00:00.000Z"
+                    end:
+                      type: string
+                      format: date-time
+                      example: "2030-01-31T00:00:00.000Z"
+      responses:
+        "201":
+          description: Report generated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Report"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/reports/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      summary: Get a report (admin only)
+      tags: [Reports]
+      responses:
+        "200":
+          description: The report
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Report"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      summary: Delete a report (admin only)
+      tags: [Reports]
+      responses:
+        "200":
+          description: "`Report deleted successfully`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/branding:
+    get:
+      summary: Get the hotel branding
+      tags: [Branding]
+      responses:
+        "200":
+          description: The branding
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Branding"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    put:
+      summary: Update the hotel branding (admin only)
+      tags: [Branding]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BrandingInput"
+            example:
+              name: Seaside Hotel
+              theme:
+                primaryColor: "#1565C0"
+      responses:
+        "200":
+          description: Branding updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Branding"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/branding/reset:
+    post:
+      summary: Restore the default branding (admin only)
+      tags: [Branding]
+      responses:
+        "200":
+          description: Default branding restored
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Branding"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"

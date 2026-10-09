@@ -3,7 +3,7 @@ import { ApiResponse } from "../../types/api.types";
 import { safeJsonParse } from "../helpers/exception.helper";
 
 type RequestOptions = {
-  method: string;
+  method: "get" | "post" | "put" | "delete";
   endpoint: string;
   data?: object;
   token?: string;

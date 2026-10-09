@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Restful Booker Platform API",
+    "title": "Booker Platform API",
     "version": "1.0.0",
-    "description": "API documentation for the Restful Booker Platform"
+    "description": "API of the Booker hotel, the test object for the DeTesters Playwright training. Log in with `admin` / `password123` or `user` / `password123` and click Authorize."
   },
   "servers": [
     {
@@ -18,6 +18,654 @@
         "scheme": "bearer",
         "bearerFormat": "JWT"
       }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Validation failed. `details` maps each invalid field to a message.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "No token was sent.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "The token is invalid or expired, or the user may not access this resource.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "The resource does not exist.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "Id": {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "success",
+          "error"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "required": [
+          "success",
+          "error",
+          "details"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "Validation failed"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "checkIn": "checkIn must not be in the past"
+            }
+          }
+        }
+      },
+      "SuccessMessage": {
+        "type": "object",
+        "required": [
+          "success",
+          "message"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "email",
+          "role",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ROLE_USER",
+              "ROLE_ADMIN"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UserSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "email"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "data"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "required": [
+              "token",
+              "user"
+            ],
+            "properties": {
+              "token": {
+                "type": "string"
+              },
+              "user": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        }
+      },
+      "Room": {
+        "type": "object",
+        "required": [
+          "id",
+          "number",
+          "type",
+          "price",
+          "capacity",
+          "amenities",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string",
+            "example": "101"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "STANDARD",
+              "DELUXE",
+              "SUITE"
+            ]
+          },
+          "price": {
+            "type": "number",
+            "description": "Price per night",
+            "example": 100
+          },
+          "capacity": {
+            "type": "integer",
+            "example": 2
+          },
+          "amenities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "WiFi",
+              "TV"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "OCCUPIED",
+              "MAINTENANCE"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RoomInput": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "string",
+            "maxLength": 20,
+            "example": "105"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "STANDARD",
+              "DELUXE",
+              "SUITE"
+            ]
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0,
+            "example": 120
+          },
+          "capacity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "example": 2
+          },
+          "amenities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "WiFi",
+              "TV"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "OCCUPIED",
+              "MAINTENANCE"
+            ]
+          }
+        }
+      },
+      "Booking": {
+        "type": "object",
+        "required": [
+          "id",
+          "userId",
+          "roomId",
+          "checkIn",
+          "checkOut",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "roomId": {
+            "type": "string"
+          },
+          "checkIn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "checkOut": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "CONFIRMED",
+              "CANCELLED",
+              "COMPLETED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "room": {
+            "$ref": "#/components/schemas/Room"
+          }
+        }
+      },
+      "Message": {
+        "type": "object",
+        "required": [
+          "id",
+          "userId",
+          "subject",
+          "content",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "UNREAD",
+              "READ",
+              "ARCHIVED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserSummary"
+          }
+        }
+      },
+      "Report": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "data",
+          "period",
+          "generatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "OCCUPANCY",
+              "REVENUE",
+              "CUSTOMER_SATISFACTION"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Report figures; the shape depends on the report type."
+          },
+          "period": {
+            "type": "object",
+            "required": [
+              "start",
+              "end"
+            ],
+            "properties": {
+              "start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BrandingContact": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "address": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254
+          }
+        }
+      },
+      "BrandingMap": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          }
+        }
+      },
+      "BrandingTheme": {
+        "type": "object",
+        "properties": {
+          "primaryColor": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$",
+            "example": "#2E7D32"
+          },
+          "secondaryColor": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$",
+            "example": "#D84315"
+          }
+        }
+      },
+      "Branding": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "logoUrl",
+          "description",
+          "contact",
+          "map",
+          "theme",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "logoUrl": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "contact": {
+            "$ref": "#/components/schemas/BrandingContact"
+          },
+          "map": {
+            "$ref": "#/components/schemas/BrandingMap"
+          },
+          "theme": {
+            "$ref": "#/components/schemas/BrandingTheme"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BrandingInput": {
+        "type": "object",
+        "description": "Every field is optional; nested objects are merged with the current branding.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "logoUrl": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "contact": {
+            "$ref": "#/components/schemas/BrandingContact"
+          },
+          "map": {
+            "$ref": "#/components/schemas/BrandingMap"
+          },
+          "theme": {
+            "$ref": "#/components/schemas/BrandingTheme"
+          }
+        }
+      },
+      "Flags": {
+        "type": "object",
+        "required": [
+          "success",
+          "data"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "required": [
+              "enabled",
+              "available"
+            ],
+            "properties": {
+              "enabled": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "available": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "RecordCounts": {
+        "type": "object",
+        "required": [
+          "success",
+          "data"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "required": [
+              "users",
+              "rooms",
+              "bookings",
+              "messages"
+            ],
+            "properties": {
+              "users": {
+                "type": "integer"
+              },
+              "rooms": {
+                "type": "integer"
+              },
+              "bookings": {
+                "type": "integer"
+              },
+              "messages": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "security": [
@@ -28,10 +676,11 @@
   "paths": {
     "/api/auth/login": {
       "post": {
-        "summary": "Login user",
+        "summary": "Log in",
         "tags": [
           "Auth"
         ],
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -58,58 +707,39 @@
         },
         "responses": {
           "200": {
-            "description": "Login successful",
+            "description": "Logged in",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "token": {
-                          "type": "string"
-                        },
-                        "user": {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "string"
-                            },
-                            "username": {
-                              "type": "string"
-                            },
-                            "role": {
-                              "type": "string",
-                              "enum": [
-                                "ROLE_USER",
-                                "ROLE_ADMIN"
-                              ]
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/AuthResponse"
                 }
               }
             }
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
           "401": {
-            "description": "Invalid credentials"
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
     },
     "/api/auth/register": {
       "post": {
-        "summary": "Register new user",
+        "summary": "Register a new user",
+        "description": "New users always get ROLE_USER. The response contains a token, so the user is logged in straight away.",
         "tags": [
           "Auth"
         ],
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -118,21 +748,27 @@
                 "type": "object",
                 "required": [
                   "username",
-                  "password",
-                  "email"
+                  "email",
+                  "password"
                 ],
                 "properties": {
                   "username": {
                     "type": "string",
+                    "minLength": 3,
+                    "maxLength": 50,
+                    "pattern": "^[A-Za-z0-9_.-]+$",
                     "example": "newuser"
-                  },
-                  "password": {
-                    "type": "string",
-                    "example": "password123"
                   },
                   "email": {
                     "type": "string",
+                    "format": "email",
                     "example": "newuser@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 100,
+                    "example": "password123"
                   }
                 }
               }
@@ -141,64 +777,48 @@
         },
         "responses": {
           "201": {
-            "description": "User registered successfully",
+            "description": "User registered",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "username": {
-                          "type": "string"
-                        },
-                        "email": {
-                          "type": "string"
-                        },
-                        "role": {
-                          "type": "string",
-                          "enum": [
-                            "ROLE_USER"
-                          ]
-                        }
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/AuthResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Username already exists"
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "description": "`Username already exists` or `Email already exists`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
     },
     "/api/auth/logout": {
       "post": {
-        "summary": "Logout user",
+        "summary": "Log out",
+        "description": "Tokens are stateless JWTs, so logging out only tells the client to forget its token.",
         "tags": [
           "Auth"
         ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
         "responses": {
           "200": {
-            "description": "Logout successful",
+            "description": "Logged out",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "success"
+                  ],
                   "properties": {
                     "success": {
                       "type": "boolean"
@@ -207,31 +827,28 @@
                 }
               }
             }
-          },
-          "401": {
-            "description": "Unauthorized"
           }
         }
       }
     },
-    "/api/bookings": {
+    "/api/rooms": {
       "get": {
-        "summary": "Get all bookings",
+        "summary": "List all rooms",
+        "description": "Sorted by room number.",
         "tags": [
-          "Bookings"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
+          "Rooms"
         ],
         "responses": {
           "200": {
-            "description": "List of bookings",
+            "description": "All rooms",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
                   "properties": {
                     "success": {
                       "type": "boolean"
@@ -239,46 +856,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "userId": {
-                            "type": "string"
-                          },
-                          "roomId": {
-                            "type": "string"
-                          },
-                          "checkIn": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "checkOut": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "PENDING",
-                              "CONFIRMED",
-                              "CANCELLED",
-                              "COMPLETED"
-                            ]
-                          },
-                          "totalPrice": {
-                            "type": "number"
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "updatedAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          }
-                        }
+                        "$ref": "#/components/schemas/Room"
                       }
                     }
                   }
@@ -287,19 +865,277 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           }
         }
       },
       "post": {
-        "summary": "Create new booking",
+        "summary": "Create a room (admin only)",
+        "tags": [
+          "Rooms"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/RoomInput"
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "number",
+                      "type",
+                      "price",
+                      "capacity"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Room created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Room"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "A room with this number already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rooms/{id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Id"
+        }
+      ],
+      "get": {
+        "summary": "Get a room",
+        "tags": [
+          "Rooms"
+        ],
+        "responses": {
+          "200": {
+            "description": "The room",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Room"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a room (admin only)",
+        "description": "Partial update; only the fields you send are changed.",
+        "tags": [
+          "Rooms"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoomInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Room updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Room"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "Another room already has this number",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a room (admin only)",
+        "tags": [
+          "Rooms"
+        ],
+        "responses": {
+          "200": {
+            "description": "`Room deleted successfully`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "The room still has bookings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bookings": {
+      "get": {
+        "summary": "List all bookings (admin only)",
         "tags": [
           "Bookings"
         ],
-        "security": [
-          {
-            "bearerAuth": []
+        "responses": {
+          "200": {
+            "description": "All bookings, sorted by check-in date",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Booking"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           }
+        }
+      },
+      "post": {
+        "summary": "Book a room",
+        "description": "Creates a PENDING booking for the logged-in user.\n- `checkIn` may not be in the past and `checkOut` must be after `checkIn` (400).\n- The room must exist (404) and not be in MAINTENANCE (409).\n- The dates may not overlap a PENDING or CONFIRMED booking for the same room (409 `Room not available`).\n  Checking out on the day the next guest checks in is fine.\n",
+        "tags": [
+          "Bookings"
         ],
         "requestBody": {
           "required": true,
@@ -314,18 +1150,17 @@
                 ],
                 "properties": {
                   "roomId": {
-                    "type": "string",
-                    "example": "room-id-123"
+                    "type": "string"
                   },
                   "checkIn": {
                     "type": "string",
                     "format": "date-time",
-                    "example": "2024-04-01T14:00:00Z"
+                    "example": "2030-04-01T00:00:00.000Z"
                   },
                   "checkOut": {
                     "type": "string",
                     "format": "date-time",
-                    "example": "2024-04-05T12:00:00Z"
+                    "example": "2030-04-05T00:00:00.000Z"
                   }
                 }
               }
@@ -334,53 +1169,21 @@
         },
         "responses": {
           "201": {
-            "description": "Booking created successfully",
+            "description": "Booking created",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
                   "properties": {
                     "success": {
                       "type": "boolean"
                     },
                     "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "userId": {
-                          "type": "string"
-                        },
-                        "roomId": {
-                          "type": "string"
-                        },
-                        "checkIn": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "checkOut": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "PENDING"
-                          ]
-                        },
-                        "totalPrice": {
-                          "type": "number"
-                        },
-                        "createdAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
-                      }
+                      "$ref": "#/components/schemas/Booking"
                     }
                   }
                 }
@@ -388,87 +1191,62 @@
             }
           },
           "400": {
-            "description": "Invalid booking data"
+            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Room not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The room is under maintenance or not available for these dates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
     },
-    "/api/bookings/{id}": {
+    "/api/bookings/my-bookings": {
       "get": {
-        "summary": "Get booking by ID",
+        "summary": "List the bookings of the logged-in user",
         "tags": [
           "Bookings"
         ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Booking ID"
-          }
-        ],
         "responses": {
           "200": {
-            "description": "Booking details",
+            "description": "Your bookings, sorted by check-in date",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
                   "properties": {
                     "success": {
                       "type": "boolean"
                     },
                     "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "userId": {
-                          "type": "string"
-                        },
-                        "roomId": {
-                          "type": "string"
-                        },
-                        "checkIn": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "checkOut": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "PENDING",
-                            "CONFIRMED",
-                            "CANCELLED",
-                            "COMPLETED"
-                          ]
-                        },
-                        "totalPrice": {
-                          "type": "number"
-                        },
-                        "createdAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Booking"
                       }
                     }
                   }
@@ -477,33 +1255,64 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/bookings/{id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Id"
+        }
+      ],
+      "get": {
+        "summary": "Get a booking",
+        "description": "Only the owner of the booking or an admin may read it.",
+        "tags": [
+          "Bookings"
+        ],
+        "responses": {
+          "200": {
+            "description": "The booking",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Booking"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Booking not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       },
       "put": {
-        "summary": "Update booking status (admin only)",
+        "summary": "Change the status of a booking (admin only)",
         "tags": [
           "Bookings"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Booking ID"
-          }
         ],
         "requestBody": {
           "required": true,
@@ -532,339 +1341,87 @@
         },
         "responses": {
           "200": {
-            "description": "Booking updated successfully",
+            "description": "Booking updated",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
                   "properties": {
                     "success": {
                       "type": "boolean"
                     },
                     "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "PENDING",
-                            "CONFIRMED",
-                            "CANCELLED",
-                            "COMPLETED"
-                          ]
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
-                      }
+                      "$ref": "#/components/schemas/Booking"
                     }
                   }
                 }
               }
             }
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
           },
           "403": {
-            "description": "Forbidden - Admin access required"
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Booking not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       },
       "delete": {
-        "summary": "Cancel booking",
+        "summary": "Cancel a booking",
+        "description": "Sets the status to CANCELLED. Only the owner of the booking or an admin may cancel it.",
         "tags": [
           "Bookings"
         ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Booking ID"
-          }
-        ],
         "responses": {
           "200": {
-            "description": "Booking cancelled successfully",
+            "description": "`Booking cancelled successfully`",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/SuccessMessage"
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Booking not found"
-          }
-        }
-      }
-    },
-    "/api/branding": {
-      "get": {
-        "summary": "Get branding settings",
-        "tags": [
-          "Branding"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Branding settings",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "hotelName": {
-                          "type": "string"
-                        },
-                        "logo": {
-                          "type": "string"
-                        },
-                        "primaryColor": {
-                          "type": "string"
-                        },
-                        "secondaryColor": {
-                          "type": "string"
-                        },
-                        "fontFamily": {
-                          "type": "string"
-                        },
-                        "createdAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        }
-      },
-      "put": {
-        "summary": "Update branding settings (admin only)",
-        "tags": [
-          "Branding"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "hotelName": {
-                    "type": "string",
-                    "example": "Grand Hotel"
-                  },
-                  "logo": {
-                    "type": "string",
-                    "example": "https://example.com/logo.png"
-                  },
-                  "primaryColor": {
-                    "type": "string",
-                    "example": "#FF5733"
-                  },
-                  "secondaryColor": {
-                    "type": "string",
-                    "example": "#33FF57"
-                  },
-                  "fontFamily": {
-                    "type": "string",
-                    "example": "Arial, sans-serif"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Branding settings updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "hotelName": {
-                          "type": "string"
-                        },
-                        "logo": {
-                          "type": "string"
-                        },
-                        "primaryColor": {
-                          "type": "string"
-                        },
-                        "secondaryColor": {
-                          "type": "string"
-                        },
-                        "fontFamily": {
-                          "type": "string"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden - Admin access required"
-          }
-        }
-      }
-    },
-    "/api/branding/reset": {
-      "post": {
-        "summary": "Reset branding settings to default (admin only)",
-        "tags": [
-          "Branding"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Branding settings reset successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "hotelName": {
-                          "type": "string"
-                        },
-                        "logo": {
-                          "type": "string"
-                        },
-                        "primaryColor": {
-                          "type": "string"
-                        },
-                        "secondaryColor": {
-                          "type": "string"
-                        },
-                        "fontFamily": {
-                          "type": "string"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden - Admin access required"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       }
     },
     "/api/messages": {
       "get": {
-        "summary": "Get all messages",
+        "summary": "List all messages (admin only)",
         "tags": [
           "Messages"
         ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
         "responses": {
           "200": {
-            "description": "List of messages",
+            "description": "All messages, newest first",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
                   "properties": {
                     "success": {
                       "type": "boolean"
@@ -872,26 +1429,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "userId": {
-                            "type": "string"
-                          },
-                          "content": {
-                            "type": "string"
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "updatedAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          }
-                        }
+                        "$ref": "#/components/schemas/Message"
                       }
                     }
                   }
@@ -900,19 +1438,17 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           }
         }
       },
       "post": {
-        "summary": "Create new message",
+        "summary": "Send a message to the hotel",
         "tags": [
           "Messages"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
         ],
         "requestBody": {
           "required": true,
@@ -921,12 +1457,19 @@
               "schema": {
                 "type": "object",
                 "required": [
+                  "subject",
                   "content"
                 ],
                 "properties": {
+                  "subject": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "example": "Late check-in"
+                  },
                   "content": {
                     "type": "string",
-                    "example": "Hello, I have a question about my booking."
+                    "maxLength": 5000,
+                    "example": "We will arrive around 23:00."
                   }
                 }
               }
@@ -935,36 +1478,21 @@
         },
         "responses": {
           "201": {
-            "description": "Message created successfully",
+            "description": "Message sent",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
                   "properties": {
                     "success": {
                       "type": "boolean"
                     },
                     "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "userId": {
-                          "type": "string"
-                        },
-                        "content": {
-                          "type": "string"
-                        },
-                        "createdAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
-                      }
+                      "$ref": "#/components/schemas/Message"
                     }
                   }
                 }
@@ -972,67 +1500,42 @@
             }
           },
           "400": {
-            "description": "Invalid message data"
+            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           }
         }
       }
     },
-    "/api/messages/{id}": {
+    "/api/messages/my-messages": {
       "get": {
-        "summary": "Get message by ID",
+        "summary": "List the messages of the logged-in user",
         "tags": [
           "Messages"
         ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Message ID"
-          }
-        ],
         "responses": {
           "200": {
-            "description": "Message details",
+            "description": "Your messages, newest first",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
                   "properties": {
                     "success": {
                       "type": "boolean"
                     },
                     "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "userId": {
-                          "type": "string"
-                        },
-                        "content": {
-                          "type": "string"
-                        },
-                        "createdAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Message"
                       }
                     }
                   }
@@ -1041,33 +1544,64 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/messages/{id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Id"
+        }
+      ],
+      "get": {
+        "summary": "Get a message",
+        "description": "Only the sender or an admin may read it.",
+        "tags": [
+          "Messages"
+        ],
+        "responses": {
+          "200": {
+            "description": "The message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Message not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       },
       "put": {
-        "summary": "Update message (admin only)",
+        "summary": "Change the status of a message (admin only)",
         "tags": [
           "Messages"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Message ID"
-          }
         ],
         "requestBody": {
           "required": true,
@@ -1076,12 +1610,17 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "content"
+                  "status"
                 ],
                 "properties": {
-                  "content": {
+                  "status": {
                     "type": "string",
-                    "example": "Updated message content"
+                    "enum": [
+                      "UNREAD",
+                      "READ",
+                      "ARCHIVED"
+                    ],
+                    "example": "READ"
                   }
                 }
               }
@@ -1090,116 +1629,86 @@
         },
         "responses": {
           "200": {
-            "description": "Message updated successfully",
+            "description": "Message updated",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
                   "properties": {
                     "success": {
                       "type": "boolean"
                     },
                     "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "content": {
-                          "type": "string"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
-                      }
+                      "$ref": "#/components/schemas/Message"
                     }
                   }
                 }
               }
             }
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
           },
           "403": {
-            "description": "Forbidden - Admin access required"
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Message not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       },
       "delete": {
-        "summary": "Delete message (admin only)",
+        "summary": "Delete a message (admin only)",
         "tags": [
           "Messages"
         ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Message ID"
-          }
-        ],
         "responses": {
           "200": {
-            "description": "Message deleted successfully",
+            "description": "`Message deleted successfully`",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/SuccessMessage"
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
           },
           "403": {
-            "description": "Forbidden - Admin access required"
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Message not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       }
     },
     "/api/reports": {
       "get": {
-        "summary": "Get all reports",
+        "summary": "List all reports (admin only)",
         "tags": [
           "Reports"
         ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
         "responses": {
           "200": {
-            "description": "List of reports",
+            "description": "All reports, newest first",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
                   "properties": {
                     "success": {
                       "type": "boolean"
@@ -1207,34 +1716,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          },
-                          "content": {
-                            "type": "string"
-                          },
-                          "type": {
-                            "type": "string",
-                            "enum": [
-                              "OCCUPANCY",
-                              "REVENUE",
-                              "MAINTENANCE"
-                            ]
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "updatedAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          }
-                        }
+                        "$ref": "#/components/schemas/Report"
                       }
                     }
                   }
@@ -1243,19 +1725,20 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           }
         }
-      },
+      }
+    },
+    "/api/reports/generate": {
       "post": {
-        "summary": "Create new report (admin only)",
+        "summary": "Generate a report (admin only)",
+        "description": "The report figures are sample data.",
         "tags": [
           "Reports"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
         ],
         "requestBody": {
           "required": true,
@@ -1264,27 +1747,36 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "title",
-                  "content",
-                  "type"
+                  "type",
+                  "period"
                 ],
                 "properties": {
-                  "title": {
-                    "type": "string",
-                    "example": "Monthly Occupancy Report"
-                  },
-                  "content": {
-                    "type": "string",
-                    "example": "The hotel occupancy rate for March 2024 was 85%"
-                  },
                   "type": {
                     "type": "string",
                     "enum": [
                       "OCCUPANCY",
                       "REVENUE",
-                      "MAINTENANCE"
+                      "CUSTOMER_SATISFACTION"
+                    ]
+                  },
+                  "period": {
+                    "type": "object",
+                    "required": [
+                      "start",
+                      "end"
                     ],
-                    "example": "OCCUPANCY"
+                    "properties": {
+                      "start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2030-01-01T00:00:00.000Z"
+                      },
+                      "end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2030-01-31T00:00:00.000Z"
+                      }
+                    }
                   }
                 }
               }
@@ -1293,44 +1785,21 @@
         },
         "responses": {
           "201": {
-            "description": "Report created successfully",
+            "description": "Report generated",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
                   "properties": {
                     "success": {
                       "type": "boolean"
                     },
                     "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        },
-                        "content": {
-                          "type": "string"
-                        },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "OCCUPANCY",
-                            "REVENUE",
-                            "MAINTENANCE"
-                          ]
-                        },
-                        "createdAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
-                      }
+                      "$ref": "#/components/schemas/Report"
                     }
                   }
                 }
@@ -1338,79 +1807,45 @@
             }
           },
           "400": {
-            "description": "Invalid report data"
+            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
           },
           "403": {
-            "description": "Forbidden - Admin access required"
+            "$ref": "#/components/responses/Forbidden"
           }
         }
       }
     },
     "/api/reports/{id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Id"
+        }
+      ],
       "get": {
-        "summary": "Get report by ID",
+        "summary": "Get a report (admin only)",
         "tags": [
           "Reports"
         ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Report ID"
-          }
-        ],
         "responses": {
           "200": {
-            "description": "Report details",
+            "description": "The report",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
                   "properties": {
                     "success": {
                       "type": "boolean"
                     },
                     "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        },
-                        "content": {
-                          "type": "string"
-                        },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "OCCUPANCY",
-                            "REVENUE",
-                            "MAINTENANCE"
-                          ]
-                        },
-                        "createdAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
-                      }
+                      "$ref": "#/components/schemas/Report"
                     }
                   }
                 }
@@ -1418,128 +1853,67 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Report not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       },
       "delete": {
-        "summary": "Delete report (admin only)",
+        "summary": "Delete a report (admin only)",
         "tags": [
           "Reports"
         ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Report ID"
-          }
-        ],
         "responses": {
           "200": {
-            "description": "Report deleted successfully",
+            "description": "`Report deleted successfully`",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/SuccessMessage"
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
           },
           "403": {
-            "description": "Forbidden - Admin access required"
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Report not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       }
     },
-    "/api/rooms": {
+    "/api/branding": {
       "get": {
-        "summary": "Get all rooms",
+        "summary": "Get the hotel branding",
         "tags": [
-          "Rooms"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
+          "Branding"
         ],
         "responses": {
           "200": {
-            "description": "List of rooms",
+            "description": "The branding",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
                   "properties": {
                     "success": {
                       "type": "boolean"
                     },
                     "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "number": {
-                            "type": "string"
-                          },
-                          "type": {
-                            "type": "string",
-                            "enum": [
-                              "STANDARD",
-                              "DELUXE",
-                              "SUITE"
-                            ]
-                          },
-                          "price": {
-                            "type": "number"
-                          },
-                          "capacity": {
-                            "type": "number"
-                          },
-                          "amenities": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "AVAILABLE",
-                              "OCCUPIED",
-                              "MAINTENANCE"
-                            ]
-                          }
-                        }
-                      }
+                      "$ref": "#/components/schemas/Branding"
                     }
                   }
                 }
@@ -1547,20 +1921,137 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           }
         }
       },
-      "post": {
-        "summary": "Create new room (admin only)",
+      "put": {
+        "summary": "Update the hotel branding (admin only)",
         "tags": [
-          "Rooms"
+          "Branding"
         ],
-        "security": [
-          {
-            "bearerAuth": []
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandingInput"
+              },
+              "example": {
+                "name": "Seaside Hotel",
+                "theme": {
+                  "primaryColor": "#1565C0"
+                }
+              }
+            }
           }
+        },
+        "responses": {
+          "200": {
+            "description": "Branding updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Branding"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/branding/reset": {
+      "post": {
+        "summary": "Restore the default branding (admin only)",
+        "tags": [
+          "Branding"
         ],
+        "responses": {
+          "200": {
+            "description": "Default branding restored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Branding"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/testing/reset": {
+      "post": {
+        "summary": "Reset the database to the seed data",
+        "description": "Removes all users, rooms, bookings, messages, reports and branding, runs the seed again\nand turns all trainer flags off.\n",
+        "tags": [
+          "Testing"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Number of records after the reset",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordCounts"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/testing/seed": {
+      "post": {
+        "summary": "Create namespaced test data",
+        "description": "Creates users, rooms and bookings for one namespace (for example one Playwright worker).\nUsernames become `{namespace}-{username}` and room numbers `{namespace}-{number}`.\nUsers and rooms that already exist are updated, so calling this twice is safe.\nBookings refer to users and rooms by their name in this request (or an existing username / room number)\nand are created without validation, so you can create past bookings or any status.\n",
+        "tags": [
+          "Testing"
+        ],
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -1568,143 +2059,59 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "number",
-                  "type",
-                  "price",
-                  "capacity"
+                  "namespace"
                 ],
                 "properties": {
-                  "number": {
+                  "namespace": {
                     "type": "string",
-                    "example": "101"
+                    "pattern": "^[A-Za-z0-9_]{1,30}$",
+                    "example": "w3"
                   },
-                  "type": {
-                    "type": "string",
-                    "enum": [
-                      "STANDARD",
-                      "DELUXE",
-                      "SUITE"
-                    ],
-                    "example": "STANDARD"
-                  },
-                  "price": {
-                    "type": "number",
-                    "example": 100
-                  },
-                  "capacity": {
-                    "type": "number",
-                    "example": 2
-                  },
-                  "amenities": {
+                  "users": {
                     "type": "array",
                     "items": {
-                      "type": "string"
-                    },
-                    "example": [
-                      "WiFi",
-                      "TV"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Room created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
                       "type": "object",
+                      "required": [
+                        "username"
+                      ],
                       "properties": {
-                        "id": {
-                          "type": "string"
+                        "username": {
+                          "type": "string",
+                          "example": "alice"
                         },
-                        "number": {
-                          "type": "string"
+                        "password": {
+                          "type": "string",
+                          "default": "password123"
                         },
-                        "type": {
-                          "type": "string"
+                        "email": {
+                          "type": "string",
+                          "description": "Default: `{namespace}-{username}@booker.test`"
                         },
-                        "price": {
-                          "type": "number"
-                        },
-                        "capacity": {
-                          "type": "number"
-                        },
-                        "amenities": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "status": {
-                          "type": "string"
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "USER",
+                            "ADMIN"
+                          ],
+                          "default": "USER"
                         }
                       }
                     }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden - Admin access required"
-          }
-        }
-      }
-    },
-    "/api/rooms/{id}": {
-      "get": {
-        "summary": "Get room by ID",
-        "tags": [
-          "Rooms"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Room ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Room details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
+                  },
+                  "rooms": {
+                    "type": "array",
+                    "items": {
                       "type": "object",
+                      "required": [
+                        "number",
+                        "type",
+                        "price",
+                        "capacity"
+                      ],
                       "properties": {
-                        "id": {
-                          "type": "string"
-                        },
                         "number": {
-                          "type": "string"
+                          "type": "string",
+                          "example": "101"
                         },
                         "type": {
                           "type": "string",
@@ -1715,10 +2122,12 @@
                           ]
                         },
                         "price": {
-                          "type": "number"
+                          "type": "number",
+                          "example": 120
                         },
                         "capacity": {
-                          "type": "number"
+                          "type": "integer",
+                          "example": 2
                         },
                         "amenities": {
                           "type": "array",
@@ -1732,7 +2141,117 @@
                             "AVAILABLE",
                             "OCCUPIED",
                             "MAINTENANCE"
-                          ]
+                          ],
+                          "default": "AVAILABLE"
+                        }
+                      }
+                    }
+                  },
+                  "bookings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "user",
+                        "room",
+                        "checkIn",
+                        "checkOut"
+                      ],
+                      "properties": {
+                        "user": {
+                          "type": "string",
+                          "example": "alice"
+                        },
+                        "room": {
+                          "type": "string",
+                          "example": "101"
+                        },
+                        "checkIn": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "checkOut": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "PENDING",
+                            "CONFIRMED",
+                            "CANCELLED",
+                            "COMPLETED"
+                          ],
+                          "default": "CONFIRMED"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Test data created. Every user comes with a token and its password.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "namespace",
+                        "users",
+                        "rooms",
+                        "bookings"
+                      ],
+                      "properties": {
+                        "namespace": {
+                          "type": "string"
+                        },
+                        "users": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "token",
+                              "user",
+                              "password"
+                            ],
+                            "properties": {
+                              "token": {
+                                "type": "string"
+                              },
+                              "user": {
+                                "$ref": "#/components/schemas/User"
+                              },
+                              "password": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "rooms": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Room"
+                          }
+                        },
+                        "bookings": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Booking"
+                          }
                         }
                       }
                     }
@@ -1741,72 +2260,100 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized"
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/api/testing/namespace/{namespace}": {
+      "delete": {
+        "summary": "Delete all test data of a namespace",
+        "tags": [
+          "Testing"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "namespace",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_]{1,30}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Number of deleted records per type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordCounts"
+                }
+              }
+            }
           },
-          "404": {
-            "description": "Room not found"
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/api/testing/flags": {
+      "get": {
+        "summary": "Get the enabled and available trainer flags",
+        "tags": [
+          "Testing"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Flags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Flags"
+                }
+              }
+            }
           }
         }
       },
       "put": {
-        "summary": "Update room (admin only)",
+        "summary": "Set the enabled trainer flags",
+        "description": "Replaces the enabled flags for all requests. A single request can also enable flags with the\n`x-booker-flags` header, for example `x-booker-flags: slow-rooms,random-order`.\n`POST /api/testing/reset` turns all flags off.\n",
         "tags": [
-          "Rooms"
+          "Testing"
         ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Room ID"
-          }
-        ],
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "flags"
+                ],
                 "properties": {
-                  "number": {
-                    "type": "string"
-                  },
-                  "type": {
-                    "type": "string",
-                    "enum": [
-                      "STANDARD",
-                      "DELUXE",
-                      "SUITE"
-                    ]
-                  },
-                  "price": {
-                    "type": "number"
-                  },
-                  "capacity": {
-                    "type": "number"
-                  },
-                  "amenities": {
+                  "flags": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "slow-rooms",
+                        "flaky-booking",
+                        "stale-list",
+                        "bug-a11y",
+                        "bug-visual",
+                        "bug-price",
+                        "bug-auth",
+                        "random-order",
+                        "popup-cookie"
+                      ]
                     }
-                  },
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "AVAILABLE",
-                      "OCCUPIED",
-                      "MAINTENANCE"
-                    ]
                   }
                 }
               }
@@ -1815,112 +2362,45 @@
         },
         "responses": {
           "200": {
-            "description": "Room updated successfully",
+            "description": "Flags updated",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "number": {
-                          "type": "string"
-                        },
-                        "type": {
-                          "type": "string"
-                        },
-                        "price": {
-                          "type": "number"
-                        },
-                        "capacity": {
-                          "type": "number"
-                        },
-                        "amenities": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "status": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/Flags"
                 }
               }
             }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden - Admin access required"
-          },
-          "404": {
-            "description": "Room not found"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete room (admin only)",
-        "tags": [
-          "Rooms"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Room ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Room deleted successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden - Admin access required"
-          },
-          "404": {
-            "description": "Room not found"
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           }
         }
       }
     }
   },
-  "tags": []
+  "tags": [
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "Rooms"
+    },
+    {
+      "name": "Bookings"
+    },
+    {
+      "name": "Messages"
+    },
+    {
+      "name": "Reports",
+      "description": "Admin only"
+    },
+    {
+      "name": "Branding"
+    },
+    {
+      "name": "Testing",
+      "description": "Test support (local development only). Reset data, create isolated test data and toggle trainer flags."
+    }
+  ]
 }

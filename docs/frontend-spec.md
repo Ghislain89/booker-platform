@@ -90,16 +90,16 @@ Findings from reviewing the current API, and what the UI needs.
 
 ## 5. Test support
 
-Enabled only when `BOOKER_TEST_API=1` (default on in `dev`, off in `start` unless set).
+On by default, off when `NODE_ENV=production`. `BOOKER_TEST_API=1` / `0` overrides both. Documented in Swagger under "Testing" (only when enabled).
 
 | Endpoint | Purpose |
 |---|---|
 | `POST /api/testing/reset` | Truncate all tables, run seed. |
 | `POST /api/testing/seed` | Body `{ namespace, users?, rooms?, bookings? }` → creates namespaced data (e.g. usernames `w3-alice`), returns created entities + tokens. Used by per-worker fixtures. |
 | `DELETE /api/testing/namespace/:ns` | Clean up a worker's data. |
-| `PUT /api/testing/flags` | Toggle feature flags at runtime (see §7). Also settable per request via header `x-booker-flags: slow-rooms,bug-a11y`. |
+| `GET`/`PUT /api/testing/flags` | Read or toggle feature flags at runtime (see §7). Also settable per request via header `x-booker-flags: slow-rooms,bug-a11y`. Reset turns all flags off. |
 
-Seed data (fixed, deterministic, idempotent via `upsert`): `admin`/`password123` (ADMIN), `user`/`password123` (USER), 12 rooms (3 types, varied price/capacity, 2 with images, 1 `MAINTENANCE`), bookings in past/future with every status, 5 messages (read/unread).
+Seed data (fixed, deterministic, idempotent via `upsert`): `admin`/`password123` (ADMIN), `user`/`password123` (USER), 12 rooms (3 types, varied price/capacity, 1 `MAINTENANCE`; 2 with images once A9 lands), bookings in past/future with every status (dates relative to today), 5 messages (unread/read/archived).
 
 ---
 
@@ -185,6 +185,7 @@ Numbered in the order of the UI deck (`ui.md` in [playwright-training-slides](ht
 
 **Phase 0 – API fixes (½ day)**
 A1–A6, A16; test-support endpoints (§5). Existing API assignment still passes.
+✅ Done. Also fixed: `PUT /bookings/:id`, `PUT /messages/:id` and all branding routes always returned 500; booking/message responses leaked the user's password hash; report `data`/`period` were JSON strings; deleting a room with bookings returned a misleading 404 (now 409). All input is validated (400 + `details`), API docs moved to `src/docs/*.yaml`, and CI checks types and `swagger.json` drift. API-side effects of the `slow-rooms`, `random-order` and `flaky-booking` flags are in; the UI flags follow in phase 3.
 
 **Phase 1 – MVP replacing the todo app (2–3 days)**
 Scaffold `web/`, single-port serving, auth pages, `/rooms` (filters + pagination), room detail, booking wizard (without shadow DOM), My bookings (cancel + confirm), admin rooms (CRUD, no DnD), deterministic mode.
@@ -202,7 +203,7 @@ Feature flags + `/__trainer` panel, optional Docker image, preparation page upda
 
 ## 10. Open decisions
 
-1. **Register duplicate status:** `409` (recommended; no solution test depends on `400`) vs keep `400`.
+1. ~~**Register duplicate status:**~~ Decided: `409` (implemented in phase 0).
 2. **Public endpoints:** new `/api/public/*` (recommended, non-breaking) vs make existing `GET /rooms` anonymous.
 3. **Token storage:** `localStorage` (simple, visible in storageState) vs httpOnly cookie (realistic). Recommendation: localStorage, cover cookies in the slides.
 4. **Licence:** e.g. MIT for code, CC BY-NC-SA for training material (as Tim does).

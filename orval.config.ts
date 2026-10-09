@@ -20,6 +20,7 @@ export default defineConfig({
       target: "playwright/support/zod/zod/index.ts",
       schemas: "playwright/support/zod/zod/types",
       client: "zod",
+      clean: true,
     },
   },
 });

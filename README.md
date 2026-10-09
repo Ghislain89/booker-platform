@@ -44,10 +44,41 @@ Seeded accounts:
 | `admin` | `password123` | admin |
 | `user` | `password123` | user |
 
+The seed also creates 12 rooms (101–104 standard, 201–204 deluxe, 301–304 suite; room 104 is under maintenance), bookings in every status and a few messages. Seeded dates are relative to today, so the data never goes stale.
+
+### Business rules
+
+- Bookings: `checkIn` can't be in the past and `checkOut` must be after `checkIn` (400). You can't book a room under maintenance or a room that already has a pending or confirmed booking for those dates (409). Checking out on the day the next guest checks in is fine.
+- Only the owner of a booking (or an admin) can read or cancel it, and only the sender of a message (or an admin) can read it (403).
+- Usernames and e-mail addresses are unique (409). Passwords need at least 8 characters.
+- Invalid input returns 400 with a `details` object that names each invalid field.
+
+## Test support API
+
+For local development and training only. It's switched off when `NODE_ENV=production`.
+
+| Endpoint | What it does |
+| --- | --- |
+| `POST /api/testing/reset` | Resets the database to the seed data and turns all flags off |
+| `POST /api/testing/seed` | Creates users, rooms and bookings in a namespace, for example one per Playwright worker. Users come back with a token |
+| `DELETE /api/testing/namespace/{ns}` | Deletes everything in a namespace |
+| `GET` / `PUT /api/testing/flags` | Reads or sets the trainer flags |
+
+Trainer flags switch on deliberate bugs or flakiness, for example `slow-rooms`, `random-order` and `flaky-booking`. Set them for everyone with `PUT /api/testing/flags`, or for a single request with the `x-booker-flags: slow-rooms,random-order` header. See [docs/frontend-spec.md](docs/frontend-spec.md) §7 for the full list. The full request and response formats are in Swagger.
+
+### Environment variables
+
+| Variable | Default | Effect |
+| --- | --- | --- |
+| `PORT` | `3000` | Server port |
+| `DEBUG` | off | `DEBUG=booker` logs every request and database query |
+| `BOOKER_TEST_API` | on (off in production) | `BOOKER_TEST_API=0` disables the test support API |
+| `JWT_SECRET` | `booker-dev-secret` | Secret used to sign tokens |
+
 ## Folder structure
 
 ```
-├── src/                     # API server (Express)
+├── src/                     # API server (Express); OpenAPI docs in src/docs/
 ├── prisma/                  # Database schema, migrations and seed data
 ├── docs/                    # Specs and design notes
 ├── playwright/
@@ -94,6 +125,19 @@ Make sure to add assertions on status codes, the response body and headers.
 - API assertions: https://playwright.dev/docs/api/class-apiresponseassertions
 - Generic assertions: https://playwright.dev/docs/api/class-genericassertions
 - HTTP status codes: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+
+## Changing the API
+
+The API docs live in `src/docs/api.yaml` and `src/docs/testing.yaml`. After changing them:
+
+```bash
+npm run swagger:export      # writes playwright/support/zod/swagger.json
+npm run codegen             # regenerates the zod schemas in playwright/support/zod/zod/
+npm run schema:generation   # regenerates playwright/support/zod/api-schema.zod.ts
+npm run typecheck
+```
+
+CI fails when `swagger.json` is out of date.
 
 ## Solutions
 

@@ -11,7 +11,9 @@
     "test": "playwright test",
     "codegen": "orval --config orval.config.ts",
     "schema:generation": "typed-openapi ./playwright/support/zod/swagger.json -r zod --output ./playwright/support/zod/api-schema.zod.ts",
-    "lint": "eslint playwright"
+    "lint": "eslint playwright",
+    "swagger:export": "ts-node scripts/export-swagger.ts",
+    "typecheck": "tsc"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

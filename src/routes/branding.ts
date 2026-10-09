@@ -1,199 +1,72 @@
-import express from 'express';
-import { Branding } from '../types';
-import { brandingController } from '../controllers/branding';
-import { authenticate, authorizeAdmin } from '../middleware/auth';
+import express from "express";
+import { brandingController } from "../controllers/branding";
+import { authenticate, authorizeAdmin } from "../middleware/auth";
+import { asyncHandler } from "../lib/http";
+import { asBody, Validator } from "../lib/validation";
+import { BrandingInput } from "../types";
 
 const router = express.Router();
 
-/**
- * @swagger
- * /api/branding:
- *   get:
- *     summary: Get branding settings
- *     tags: [Branding]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Branding settings
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     hotelName:
- *                       type: string
- *                     logo:
- *                       type: string
- *                     primaryColor:
- *                       type: string
- *                     secondaryColor:
- *                       type: string
- *                     fontFamily:
- *                       type: string
- *                     createdAt:
- *                       type: string
- *                       format: date-time
- *                     updatedAt:
- *                       type: string
- *                       format: date-time
- *       401:
- *         description: Unauthorized
- */
-router.get('/', authenticate, async (req, res) => {
-  try {
-    const branding = await brandingController.getSettings();
-    res.json({
-      success: true,
-      data: branding
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch branding settings'
-    });
-  }
-});
+const COLOR_PATTERN = /^#[0-9A-Fa-f]{6}$/;
 
-/**
- * @swagger
- * /api/branding:
- *   put:
- *     summary: Update branding settings (admin only)
- *     tags: [Branding]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               hotelName:
- *                 type: string
- *                 example: "Grand Hotel"
- *               logo:
- *                 type: string
- *                 example: "https://example.com/logo.png"
- *               primaryColor:
- *                 type: string
- *                 example: "#FF5733"
- *               secondaryColor:
- *                 type: string
- *                 example: "#33FF57"
- *               fontFamily:
- *                 type: string
- *                 example: "Arial, sans-serif"
- *     responses:
- *       200:
- *         description: Branding settings updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     hotelName:
- *                       type: string
- *                     logo:
- *                       type: string
- *                     primaryColor:
- *                       type: string
- *                     secondaryColor:
- *                       type: string
- *                     fontFamily:
- *                       type: string
- *                     updatedAt:
- *                       type: string
- *                       format: date-time
- *       403:
- *         description: Forbidden - Admin access required
- *       401:
- *         description: Unauthorized
- */
-router.put('/', authenticate, authorizeAdmin, async (req, res) => {
-  try {
-    const branding = await brandingController.updateSettings(req.body);
-    res.json({
-      success: true,
-      data: branding
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to update branding settings'
-    });
-  }
-});
+const readBranding = (body: unknown): BrandingInput => {
+  const v = new Validator(asBody(body));
+  const input: BrandingInput = {
+    name: v.string("name", { required: false, max: 100 }),
+    logoUrl: v.string("logoUrl", { required: false, max: 500 }),
+    description: v.string("description", { required: false, max: 1000 }),
+  };
 
-/**
- * @swagger
- * /api/branding/reset:
- *   post:
- *     summary: Reset branding settings to default (admin only)
- *     tags: [Branding]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Branding settings reset successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     hotelName:
- *                       type: string
- *                     logo:
- *                       type: string
- *                     primaryColor:
- *                       type: string
- *                     secondaryColor:
- *                       type: string
- *                     fontFamily:
- *                       type: string
- *                     updatedAt:
- *                       type: string
- *                       format: date-time
- *       403:
- *         description: Forbidden - Admin access required
- *       401:
- *         description: Unauthorized
- */
-router.post('/reset', authenticate, authorizeAdmin, async (req, res) => {
-  try {
-    const branding = await brandingController.resetSettings();
-    res.json({
-      success: true,
-      data: branding
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to reset branding settings'
-    });
+  const contact = v.object("contact");
+  if (contact) {
+    const c = new Validator(contact);
+    input.contact = {
+      name: c.string("name", { required: false, max: 100 }),
+      address: c.string("address", { required: false, max: 200 }),
+      phone: c.string("phone", { required: false, max: 50 }),
+      email: c.string("email", { required: false, max: 254 }),
+    } as BrandingInput["contact"];
+    for (const [field, message] of Object.entries(c.errors)) v.error(`contact.${field}`, message);
   }
-});
 
-export default router; 
+  const map = v.object("map");
+  if (map) {
+    const m = new Validator(map);
+    input.map = {
+      latitude: m.number("latitude", { required: false, min: -90, max: 90 }),
+      longitude: m.number("longitude", { required: false, min: -180, max: 180 }),
+    } as BrandingInput["map"];
+    for (const [field, message] of Object.entries(m.errors)) v.error(`map.${field}`, message);
+  }
+
+  const theme = v.object("theme");
+  if (theme) {
+    const t = new Validator(theme);
+    const colour = { required: false, pattern: COLOR_PATTERN, patternMessage: "must be a hex colour like #2E7D32" };
+    input.theme = {
+      primaryColor: t.string("primaryColor", colour),
+      secondaryColor: t.string("secondaryColor", colour),
+    } as BrandingInput["theme"];
+    for (const [field, message] of Object.entries(t.errors)) v.error(`theme.${field}`, message);
+  }
+
+  v.assertValid();
+  return JSON.parse(JSON.stringify(input));
+};
+
+router.get("/", authenticate, asyncHandler(async (req, res) => {
+  const branding = await brandingController.get();
+  res.json({ success: true, data: branding });
+}));
+
+router.put("/", authenticate, authorizeAdmin, asyncHandler(async (req, res) => {
+  const branding = await brandingController.update(readBranding(req.body));
+  res.json({ success: true, data: branding });
+}));
+
+router.post("/reset", authenticate, authorizeAdmin, asyncHandler(async (req, res) => {
+  const branding = await brandingController.reset();
+  res.json({ success: true, data: branding });
+}));
+
+export default router;

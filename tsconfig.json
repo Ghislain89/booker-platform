@@ -2,8 +2,7 @@
   "compilerOptions": {
     "target": "es2018",
     "module": "commonjs",
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "noEmit": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -15,6 +14,6 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "scripts/**/*", "prisma/**/*", "playwright/**/*", "playwright.config.ts", "orval.config.ts"],
   "exclude": ["node_modules", "**/*.test.ts"]
 } 

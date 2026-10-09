@@ -8,7 +8,8 @@ export async function createRandomRoom(number?: string, price?: number) {
   const amenities = features.sort(() => 0.5 - Math.random()).slice(0, 3);
 
   return {
-    number: number || faker.string.numeric(3),
+    // 5 digits, so it never clashes with the seeded rooms (101-304)
+    number: number || faker.string.numeric({ length: 5, allowLeadingZeros: false }),
     type: roomType[Math.floor(Math.random() * roomType.length)],
     capacity: faker.number.int({ min: 1, max: 4 }),
     price: price || faker.number.int({ min: 100, max: 500 }),
