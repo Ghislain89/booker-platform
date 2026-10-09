@@ -1,49 +1,48 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
+import { JWT_SECRET } from "../config/env";
+import { AuthUser } from "../types";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+export type AuthRequest = Request;
 
-export interface AuthRequest extends Request {
-  user?: {
-    userId: string;
-    username: string;
-    role: string;
-  };
-}
+export const isAdmin = (user?: AuthUser) => user?.role === "ROLE_ADMIN";
 
-export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+export const signToken = (user: AuthUser) =>
+  jwt.sign(user, JWT_SECRET, { expiresIn: "24h" });
+
+export const verifyToken = (token: string): AuthUser => {
+  const { userId, username, role } = jwt.verify(token, JWT_SECRET) as AuthUser;
+  return { userId, username, role };
+};
+
+export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({
       success: false,
-      error: 'Authentication required'
+      error: "Authentication required",
     });
   }
 
   try {
-    const user = jwt.verify(token, JWT_SECRET) as {
-      userId: string;
-      username: string;
-      role: string;
-    };
-    req.user = user;
+    req.user = verifyToken(token);
     next();
   } catch (error) {
     return res.status(403).json({
       success: false,
-      error: 'Invalid token'
+      error: "Invalid token",
     });
   }
 };
 
-export const authorizeAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
-  if (req.user?.role !== 'ROLE_ADMIN') {
+export const authorizeAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (!isAdmin(req.user)) {
     return res.status(403).json({
       success: false,
-      error: 'Admin access required'
+      error: "Admin access required",
     });
   }
   next();
-}; 
+};

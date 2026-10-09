@@ -16,6 +16,10 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Type check
+        run: npm run typecheck
+      - name: Check swagger.json is up to date
+        run: npm run swagger:export && git diff --exit-code playwright/support/zod/swagger.json
       - name: Set up database
         run: npm run setup
       - name: Install Playwright browsers

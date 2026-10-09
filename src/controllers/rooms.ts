@@ -1,26 +1,26 @@
-import { Room } from '../types';
-import { roomsService } from '../services/rooms';
+import { Room, RoomInput } from "../types";
+import { roomsService } from "../services/rooms";
 
 class RoomsController {
-  async getAll(): Promise<Room[]> {
-    return roomsService.getAll();
+  getAll(options?: { shuffle?: boolean }): Promise<Room[]> {
+    return roomsService.getAll(options);
   }
 
-  async getById(id: string): Promise<Room | null> {
+  getById(id: string): Promise<Room> {
     return roomsService.getById(id);
   }
 
-  async create(room: Omit<Room, 'id' | 'createdAt' | 'updatedAt'>): Promise<Room> {
+  create(room: RoomInput): Promise<Room> {
     return roomsService.create(room);
   }
 
-  async update(id: string, room: Partial<Room>): Promise<Room | null> {
+  update(id: string, room: Partial<RoomInput>): Promise<Room> {
     return roomsService.update(id, room);
   }
 
-  async delete(id: string): Promise<boolean> {
+  delete(id: string): Promise<void> {
     return roomsService.delete(id);
   }
 }
 
-export const roomsController = new RoomsController(); 
+export const roomsController = new RoomsController();

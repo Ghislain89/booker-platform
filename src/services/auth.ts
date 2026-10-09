@@ -1,114 +1,70 @@
-import { Request } from 'express';
-import { AuthRequest, AuthResponse, RegisterRequest, User } from '../types';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import { PrismaClient } from '@prisma/client';
+import bcrypt from "bcryptjs";
+import { Prisma, User as DbUser } from "@prisma/client";
+import { prisma } from "../lib/prisma";
+import { conflict, HttpError } from "../lib/http";
+import { signToken } from "../middleware/auth";
+import { AuthRequest, AuthResponse, RegisterRequest, Role, User } from "../types";
 
-const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+export const toRole = (dbRole: string): Role => (dbRole === "ADMIN" ? "ROLE_ADMIN" : "ROLE_USER");
+
+export const toUser = (user: DbUser): User => ({
+  id: user.id,
+  username: user.username,
+  email: user.email,
+  role: toRole(user.role),
+  createdAt: user.createdAt,
+  updatedAt: user.updatedAt,
+});
+
+export const issueToken = (user: DbUser): AuthResponse => ({
+  token: signToken({ userId: user.id, username: user.username, role: toRole(user.role) }),
+  user: toUser(user),
+});
 
 class AuthService {
   async login(credentials: AuthRequest): Promise<AuthResponse> {
-    console.log('\n=== Login Attempt ===');
-    console.log('Username:', credentials.username);
-    
     const user = await prisma.user.findUnique({
       where: { username: credentials.username },
     });
-
-    if (!user) {
-      console.log("User not found");
-      throw new Error("User not found");
+    const isValidPassword = user && (await bcrypt.compare(credentials.password, user.password));
+    if (!user || !isValidPassword) {
+      throw new HttpError(401, "Invalid credentials");
     }
-
-    const isValidPassword = await bcrypt.compare(
-      credentials.password,
-      user.password,
-    );
-    if (!isValidPassword) {
-      console.log("Invalid password");
-      throw new Error("Invalid password");
-    }
-
-    const token = jwt.sign(
-      { userId: user.id, username: user.username, role: `ROLE_${user.role}` },
-      JWT_SECRET,
-      { expiresIn: "24h" },
-    );
-
-    console.log("Login successful");
-    return {
-      token,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: `ROLE_${user.role}` as User["role"],
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
-    };
+    return issueToken(user);
   }
 
   async register(userData: RegisterRequest): Promise<AuthResponse> {
-    console.log('\n=== Registration Attempt ===');
-    console.log('Username:', userData.username);
-    console.log('Email:', userData.email);
-
-    const existingUser = await prisma.user.findUnique({
-      where: { username: userData.username },
+    const existing = await prisma.user.findFirst({
+      where: { OR: [{ username: userData.username }, { email: userData.email }] },
     });
-
-    if (existingUser) {
-      console.log("Username already exists:", existingUser.username);
-      throw new Error("Username already exists");
+    if (existing) {
+      throw conflict(
+        existing.username === userData.username ? "Username already exists" : "Email already exists",
+      );
     }
 
-    console.log("No existing user found, proceeding with registration");
-
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
-    const newUser = await prisma.user.create({
-      data: {
-        username: userData.username,
-        email: userData.email,
-        password: hashedPassword,
-        role: "USER",
-      },
-    });
-
-    console.log("User created successfully:", newUser.username);
-
-    const token = jwt.sign(
-      {
-        userId: newUser.id,
-        username: newUser.username,
-        role: `ROLE_${newUser.role}`,
-      },
-      JWT_SECRET,
-      { expiresIn: "24h" },
-    );
-
-    console.log("Token generated successfully");
-    console.log("Registration completed successfully");
-
-    return {
-      token,
-      user: {
-        id: newUser.id,
-        username: newUser.username,
-        email: newUser.email,
-        role: `ROLE_${newUser.role}` as User["role"],
-        createdAt: newUser.createdAt,
-        updatedAt: newUser.updatedAt,
-      },
-    };
+    try {
+      const newUser = await prisma.user.create({
+        data: {
+          username: userData.username,
+          email: userData.email,
+          password: await bcrypt.hash(userData.password, 10),
+          role: "USER",
+        },
+      });
+      return issueToken(newUser);
+    } catch (error) {
+      // Lost a race with a parallel registration of the same username or e-mail.
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        throw conflict("Username already exists");
+      }
+      throw error;
+    }
   }
 
-  async logout(req: Request): Promise<void> {
-    // In a real application, you might want to invalidate the token
-    // or implement a token blacklist
-    return Promise.resolve();
+  async logout(): Promise<void> {
+    // JWTs are stateless; a real application would add the token to a deny list.
   }
 }
 
-export const authService = new AuthService(); 
+export const authService = new AuthService();

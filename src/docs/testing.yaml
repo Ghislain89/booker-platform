@@ -1,0 +1,257 @@
+# Test-support endpoints (src/routes/testing.ts). Only documented and mounted when
+# the test API is enabled; see TEST_API_ENABLED in src/config/env.ts.
+
+components:
+  schemas:
+    Flags:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          required: [enabled, available]
+          properties:
+            enabled:
+              type: array
+              items:
+                type: string
+            available:
+              type: array
+              items:
+                type: string
+    RecordCounts:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          required: [users, rooms, bookings, messages]
+          properties:
+            users:
+              type: integer
+            rooms:
+              type: integer
+            bookings:
+              type: integer
+            messages:
+              type: integer
+
+tags:
+  - name: Testing
+    description: Test support (local development only). Reset data, create isolated test data and toggle trainer flags.
+
+paths:
+  /api/testing/reset:
+    post:
+      summary: Reset the database to the seed data
+      description: |
+        Removes all users, rooms, bookings, messages, reports and branding, runs the seed again
+        and turns all trainer flags off.
+      tags: [Testing]
+      security: []
+      responses:
+        "200":
+          description: Number of records after the reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordCounts"
+
+  /api/testing/seed:
+    post:
+      summary: Create namespaced test data
+      description: |
+        Creates users, rooms and bookings for one namespace (for example one Playwright worker).
+        Usernames become `{namespace}-{username}` and room numbers `{namespace}-{number}`.
+        Users and rooms that already exist are updated, so calling this twice is safe.
+        Bookings refer to users and rooms by their name in this request (or an existing username / room number)
+        and are created without validation, so you can create past bookings or any status.
+      tags: [Testing]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [namespace]
+              properties:
+                namespace:
+                  type: string
+                  pattern: "^[A-Za-z0-9_]{1,30}$"
+                  example: w3
+                users:
+                  type: array
+                  items:
+                    type: object
+                    required: [username]
+                    properties:
+                      username:
+                        type: string
+                        example: alice
+                      password:
+                        type: string
+                        default: password123
+                      email:
+                        type: string
+                        description: "Default: `{namespace}-{username}@booker.test`"
+                      role:
+                        type: string
+                        enum: [USER, ADMIN]
+                        default: USER
+                rooms:
+                  type: array
+                  items:
+                    type: object
+                    required: [number, type, price, capacity]
+                    properties:
+                      number:
+                        type: string
+                        example: "101"
+                      type:
+                        type: string
+                        enum: [STANDARD, DELUXE, SUITE]
+                      price:
+                        type: number
+                        example: 120
+                      capacity:
+                        type: integer
+                        example: 2
+                      amenities:
+                        type: array
+                        items:
+                          type: string
+                      status:
+                        type: string
+                        enum: [AVAILABLE, OCCUPIED, MAINTENANCE]
+                        default: AVAILABLE
+                bookings:
+                  type: array
+                  items:
+                    type: object
+                    required: [user, room, checkIn, checkOut]
+                    properties:
+                      user:
+                        type: string
+                        example: alice
+                      room:
+                        type: string
+                        example: "101"
+                      checkIn:
+                        type: string
+                        format: date-time
+                      checkOut:
+                        type: string
+                        format: date-time
+                      status:
+                        type: string
+                        enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED]
+                        default: CONFIRMED
+      responses:
+        "201":
+          description: Test data created. Every user comes with a token and its password.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    required: [namespace, users, rooms, bookings]
+                    properties:
+                      namespace:
+                        type: string
+                      users:
+                        type: array
+                        items:
+                          type: object
+                          required: [token, user, password]
+                          properties:
+                            token:
+                              type: string
+                            user:
+                              $ref: "#/components/schemas/User"
+                            password:
+                              type: string
+                      rooms:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Room"
+                      bookings:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Booking"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/testing/namespace/{namespace}:
+    delete:
+      summary: Delete all test data of a namespace
+      tags: [Testing]
+      security: []
+      parameters:
+        - in: path
+          name: namespace
+          required: true
+          schema:
+            type: string
+            pattern: "^[A-Za-z0-9_]{1,30}$"
+      responses:
+        "200":
+          description: Number of deleted records per type
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordCounts"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/testing/flags:
+    get:
+      summary: Get the enabled and available trainer flags
+      tags: [Testing]
+      security: []
+      responses:
+        "200":
+          description: Flags
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Flags"
+    put:
+      summary: Set the enabled trainer flags
+      description: |
+        Replaces the enabled flags for all requests. A single request can also enable flags with the
+        `x-booker-flags` header, for example `x-booker-flags: slow-rooms,random-order`.
+        `POST /api/testing/reset` turns all flags off.
+      tags: [Testing]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [flags]
+              properties:
+                flags:
+                  type: array
+                  items:
+                    type: string
+                    enum: [slow-rooms, flaky-booking, stale-list, bug-a11y, bug-visual, bug-price, bug-auth, random-order, popup-cookie]
+      responses:
+        "200":
+          description: Flags updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Flags"
+        "400":
+          $ref: "#/components/responses/BadRequest"

@@ -1,86 +1,94 @@
-import { Booking } from "@prisma/client";
+import { Booking as DbBooking, Room as DbRoom } from "@prisma/client";
 import { prisma } from "../lib/prisma";
+import { badRequest, conflict, forbidden, notFound } from "../lib/http";
+import { isAdmin } from "../middleware/auth";
+import { AuthUser, Booking, BookingInput, BookingStatus, UserSummary } from "../types";
+import { toRoom } from "./rooms";
+
+const include = {
+  user: { select: { id: true, username: true, email: true } },
+  room: true,
+} as const;
+
+type DbBookingWithRelations = DbBooking & { user: UserSummary; room: DbRoom };
+
+const toBooking = (booking: DbBookingWithRelations): Booking => ({
+  ...booking,
+  status: booking.status as BookingStatus,
+  room: toRoom(booking.room),
+});
+
+export const ACTIVE_BOOKING_STATUSES: BookingStatus[] = ["PENDING", "CONFIRMED"];
+
+const startOfTodayUtc = () => {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+};
 
 class BookingsService {
   async getAll(): Promise<Booking[]> {
-    return prisma.booking.findMany({
-      include: {
-        user: true,
-        room: true,
-      },
-    });
+    const bookings = await prisma.booking.findMany({ include, orderBy: { checkIn: "asc" } });
+    return bookings.map(toBooking);
   }
 
   async getUserBookings(userId: string): Promise<Booking[]> {
-    return prisma.booking.findMany({
+    const bookings = await prisma.booking.findMany({
       where: { userId },
-      include: {
-        user: true,
-        room: true,
-      },
+      include,
+      orderBy: { checkIn: "asc" },
     });
+    return bookings.map(toBooking);
   }
 
-  async getById(id: string): Promise<Booking | null> {
-    return prisma.booking.findUnique({
-      where: { id },
-      include: {
-        user: true,
-        room: true,
-      },
-    });
+  async getById(id: string, requester: AuthUser): Promise<Booking> {
+    const booking = await prisma.booking.findUnique({ where: { id }, include });
+    if (!booking) throw notFound("Booking not found");
+    if (booking.userId !== requester.userId && !isAdmin(requester)) throw forbidden();
+    return toBooking(booking);
   }
 
-  async create(
-    booking: Omit<Booking, "id" | "createdAt" | "updatedAt">,
-  ): Promise<Booking> {
-    return prisma.booking.create({
-      data: {
-        ...booking,
-        status: "PENDING",
-      },
-      include: {
-        user: true,
-        room: true,
-      },
-    });
-  }
-
-  async updateStatus(
-    id: string,
-    status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED",
-  ): Promise<Booking | null> {
-    return prisma.booking.update({
-      where: { id },
-      data: { status },
-      include: {
-        user: true,
-        room: true,
-      },
-    });
-  }
-
-  async cancelBooking(id: string, userId: string): Promise<Booking | null> {
-    console.log("Service: Attempting to cancel booking:", { id, userId });
-
-    const booking = await this.getById(id);
-    console.log("Service: Found booking:", booking);
-
-    if (!booking || booking.userId !== userId) {
-      console.log(
-        "Service: Cannot cancel booking - not found or unauthorized:",
-        {
-          bookingFound: !!booking,
-          bookingUserId: booking?.userId,
-          requestUserId: userId,
-        },
-      );
-      return null;
+  async create(input: BookingInput, userId: string): Promise<Booking> {
+    if (input.checkOut <= input.checkIn) {
+      throw badRequest({ checkOut: "checkOut must be after checkIn" });
+    }
+    if (input.checkIn < startOfTodayUtc()) {
+      throw badRequest({ checkIn: "checkIn cannot be in the past" });
     }
 
-    const result = await this.updateStatus(id, "CANCELLED");
-    console.log("Service: Booking cancelled:", result);
-    return result;
+    const booking = await prisma.$transaction(async (tx) => {
+      const room = await tx.room.findUnique({ where: { id: input.roomId } });
+      if (!room) throw notFound("Room not found");
+      if (room.status === "MAINTENANCE") throw conflict("Room not available");
+
+      const overlapping = await tx.booking.count({
+        where: {
+          roomId: input.roomId,
+          status: { in: ACTIVE_BOOKING_STATUSES },
+          checkIn: { lt: input.checkOut },
+          checkOut: { gt: input.checkIn },
+        },
+      });
+      if (overlapping > 0) throw conflict("Room not available");
+
+      return tx.booking.create({
+        data: { ...input, userId, status: "PENDING" },
+        include,
+      });
+    });
+    return toBooking(booking);
+  }
+
+  async updateStatus(id: string, status: BookingStatus): Promise<Booking> {
+    const existing = await prisma.booking.findUnique({ where: { id } });
+    if (!existing) throw notFound("Booking not found");
+    const booking = await prisma.booking.update({ where: { id }, data: { status }, include });
+    return toBooking(booking);
+  }
+
+  async cancel(id: string, requester: AuthUser): Promise<Booking> {
+    const booking = await this.getById(id, requester);
+    if (booking.status === "CANCELLED") return booking;
+    return this.updateStatus(id, "CANCELLED");
   }
 }
 

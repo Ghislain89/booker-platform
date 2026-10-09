@@ -1,75 +1,76 @@
-import { Branding } from '@prisma/client';
-import { prisma } from '../lib/prisma';
+import { Branding as DbBranding } from "@prisma/client";
+import { prisma } from "../lib/prisma";
+import { Branding, BrandingInput } from "../types";
 
-const defaultBranding = {
-  name: 'Restful Booker',
-  logoUrl: 'https://example.com/logo.png',
-  description: 'Your trusted hotel booking platform',
+export const defaultBranding: Omit<Branding, "id" | "createdAt" | "updatedAt"> = {
+  name: "Booker Hotel",
+  logoUrl: "/logo.svg",
+  description: "A small hotel by the sea, built for practising test automation.",
   contact: {
-    name: 'Restful Booker Support',
-    address: '123 Hotel Street, City, Country',
-    phone: '+1 234 567 8900',
-    email: 'support@restfulbooker.com'
+    name: "Booker Front Desk",
+    address: "Testlaan 1, 3511 AB Utrecht, The Netherlands",
+    phone: "+31 30 123 4567",
+    email: "frontdesk@booker.test",
   },
   map: {
-    latitude: 40.7128,
-    longitude: -74.0060
+    latitude: 52.0907,
+    longitude: 5.1214,
   },
   theme: {
-    primaryColor: '#4A90E2',
-    secondaryColor: '#F5A623'
-  }
+    primaryColor: "#2E7D32",
+    secondaryColor: "#D84315",
+  },
 };
+
+const toBranding = (branding: DbBranding): Branding => ({
+  ...branding,
+  contact: JSON.parse(branding.contact),
+  map: JSON.parse(branding.map),
+  theme: JSON.parse(branding.theme),
+});
+
+const toDbData = (branding: Omit<Branding, "id" | "createdAt" | "updatedAt">) => ({
+  name: branding.name,
+  logoUrl: branding.logoUrl,
+  description: branding.description,
+  contact: JSON.stringify(branding.contact),
+  map: JSON.stringify(branding.map),
+  theme: JSON.stringify(branding.theme),
+});
 
 class BrandingService {
   async get(): Promise<Branding> {
-    let branding = await prisma.branding.findFirst();
-    if (!branding) {
-      branding = await prisma.branding.create({
-        data: {
-          ...defaultBranding,
-          contact: JSON.stringify(defaultBranding.contact),
-          map: JSON.stringify(defaultBranding.map),
-          theme: JSON.stringify(defaultBranding.theme)
-        }
-      });
-    }
-    return {
-      ...branding,
-      contact: JSON.parse(branding.contact),
-      map: JSON.parse(branding.map),
-      theme: JSON.parse(branding.theme)
-    };
+    const branding =
+      (await prisma.branding.findFirst()) ??
+      (await prisma.branding.create({ data: toDbData(defaultBranding) }));
+    return toBranding(branding);
   }
 
-  async update(updatedBranding: Partial<Branding>): Promise<Branding> {
-    const currentBranding = await this.get();
-    const updatedData = {
-      ...currentBranding,
-      ...updatedBranding,
-      contact: typeof updatedBranding.contact === 'object' 
-        ? JSON.stringify(updatedBranding.contact)
-        : currentBranding.contact,
-      map: typeof updatedBranding.map === 'object'
-        ? JSON.stringify(updatedBranding.map)
-        : currentBranding.map,
-      theme: typeof updatedBranding.theme === 'object'
-        ? JSON.stringify(updatedBranding.theme)
-        : currentBranding.theme
+  async update(input: BrandingInput): Promise<Branding> {
+    const current = await this.get();
+    const merged = {
+      name: input.name ?? current.name,
+      logoUrl: input.logoUrl ?? current.logoUrl,
+      description: input.description ?? current.description,
+      contact: { ...current.contact, ...input.contact },
+      map: { ...current.map, ...input.map },
+      theme: { ...current.theme, ...input.theme },
     };
-
     const branding = await prisma.branding.update({
-      where: { id: currentBranding.id },
-      data: updatedData
+      where: { id: current.id },
+      data: toDbData(merged),
     });
+    return toBranding(branding);
+  }
 
-    return {
-      ...branding,
-      contact: JSON.parse(branding.contact),
-      map: JSON.parse(branding.map),
-      theme: JSON.parse(branding.theme)
-    };
+  async reset(): Promise<Branding> {
+    const current = await this.get();
+    const branding = await prisma.branding.update({
+      where: { id: current.id },
+      data: toDbData(defaultBranding),
+    });
+    return toBranding(branding);
   }
 }
 
-export const brandingService = new BrandingService(); 
+export const brandingService = new BrandingService();

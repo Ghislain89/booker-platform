@@ -1,14 +1,18 @@
-import { Branding } from '../types';
-import { brandingService } from '../services/branding';
+import { Branding, BrandingInput } from "../types";
+import { brandingService } from "../services/branding";
 
 class BrandingController {
-  async get(): Promise<Branding> {
+  get(): Promise<Branding> {
     return brandingService.get();
   }
 
-  async update(branding: Partial<Branding>): Promise<Branding> {
+  update(branding: BrandingInput): Promise<Branding> {
     return brandingService.update(branding);
+  }
+
+  reset(): Promise<Branding> {
+    return brandingService.reset();
   }
 }
 
-export const brandingController = new BrandingController(); 
+export const brandingController = new BrandingController();
