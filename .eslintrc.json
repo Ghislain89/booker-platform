@@ -1,12 +1,30 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "parserOptions": { "ecmaVersion": 2022, "sourceType": "module" },
-  "plugins": ["@typescript-eslint"],
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "overrides": [
     {
-      "files": ["playwright/**/*.ts"],
-      "extends": ["plugin:playwright/recommended"]
+      "files": [
+        "playwright/**/*.ts"
+      ],
+      "extends": [
+        "plugin:playwright/recommended"
+      ],
+      "settings": {
+        "playwright": {
+          "globalAliases": {
+            "test": [
+              "setup"
+            ]
+          }
+        }
+      }
     }
   ]
 }

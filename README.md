@@ -229,3 +229,24 @@ CI fails when `swagger.json` is out of date.
 ## Solutions
 
 All assignments are worked out on the [`solutions`](https://github.com/Ghislain89/booker-platform/tree/solutions) branch. There are many ways to solve each assignment. The solutions show what _could_ be a good approach. Depending on your organisation's context, you might do things (very) differently, and that's fine.
+
+### UI solutions
+
+| Assignment | Where |
+| --- | --- |
+| 1A, 1B | `playwright/tests/ui/assignment1.spec.ts`, unique users from `support/datafactories/user.factory.ts` |
+| 2 | `support/pages/*` (page objects), `support/fixtures/ui.fixture.ts` (fixtures), `assignment2.spec.ts` |
+| 3 | `auth.setup.ts` (user through the form, admin through the API), the `setup`, `*-user` and `*-admin` projects in `playwright.config.ts`, `assignment3*.spec.ts` |
+| 4 | `assignment4.network.spec.ts` (mock and patch), `assignment4.hybrid.spec.ts`; the `seed` fixture creates data through the test support API and removes it afterwards |
+| 6 | `assignment6.visual.spec.ts` and `visual.css`. Baselines are kept for Chromium on macOS and Linux; the "Update snapshots" workflow regenerates the Linux ones |
+| 7 | `assignment7.a11y.spec.ts` (axe per wizard step, attached to the report; aria snapshots) |
+| 8 | `.github/workflows/playwright.yml`: all browsers, 4 shards, merged HTML report |
+| 9 | `specs/cancel-booking.md` (plan) and `assignment9.cancel-booking.spec.ts` |
+
+Extra admin examples: `rooms.admin.spec.ts` and `bookings.admin.spec.ts`.
+
+```bash
+npx playwright test                                   # API + Chromium
+npx playwright test --project "*"                     # API + Chromium, Firefox and WebKit
+npx playwright test --project "ui-*" --repeat-each 5  # check that the tests are independent
+```

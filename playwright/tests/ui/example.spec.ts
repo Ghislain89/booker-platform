@@ -1,6 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { LOGGED_OUT } from "../../support/auth";
 
-// An example to get you started. Your own UI tests go in this folder too.
+// The projects start logged in; these tests need a fresh browser.
+test.use({ storageState: LOGGED_OUT });
+
 test.describe("login", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/login");

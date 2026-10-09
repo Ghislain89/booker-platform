@@ -1,0 +1,30 @@
+# Screenshots differ per operating system. Run this workflow (Actions tab → "Update snapshots"
+# → Run workflow) to regenerate the Linux baselines of the @visual tests and commit them.
+name: Update snapshots
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - run: npm run setup
+      - run: npx playwright install --with-deps chromium
+      - name: Update the baselines
+        run: npx playwright test --grep @visual --update-snapshots --pass-with-no-tests --reporter list
+      - name: Commit the new baselines
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898777+github-actions[bot]@users.noreply.github.com"
+          git add "playwright/**/*-snapshots/*-linux.png"
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "Update Linux snapshots"
+          git push
