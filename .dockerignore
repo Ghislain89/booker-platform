@@ -1,0 +1,14 @@
+node_modules
+dist
+web/dist
+uploads
+prisma/*.db
+prisma/*.db-journal
+prisma/data
+playwright-report
+test-results
+blob-report
+playwright/.auth
+.git
+.github
+*.tmp.mjs

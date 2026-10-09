@@ -44,6 +44,17 @@ Playwright starts the server for you if it isn't running yet. You can also use t
 
 `npm run dev` serves the web app with Vite (hot reload). `npm run build && npm start` serves the production build instead.
 
+### Docker (optional)
+
+If you'd rather not install Node.js, run the whole platform in a container:
+
+```bash
+docker build -t booker .
+docker run --rm -p 3000:3000 booker
+```
+
+The container serves the production build on http://localhost:3000 with the test support API switched on. It creates and seeds the database on the first start. Add `-v booker-data:/app/prisma/data` to keep data and uploads between runs. You still run Playwright on your own machine.
+
 Seeded accounts:
 
 | Username | Password | Role |
@@ -65,15 +76,39 @@ The seed also creates 12 rooms (101–104 standard, 201–204 deluxe, 301–304 
 
 | Page | Route | Who |
 | --- | --- | --- |
-| Home (featured rooms, deal of the day) | `/` | everyone |
+| Home (featured rooms, deal of the day, map, contact form) | `/` | everyone |
 | Rooms (filters, sorting, pagination) | `/rooms` | everyone |
-| Room details | `/rooms/:number`, for example `/rooms/101` | everyone |
+| Room details (photo gallery with lightbox) | `/rooms/:number`, for example `/rooms/101` | everyone |
 | Log in / Register | `/login`, `/register` | everyone |
 | Terms and conditions | `/terms` | everyone |
-| Booking wizard (dates & guests, extras, review) | `/book/:number` | logged in |
-| My bookings (upcoming, past, cancelled) | `/my/bookings` | logged in |
-| Room management | `/admin/rooms` | admin |
+| Contact | `/contact` | everyone |
+| Booking wizard (dates & guests, extras, review + payment) | `/book/:number` | logged in |
+| My bookings (upcoming, past, cancelled; invoices; check-in countdown) | `/my/bookings` | logged in |
+| My messages | `/my/messages` | logged in |
+| My profile (e-mail, photo, language, colour scheme) | `/my/profile` | logged in |
+| Room management (photos, drag & drop order) | `/admin/rooms` | admin |
 | Booking management (approve or reject) | `/admin/bookings` | admin |
+| Messages (mark as read, archive) | `/admin/messages` | admin |
+| Reports (chart, CSV export) | `/admin/reports` | admin |
+| Branding (live preview in an iframe) | `/admin/branding` | admin |
+| Trainer panel (flags, reset) | `/__trainer` | admin |
+
+Things worth testing, by Playwright feature:
+
+| Feature | Where |
+| --- | --- |
+| Native dialogs (`page.on('dialog')`) | Cancelling a booking in *My bookings* |
+| Downloads | PDF and CSV invoices in *My bookings*, CSV export in *Reports* |
+| File uploads | Profile photo, room photo (edit a room in *Room management*) |
+| Drag & drop | *Room management* → *Change order* (or use the keyboard on the handles) |
+| Multiple tabs | The terms link in the last step of the booking wizard |
+| Shadow DOM | The payment form in the last step of the booking wizard (`<booker-payment>`) |
+| Iframes | The map on the home page, the preview in *Branding* |
+| Multiple contexts and live updates | Bookings and messages are pushed with server-sent events to the notification bell and the admin's unread counter |
+| Clock (`page.clock`) | The check-in countdown in *My bookings* for bookings that start today (check-in opens at 15:00) |
+| Emulation | Responsive layout below 720 px, `locale` (English/Dutch), `colorScheme` (light/dark) |
+
+The payment form accepts any valid card number (Luhn check), for example `4242 4242 4242 4242`, with an expiry date in the future. Card `4000 0000 0000 0002` is always declined.
 
 Notifications ("Booking cancelled." and so on) appear in a region named "Notifications": `page.getByRole('region', { name: 'Notifications' })`.
 
@@ -94,7 +129,21 @@ For local development and training only. It's switched off when `NODE_ENV=produc
 | `DELETE /api/testing/namespace/{ns}` | Deletes everything in a namespace |
 | `GET` / `PUT /api/testing/flags` | Reads or sets the trainer flags |
 
-Trainer flags switch on deliberate bugs or flakiness, for example `slow-rooms`, `random-order` and `flaky-booking`. Set them for everyone with `PUT /api/testing/flags`, or for a single request with the `x-booker-flags: slow-rooms,random-order` header. See [docs/frontend-spec.md](docs/frontend-spec.md) §7 for the full list. The full request and response formats are in Swagger.
+Trainer flags switch on deliberate bugs or flakiness:
+
+| Flag | Effect |
+| --- | --- |
+| `slow-rooms` | The rooms list takes 1–3 seconds |
+| `flaky-booking` | 30% of new bookings fail with a 500 |
+| `random-order` | Rooms come back in a random order |
+| `popup-cookie` | A cookie banner appears after a random delay |
+| `stale-list` | *My bookings* doesn't refresh after cancelling |
+| `bug-a11y` | Missing labels and alt text, low-contrast badges |
+| `bug-visual` | The page shifts 3 px and buttons change colour |
+| `bug-price` | The booking wizard charges one night too many |
+| `bug-auth` | An expired token gives a blank page instead of the login page |
+
+Set them for everyone on the trainer panel (`/__trainer`, log in as `admin`) or with `PUT /api/testing/flags`. Set them for a single test with the `x-booker-flags: slow-rooms,random-order` header, for example through `extraHTTPHeaders` in a Playwright project. The web app reads the flags once, when the page loads. `POST /api/testing/reset` turns all flags off. The full request and response formats are in Swagger.
 
 ### Environment variables
 
@@ -104,6 +153,7 @@ Trainer flags switch on deliberate bugs or flakiness, for example `slow-rooms`, 
 | `DEBUG` | off | `DEBUG=booker` logs every request and database query |
 | `BOOKER_TEST_API` | on (off in production) | `BOOKER_TEST_API=0` disables the test support API |
 | `JWT_SECRET` | `booker-dev-secret` | Secret used to sign tokens |
+| `UPLOAD_DIR` | `uploads/` | Where uploaded photos are stored |
 
 ## Folder structure
 
@@ -186,6 +236,17 @@ Put your UI tests in `playwright/tests/ui/`. `example.spec.ts` shows how a test 
 - Seed a room (as admin) and a booking (as user) via the API, then verify them in the UI. Or book in the UI and verify via `GET /api/bookings/my-bookings`.
 - Bonus: patch the rooms response so a fake room shows up, and move the seeding into a fixture.
 
+### Assignment 5 (Pick one)
+
+Choose one of these, or more if you have time:
+
+- **Dialogs and downloads:** cancel a booking (accept the native confirm dialog) and download its PDF invoice. Check the file name.
+- **Multiple contexts:** a guest books a room in one context, the admin approves it in another, and the guest's notification bell shows the change without a reload.
+- **Clock:** set the clock to 14:59:50 on the check-in day of a booking, check the countdown, fast-forward and see "Check-in for room N is open".
+- **Emulation:** add a mobile project. Use the menu button on a phone, and check the Dutch texts (`locale: 'nl-NL'`) and dark mode (`colorScheme: 'dark'`).
+- **Uploads and drag & drop:** upload a room photo as admin, then drag a room to a new position in *Change order*.
+- **Tabs and shadow DOM:** open the terms from the booking wizard in a new tab, then fill the payment form (it's inside a shadow root) and finish the booking.
+
 ### Assignment 6 (Visual testing)
 
 - Take a screenshot of the home page and run the test twice. Does it pass?
@@ -206,7 +267,11 @@ Put your UI tests in `playwright/tests/ui/`. `example.spec.ts` shows how a test 
 
 - Run `npx playwright init-agents`, let the planner write a plan for "cancel a booking" and generate the test. Would you merge it?
 
-Assignments 5 and 10 use features that are still on the [roadmap](docs/frontend-spec.md).
+### Assignment 10 (Flaky-test clinic)
+
+- Add a `chaos` project that sends `x-booker-flags: slow-rooms,flaky-booking,random-order,popup-cookie` with `extraHTTPHeaders`, and run your suite with it.
+- What fails, and why? Use traces to find out.
+- Make the suite stable without `waitForTimeout`: web-first assertions, `page.addLocatorHandler` for the cookie banner, locators that don't depend on the order, and retries only where a real user would retry.
 
 ## Documentation
 

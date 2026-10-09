@@ -15,6 +15,8 @@ export const UNAUTHORIZED_EVENT = "booker:unauthorized";
 type Options = {
   method?: string;
   body?: unknown;
+  /** Multipart upload (sent as-is, the browser sets the Content-Type). */
+  form?: FormData;
   query?: Record<string, string | number | undefined>;
 };
 
@@ -36,7 +38,8 @@ export async function api<T>(path: string, options: Options = {}): Promise<T> {
       method: options.method ?? "GET",
       headers,
       body:
-        options.body !== undefined ? JSON.stringify(options.body) : undefined,
+        options.form ??
+        (options.body !== undefined ? JSON.stringify(options.body) : undefined),
     });
   } catch {
     throw new ApiError(0, "Could not reach the server. Please try again.");
@@ -61,3 +64,37 @@ export async function api<T>(path: string, options: Options = {}): Promise<T> {
 }
 
 export type DataResponse<T> = { success: true; data: T };
+
+/** Saves a Blob through a temporary <a download> link, which Playwright sees as a download. */
+export function saveBlob(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
+/** Downloads a file from the API with the Authorization header (a plain link cannot send it). */
+export async function download(path: string) {
+  const token = getToken();
+  const response = await fetch(`/api${path}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  }).catch(() => {
+    throw new ApiError(0, "Could not reach the server. Please try again.");
+  });
+  if (!response.ok) {
+    const json = await response.json().catch(() => ({}));
+    throw new ApiError(
+      response.status,
+      typeof json.error === "string"
+        ? json.error
+        : `Download failed (${response.status})`,
+    );
+  }
+  const disposition = response.headers.get("Content-Disposition") ?? "";
+  const fileName = /filename="([^"]+)"/.exec(disposition)?.[1] ?? "download";
+  saveBlob(await response.blob(), fileName);
+}

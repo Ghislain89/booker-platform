@@ -96,15 +96,15 @@ export function AdminBookings() {
             <tbody>
               {visible.map((booking) => (
                 <tr key={booking.id} data-testid="booking-row">
-                  <td>{booking.user?.username}</td>
-                  <td>Room {booking.room?.number}</td>
-                  <td>{formatDate(booking.checkIn)}</td>
-                  <td>{formatDate(booking.checkOut)}</td>
-                  <td>{formatPrice(booking.totalPrice)}</td>
-                  <td>
+                  <td data-label="Guest">{booking.user?.username}</td>
+                  <td data-label="Room">Room {booking.room?.number}</td>
+                  <td data-label="Check-in">{formatDate(booking.checkIn)}</td>
+                  <td data-label="Check-out">{formatDate(booking.checkOut)}</td>
+                  <td data-label="Total">{formatPrice(booking.totalPrice)}</td>
+                  <td data-label="Status">
                     <StatusBadge status={booking.status} />
                   </td>
-                  <td>
+                  <td className="actions-cell">
                     <div className="row-actions">
                       {booking.status === "PENDING" && (
                         <>

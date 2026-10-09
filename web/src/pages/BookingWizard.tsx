@@ -25,6 +25,8 @@ import {
 } from "../lib/pricing";
 import { useTitle } from "../lib/useTitle";
 import { NotFound } from "./NotFound";
+import { BookerPayment } from "../components/payment";
+import { hasFlag } from "../lib/flags";
 
 const describeError = (error: Error) =>
   error instanceof ApiError && error.details
@@ -63,6 +65,9 @@ export function BookingWizard() {
   const [extras, setExtras] = useState<Extra[]>([]);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [errors, setErrors] = useState<DateErrors>({});
+  const payment = useRef<BookerPayment>(null);
+  const [paymentError, setPaymentError] = useState<string>();
+  const [paying, setPaying] = useState(false);
 
   const room = useQuery({
     queryKey: ["rooms", "detail", number],
@@ -134,7 +139,13 @@ export function BookingWizard() {
     isValidDateInput(checkIn) && isValidDateInput(checkOut)
       ? countNights(checkIn, checkOut)
       : 0;
-  const total = totalPrice(data.price, nights, guests, extras);
+  // Bug mode `bug-price`: an off-by-one in the number of nights.
+  const total = totalPrice(
+    data.price,
+    hasFlag("bug-price") ? nights + 1 : nights,
+    guests,
+    extras,
+  );
 
   const validateStepOne = () => {
     const result: DateErrors = {};
@@ -161,7 +172,7 @@ export function BookingWizard() {
     return result;
   };
 
-  const next = (event: FormEvent) => {
+  const next = async (event: FormEvent) => {
     event.preventDefault();
     if (step === 0) {
       const result = validateStepOne();
@@ -171,6 +182,16 @@ export function BookingWizard() {
     if (step < STEPS.length - 1) {
       setStep(step + 1);
       return;
+    }
+    setPaymentError(undefined);
+    setPaying(true);
+    try {
+      await payment.current?.pay();
+    } catch (error) {
+      setPaymentError((error as Error).message);
+      return;
+    } finally {
+      setPaying(false);
     }
     booking.mutate(data.id);
   };
@@ -351,6 +372,12 @@ export function BookingWizard() {
                 <span className="visually-hidden"> (opens in a new tab)</span>
               </a>
             </div>
+            <booker-payment ref={payment} />
+            {paymentError && (
+              <p className="alert alert-error" role="alert">
+                {paymentError}
+              </p>
+            )}
             {booking.isError && (
               <p className="alert alert-error" role="alert">
                 {describeError(booking.error)}
@@ -377,9 +404,13 @@ export function BookingWizard() {
             <button
               type="submit"
               className="button"
-              disabled={!acceptTerms || booking.isPending}
+              disabled={!acceptTerms || paying || booking.isPending}
             >
-              {booking.isPending ? "Booking…" : "Confirm booking"}
+              {paying
+                ? "Processing payment…"
+                : booking.isPending
+                  ? "Booking…"
+                  : "Confirm booking"}
             </button>
           )}
         </div>

@@ -4,12 +4,20 @@ import type { BookingStatus, Extra, RoomType } from "../api/types";
 export const formatPrice = (amount: number) =>
   `€ ${Number.isInteger(amount) ? amount : amount.toFixed(2)}`;
 
-const dateFormat = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-  timeZone: "UTC",
-});
+const makeDateFormat = (locale: string) =>
+  new Intl.DateTimeFormat(locale, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+
+let dateFormat = makeDateFormat("en-US");
+
+/** Called by the preferences provider: dates follow the chosen language. */
+export const setDateLocale = (locale: string) => {
+  dateFormat = makeDateFormat(locale);
+};
 
 // Booking dates are midnight UTC; show them in UTC so they never shift a day.
 export const formatDate = (value: string | Date) =>

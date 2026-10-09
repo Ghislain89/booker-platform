@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250">
+  <rect width="400" height="250" fill="#e8efe3"/>
+  <rect x="110" y="160" width="180" height="50" rx="25" fill="#a8c09a"/>
+  <rect x="120" y="150" width="160" height="20" rx="10" fill="#fff" opacity=".85"/>
+  <rect x="270" y="90" width="8" height="70" fill="#a8c09a"/>
+  <circle cx="274" cy="88" r="12" fill="#a8c09a"/>
+  <rect x="60" y="60" width="60" height="80" rx="6" fill="#fff" opacity=".6"/>
+  <text x="20" y="235" font-family="system-ui, sans-serif" font-size="14" fill="#333" opacity=".7">Standard · Bathroom</text>
+</svg>

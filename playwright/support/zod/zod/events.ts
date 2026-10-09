@@ -16,7 +16,7 @@ import {
 (an `Authorization` header works too). Events:
 
 - `ready`: sent once after connecting
-- `booking.created`, `booking.updated`: `{ id, status, roomNumber, checkIn, checkOut, username }`; sent to the guest of the booking and to admins
+- `booking.created`, `booking.updated`: `{ id, status, roomNumber, checkIn, checkOut, username, actor }` (`actor`: who made the change); sent to the guest of the booking and to admins
 - `message.created`: `{ id, subject, from }`; admins only
 
  * @summary Live updates (Server-Sent Events)

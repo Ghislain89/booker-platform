@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, DataResponse } from "../api/client";
+import { api, DataResponse, download } from "../api/client";
 import type { Booking } from "../api/types";
 import { StatusBadge } from "../components/StatusBadge";
 import { useToast } from "../components/Toasts";
@@ -15,6 +15,7 @@ import {
   toIsoDate,
 } from "../lib/format";
 import { useTitle } from "../lib/useTitle";
+import { hasFlag } from "../lib/flags";
 
 const TABS = [
   { id: "upcoming", label: "Upcoming", empty: "No upcoming bookings." },
@@ -49,6 +50,8 @@ export function MyBookings() {
     mutationFn: (id: string) => api(`/bookings/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       notify("Booking cancelled.");
+      // Chaos flag: the list is not refreshed, so the row stays under "Upcoming".
+      if (hasFlag("stale-list")) return;
       return queryClient.invalidateQueries({
         queryKey: ["private", "my-bookings"],
       });
@@ -68,6 +71,14 @@ export function MyBookings() {
     }
   };
 
+  const onInvoice = async (booking: Booking, format: "pdf" | "csv") => {
+    try {
+      await download(`/bookings/${booking.id}/invoice?format=${format}`);
+    } catch (error) {
+      notify(`Could not download the invoice: ${(error as Error).message}`);
+    }
+  };
+
   const today = toIsoDate(todayInput());
   const visible = (bookings.data ?? []).filter(
     (booking) => tabOf(booking, today) === tab,
@@ -77,6 +88,7 @@ export function MyBookings() {
   return (
     <>
       <h1>My bookings</h1>
+      {bookings.data && <CheckInCountdowns bookings={bookings.data} />}
       {bookings.isPending && <p role="status">Loading bookings…</p>}
       {bookings.isError && (
         <p className="alert alert-error" role="alert">
@@ -158,7 +170,7 @@ export function MyBookings() {
                   <tbody>
                     {visible.map((booking) => (
                       <tr key={booking.id} data-testid="booking-row">
-                        <td>
+                        <td data-label="Room">
                           {booking.room ? (
                             <Link to={`/rooms/${booking.room.number}`}>
                               Room {booking.room.number} (
@@ -168,22 +180,53 @@ export function MyBookings() {
                             "Unknown room"
                           )}
                         </td>
-                        <td>{formatDate(booking.checkIn)}</td>
-                        <td>{formatDate(booking.checkOut)}</td>
-                        <td>{booking.adults + booking.children}</td>
-                        <td>
+                        <td data-label="Check-in">
+                          {formatDate(booking.checkIn)}
+                        </td>
+                        <td data-label="Check-out">
+                          {formatDate(booking.checkOut)}
+                        </td>
+                        <td data-label="Guests">
+                          {booking.adults + booking.children}
+                        </td>
+                        <td data-label="Extras">
                           {booking.extras.length
                             ? booking.extras
                                 .map((extra) => EXTRA_LABELS[extra])
                                 .join(", ")
                             : "None"}
                         </td>
-                        <td>{plural(booking.nights, "night")}</td>
-                        <td>{formatPrice(booking.totalPrice)}</td>
-                        <td>
+                        <td data-label="Nights">
+                          {plural(booking.nights, "night")}
+                        </td>
+                        <td data-label="Total">
+                          {formatPrice(booking.totalPrice)}
+                        </td>
+                        <td data-label="Status">
                           <StatusBadge status={booking.status} />
                         </td>
-                        <td>
+                        <td className="actions-cell">
+                          <div className="row-actions">
+                          {booking.status !== "CANCELLED" && (
+                            <>
+                              <button
+                                type="button"
+                                className="button button-secondary button-small"
+                                aria-label={`Download PDF invoice for room ${booking.room?.number ?? ""}`}
+                                onClick={() => onInvoice(booking, "pdf")}
+                              >
+                                PDF
+                              </button>
+                              <button
+                                type="button"
+                                className="button button-secondary button-small"
+                                aria-label={`Download CSV invoice for room ${booking.room?.number ?? ""}`}
+                                onClick={() => onInvoice(booking, "csv")}
+                              >
+                                CSV
+                              </button>
+                            </>
+                          )}
                           {tab === "upcoming" && (
                             <button
                               type="button"
@@ -197,6 +240,7 @@ export function MyBookings() {
                               Cancel booking
                             </button>
                           )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -208,5 +252,54 @@ export function MyBookings() {
         </>
       )}
     </>
+  );
+}
+
+const CHECK_IN_HOUR = 15;
+
+const localDate = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+const pad = (value: number) => String(value).padStart(2, "0");
+
+/**
+ * Check-in opens at 15:00 local time on the day of arrival. Driven by Date.now() and a
+ * one-second interval, so `page.clock` controls it completely (assignment 5c).
+ */
+function CheckInCountdowns({ bookings }: { bookings: Booking[] }) {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const today = localDate(new Date(now));
+  const arriving = bookings.filter(
+    (booking) =>
+      (booking.status === "PENDING" || booking.status === "CONFIRMED") &&
+      booking.checkIn.slice(0, 10) === today,
+  );
+  if (arriving.length === 0) return null;
+
+  const opensAt = new Date(now);
+  opensAt.setHours(CHECK_IN_HOUR, 0, 0, 0);
+  const remaining = Math.max(0, Math.ceil((opensAt.getTime() - now) / 1000));
+  const time = `${pad(Math.floor(remaining / 3600))}:${pad(Math.floor((remaining % 3600) / 60))}:${pad(remaining % 60)}`;
+
+  return (
+    <div className="check-in-countdowns">
+      {arriving.map((booking) => (
+        <p
+          key={booking.id}
+          className="notice check-in"
+          data-testid="check-in-countdown"
+        >
+          {remaining > 0
+            ? `Check-in for room ${booking.room?.number ?? ""} opens in ${time}`
+            : `Check-in for room ${booking.room?.number ?? ""} is open`}
+        </p>
+      ))}
+    </div>
   );
 }

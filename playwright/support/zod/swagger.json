@@ -1233,7 +1233,7 @@
     "/api/events": {
       "get": {
         "summary": "Live updates (Server-Sent Events)",
-        "description": "A `text/event-stream` that stays open. `EventSource` cannot send headers, so pass the token as `?token=`\n(an `Authorization` header works too). Events:\n\n- `ready`: sent once after connecting\n- `booking.created`, `booking.updated`: `{ id, status, roomNumber, checkIn, checkOut, username }`; sent to the guest of the booking and to admins\n- `message.created`: `{ id, subject, from }`; admins only\n",
+        "description": "A `text/event-stream` that stays open. `EventSource` cannot send headers, so pass the token as `?token=`\n(an `Authorization` header works too). Events:\n\n- `ready`: sent once after connecting\n- `booking.created`, `booking.updated`: `{ id, status, roomNumber, checkIn, checkOut, username, actor }` (`actor`: who made the change); sent to the guest of the booking and to admins\n- `message.created`: `{ id, subject, from }`; admins only\n",
         "tags": [
           "Events"
         ],

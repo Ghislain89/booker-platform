@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hotel location</title>
+    <!-- A stylised map that works offline: practise frameLocator() without network access. -->
+    <style>
+      :root { color-scheme: light; font-family: system-ui, sans-serif; }
+      body { margin: 0; height: 100vh; overflow: hidden; background: #e8eef0; }
+      #map { position: absolute; inset: 0; transition: transform 0.2s ease; transform-origin: 50% 50%; }
+      .controls { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; gap: 4px; }
+      .controls button { width: 36px; height: 36px; font-size: 20px; border: 1px solid #666; border-radius: 4px; background: #fff; cursor: pointer; }
+      .controls button:focus-visible { outline: 3px solid #1a5fb4; outline-offset: 2px; }
+      .controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+      .info { position: absolute; left: 8px; bottom: 8px; background: rgba(255,255,255,0.92); padding: 6px 10px; border-radius: 4px; font-size: 13px; color: #222; }
+      .info p { margin: 0; }
+    </style>
+  </head>
+  <body>
+    <svg id="map" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="map-label">
+      <title id="map-label">Map</title>
+      <rect width="400" height="300" fill="#e8eef0" />
+      <path d="M0 230 C 80 210, 140 260, 220 240 S 340 200, 400 220 L400 300 L0 300 Z" fill="#a9cbe0" />
+      <rect x="30" y="30" width="90" height="60" fill="#cfe3c4" />
+      <rect x="280" y="40" width="80" height="70" fill="#cfe3c4" />
+      <g stroke="#ffffff" stroke-width="10" fill="none">
+        <path d="M0 120 H400" />
+        <path d="M200 0 V230" />
+        <path d="M0 40 L400 190" stroke-width="6" />
+      </g>
+      <g stroke="#f4d58d" stroke-width="4" fill="none">
+        <path d="M0 120 H400" />
+        <path d="M200 0 V230" />
+      </g>
+      <g transform="translate(200 120)">
+        <path d="M0 0 C -14 -18, -14 -34, 0 -34 C 14 -34, 14 -18, 0 0 Z" fill="#c01c28" stroke="#fff" stroke-width="2" />
+        <circle cy="-24" r="5" fill="#fff" />
+      </g>
+    </svg>
+    <div class="controls">
+      <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+      <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+    </div>
+    <div class="info">
+      <p><strong id="name">Booker Hotel</strong></p>
+      <p id="coordinates"></p>
+      <p id="zoom" aria-live="polite"></p>
+    </div>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const lat = Number(params.get("lat") ?? 52.3676);
+      const lon = Number(params.get("lon") ?? 4.9041);
+      const name = params.get("name") ?? "Booker Hotel";
+      document.getElementById("name").textContent = name;
+      document.getElementById("map-label").textContent = `Map of the area around ${name}`;
+      document.getElementById("coordinates").textContent = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+
+      const MIN = 1, MAX = 5;
+      let zoom = 3;
+      const zoomIn = document.getElementById("zoom-in");
+      const zoomOut = document.getElementById("zoom-out");
+      function render() {
+        document.getElementById("map").style.transform = `scale(${1 + (zoom - 3) * 0.35})`;
+        document.getElementById("zoom").textContent = `Zoom level ${zoom}`;
+        zoomIn.disabled = zoom >= MAX;
+        zoomOut.disabled = zoom <= MIN;
+      }
+      zoomIn.addEventListener("click", () => { zoom = Math.min(MAX, zoom + 1); render(); });
+      zoomOut.addEventListener("click", () => { zoom = Math.max(MIN, zoom - 1); render(); });
+      render();
+    </script>
+  </body>
+</html>

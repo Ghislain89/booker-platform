@@ -71,7 +71,7 @@ router.put("/:id", authenticate, authorizeAdmin, asyncHandler(async (req, res) =
   const status = v.oneOf("status", BOOKING_STATUSES);
   v.assertValid();
 
-  const booking = await bookingsController.updateStatus(req.params.id, status!);
+  const booking = await bookingsController.updateStatus(req.params.id, status!, req.user!.username);
   res.json({ success: true, data: booking });
 }));
 

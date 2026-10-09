@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250">
+  <rect width="400" height="250" fill="#f1e2e2"/>
+  <rect x="80" y="50" width="240" height="150" rx="6" fill="#fff" opacity=".7"/>
+  <circle cx="260" cy="95" r="22" fill="#c98f8f" opacity=".9"/>
+  <path d="M80 200 L150 120 L210 180 L250 140 L320 200 Z" fill="#c98f8f"/>
+  <rect x="196" y="50" width="8" height="150" fill="#f1e2e2"/>
+  <text x="20" y="235" font-family="system-ui, sans-serif" font-size="14" fill="#333" opacity=".7">Suite · View</text>
+</svg>

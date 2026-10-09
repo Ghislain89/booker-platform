@@ -33,3 +33,29 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+
+  docker:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t booker .
+      - name: Start container
+        run: docker run -d --name booker -p 3000:3000 booker
+      - name: Wait for /health
+        run: |
+          for i in $(seq 1 60); do
+            curl -fs http://localhost:3000/health && exit 0
+            sleep 2
+          done
+          docker logs booker
+          exit 1
+      - name: Smoke test
+        run: |
+          curl -fs http://localhost:3000/ | grep -q '<div id="root">'
+          curl -fs http://localhost:3000/api/public/rooms | grep -q '"success":true'
+          curl -fs -X POST http://localhost:3000/api/testing/reset | grep -q '"success":true'
+      - name: Container logs
+        if: ${{ failure() }}
+        run: docker logs booker
