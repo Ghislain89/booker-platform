@@ -232,3 +232,8 @@ CI fails when `swagger.json` is out of date.
 ## Solutions
 
 All assignments are worked out on the [`solutions`](https://github.com/Ghislain89/booker-platform/tree/solutions) branch. There are many ways to solve each assignment. The solutions show what _could_ be a good approach. Depending on your organisation's context, you might do things (very) differently, and that's fine.
+
+## Licence
+
+The code is licensed under the [MIT licence](LICENSE): fork it, copy it and use it in your own projects.
+The training slides live in [playwright-training-slides](https://github.com/Ghislain89/playwright-training-slides) and are licensed under CC BY-NC-SA 4.0.

@@ -22,7 +22,7 @@
   },
   "keywords": [],
   "author": "Ghislain Gabriëlse",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@prisma/client": "^5.10.2",
     "@types/swagger-jsdoc": "^6.0.4",

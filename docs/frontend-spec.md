@@ -205,6 +205,6 @@ Feature flags + `/__trainer` panel, optional Docker image, preparation page upda
 ## 10. Open decisions
 
 1. ~~**Register duplicate status:**~~ Decided: `409` (implemented in phase 0).
-2. **Public endpoints:** new `/api/public/*` (recommended, non-breaking) vs make existing `GET /rooms` anonymous.
-3. **Token storage:** `localStorage` (simple, visible in storageState) vs httpOnly cookie (realistic). Recommendation: localStorage, cover cookies in the slides.
-4. **Licence:** e.g. MIT for code, CC BY-NC-SA for training material (as Tim does).
+2. ~~**Public endpoints:**~~ Decided: new `/api/public/*` (implemented in phase 1).
+3. ~~**Token storage:**~~ Decided: `localStorage` (visible in storageState); cookies are covered in the slides.
+4. ~~**Licence:**~~ Decided: MIT for booker-platform, CC BY-NC-SA 4.0 for the slides.
