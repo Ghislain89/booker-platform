@@ -123,11 +123,7 @@ test.describe("Bonus: Improve the overall setup", () => {
     });
 
     await test.step("Create a new booking for the room", async () => {
-      const randomBooking = await createRandomBooking(
-        createdRoom.id,
-        "2025-03-05",
-        "2025-03-07",
-      );
+      const randomBooking = await createRandomBooking(createdRoom.id);
 
       const { statusCode, responseBody } = await api.post(
         "bookings",

@@ -103,11 +103,7 @@ test("Assignment 2: Rooms & Booking", async ({ request }) => {
   });
 
   await test.step("Create a new booking for the room", async () => {
-    const bookingData = await createRandomBooking(
-      createdRoom.id,
-      "2025-04-05",
-      "2025-04-07",
-    );
+    const bookingData = await createRandomBooking(createdRoom.id);
 
     const response = await request.post("bookings", {
       headers: { Authorization: `Bearer ${userToken}` },
