@@ -25,7 +25,9 @@ import {
 } from "../lib/pricing";
 import { useTitle } from "../lib/useTitle";
 import { NotFound } from "./NotFound";
-import { BookerPayment } from "../components/payment";
+// Side-effect import: registers <booker-payment>. A type-only import would be dropped.
+import "../components/payment";
+import type { BookerPayment } from "../components/payment";
 import { hasFlag } from "../lib/flags";
 
 const describeError = (error: Error) =>
