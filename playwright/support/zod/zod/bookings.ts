@@ -23,6 +23,11 @@ export const getApiBookingsResponse = zod.object({
   "checkIn": zod.string().datetime(),
   "checkOut": zod.string().datetime(),
   "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED']),
+  "adults": zod.number(),
+  "children": zod.number(),
+  "extras": zod.array(zod.enum(['BREAKFAST', 'PARKING', 'LATE_CHECKOUT']).describe('Breakfast: € 15 per guest per night · Parking: € 12 per night · Late check-out: € 25 per stay')),
+  "nights": zod.number().describe('Computed from checkIn and checkOut'),
+  "totalPrice": zod.number().describe('Computed; nights × room price + extras'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime(),
   "user": zod.object({
@@ -38,6 +43,7 @@ export const getApiBookingsResponse = zod.object({
   "capacity": zod.number(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
+  "featured": zod.boolean().describe('Shown on the home page'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 }).optional()
@@ -50,13 +56,26 @@ export const getApiBookingsResponse = zod.object({
 - The room must exist (404) and not be in MAINTENANCE (409).
 - The dates may not overlap a PENDING or CONFIRMED booking for the same room (409 `Room not available`).
   Checking out on the day the next guest checks in is fine.
+- `adults` (default 1) + `children` (default 0) may not exceed the room capacity (400, `details.guests`).
+- `nights` and `totalPrice` are computed by the server.
 
  * @summary Book a room
  */
+export const postApiBookingsBodyAdultsDefault = 1;
+export const postApiBookingsBodyAdultsMax = 10;
+export const postApiBookingsBodyChildrenDefault = 0;
+export const postApiBookingsBodyChildrenMin = 0;
+
+export const postApiBookingsBodyChildrenMax = 10;
+
+
 export const postApiBookingsBody = zod.object({
   "roomId": zod.string(),
   "checkIn": zod.string().datetime(),
-  "checkOut": zod.string().datetime()
+  "checkOut": zod.string().datetime(),
+  "adults": zod.number().min(1).max(postApiBookingsBodyAdultsMax).default(postApiBookingsBodyAdultsDefault),
+  "children": zod.number().min(postApiBookingsBodyChildrenMin).max(postApiBookingsBodyChildrenMax).optional(),
+  "extras": zod.array(zod.enum(['BREAKFAST', 'PARKING', 'LATE_CHECKOUT']).describe('Breakfast: € 15 per guest per night · Parking: € 12 per night · Late check-out: € 25 per stay')).optional()
 })
 
 /**
@@ -71,6 +90,11 @@ export const getApiBookingsMyBookingsResponse = zod.object({
   "checkIn": zod.string().datetime(),
   "checkOut": zod.string().datetime(),
   "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED']),
+  "adults": zod.number(),
+  "children": zod.number(),
+  "extras": zod.array(zod.enum(['BREAKFAST', 'PARKING', 'LATE_CHECKOUT']).describe('Breakfast: € 15 per guest per night · Parking: € 12 per night · Late check-out: € 25 per stay')),
+  "nights": zod.number().describe('Computed from checkIn and checkOut'),
+  "totalPrice": zod.number().describe('Computed; nights × room price + extras'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime(),
   "user": zod.object({
@@ -86,6 +110,7 @@ export const getApiBookingsMyBookingsResponse = zod.object({
   "capacity": zod.number(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
+  "featured": zod.boolean().describe('Shown on the home page'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 }).optional()
@@ -105,6 +130,11 @@ export const getApiBookingsIdResponse = zod.object({
   "checkIn": zod.string().datetime(),
   "checkOut": zod.string().datetime(),
   "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED']),
+  "adults": zod.number(),
+  "children": zod.number(),
+  "extras": zod.array(zod.enum(['BREAKFAST', 'PARKING', 'LATE_CHECKOUT']).describe('Breakfast: € 15 per guest per night · Parking: € 12 per night · Late check-out: € 25 per stay')),
+  "nights": zod.number().describe('Computed from checkIn and checkOut'),
+  "totalPrice": zod.number().describe('Computed; nights × room price + extras'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime(),
   "user": zod.object({
@@ -120,6 +150,7 @@ export const getApiBookingsIdResponse = zod.object({
   "capacity": zod.number(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
+  "featured": zod.boolean().describe('Shown on the home page'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 }).optional()
@@ -142,6 +173,11 @@ export const putApiBookingsIdResponse = zod.object({
   "checkIn": zod.string().datetime(),
   "checkOut": zod.string().datetime(),
   "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED']),
+  "adults": zod.number(),
+  "children": zod.number(),
+  "extras": zod.array(zod.enum(['BREAKFAST', 'PARKING', 'LATE_CHECKOUT']).describe('Breakfast: € 15 per guest per night · Parking: € 12 per night · Late check-out: € 25 per stay')),
+  "nights": zod.number().describe('Computed from checkIn and checkOut'),
+  "totalPrice": zod.number().describe('Computed; nights × room price + extras'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime(),
   "user": zod.object({
@@ -157,6 +193,7 @@ export const putApiBookingsIdResponse = zod.object({
   "capacity": zod.number(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
+  "featured": zod.boolean().describe('Shown on the home page'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 }).optional()

@@ -55,6 +55,16 @@ export class Validator {
     return value as T;
   }
 
+  boolean(field: string, opts: { required?: boolean } = {}) {
+    const { required = false } = opts;
+    const value = this.body[field];
+    if (value === undefined || value === null) {
+      return required ? this.fail(field, `${field} is required`) : undefined;
+    }
+    if (typeof value !== "boolean") return this.fail(field, `${field} must be a boolean`);
+    return value;
+  }
+
   stringArray(field: string, opts: { required?: boolean } = {}) {
     const { required = false } = opts;
     const value = this.body[field];

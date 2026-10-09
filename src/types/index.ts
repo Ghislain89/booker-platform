@@ -1,3 +1,5 @@
+import type { Extra } from "../lib/pricing";
+
 // API types. Prisma (SQLite) stores enums and nested objects as strings;
 // the services convert database rows into these shapes.
 
@@ -38,12 +40,15 @@ export interface Room {
   capacity: number;
   amenities: string[];
   status: RoomStatus;
+  /** Shown on the home page. */
+  featured: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export type RoomInput = Pick<Room, "number" | "type" | "price" | "capacity" | "amenities"> & {
   status?: RoomStatus;
+  featured?: boolean;
 };
 
 export interface Booking {
@@ -53,6 +58,13 @@ export interface Booking {
   checkIn: Date;
   checkOut: Date;
   status: BookingStatus;
+  adults: number;
+  children: number;
+  extras: Extra[];
+  /** Computed: number of nights between check-in and check-out. */
+  nights: number;
+  /** Computed: nights × room price + extras. */
+  totalPrice: number;
   createdAt: Date;
   updatedAt: Date;
   user?: UserSummary;
@@ -63,6 +75,37 @@ export interface BookingInput {
   roomId: string;
   checkIn: Date;
   checkOut: Date;
+  adults?: number;
+  children?: number;
+  extras?: Extra[];
+}
+
+export interface PublicRoom extends Room {
+  /** Active (pending or confirmed) bookings that have not ended yet. */
+  bookedPeriods: { checkIn: Date; checkOut: Date }[];
+}
+
+export const ROOM_SORTS = ["number", "price", "-price", "capacity", "-capacity"] as const;
+export type RoomSort = (typeof ROOM_SORTS)[number];
+
+export interface RoomQuery {
+  types?: RoomType[];
+  featured?: boolean;
+  minPrice?: number;
+  maxPrice?: number;
+  capacity?: number;
+  checkIn?: Date;
+  checkOut?: Date;
+  sort?: RoomSort;
+  page: number;
+  pageSize: number;
+}
+
+export interface PageMeta {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
 }
 
 export interface Message {

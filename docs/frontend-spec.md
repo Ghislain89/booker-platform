@@ -113,7 +113,7 @@ Topic codes: **LOC** locators · **ACT** actions · **AST** web-first assertions
 |---|---|---|
 | `/` Home | Hotel branding (name, logo, theme colours from API), hero, "deal of the day" banner (random unless test mode), featured rooms, **embedded map iframe** (OpenStreetMap), contact form. | VIS (mask banner), FRAME, AST |
 | `/rooms` | Room cards with filters (type checkboxes, price **range slider**, capacity select, **date range picker** for availability), sort select, pagination, empty state. Filters reflected in URL query. | LOC, ACT, AST (`toHaveCount`), NET (`waitForResponse`) |
-| `/rooms/:id` | Room detail, image gallery (lightbox **modal**), amenities list, price calculator (nights × price), "Book now". Unavailable dates disabled in picker. | ACT, AST, DLG (modal) |
+| `/rooms/:number` | Room detail, image gallery (lightbox **modal**), amenities list, price calculator (nights × price), "Book now". Unavailable dates disabled in picker. | ACT, AST, DLG (modal) |
 | `/login`, `/register` | Labelled forms, client-side validation (required, email, password ≥ 8, confirm password), server errors in `role="alert"`, show/hide password toggle, "remember me" checkbox. Register success → toast + redirect to login. | LOC (`getByLabel`), AST, NET (mock 409) |
 | `/terms` | Opened via link with `target="_blank"` from register & booking forms. | TAB |
 | `/contact` | Contact form → `POST /api/public/messages`; success in `role="status"`. | ACT, NET |
@@ -122,7 +122,7 @@ Topic codes: **LOC** locators · **ACT** actions · **AST** web-first assertions
 
 | Route | Features | Topics |
 |---|---|---|
-| `/book/:roomId` | Multi-step booking wizard: 1) dates + guests (adults/children steppers) 2) extras (checkboxes: breakfast, parking, late check-out) 3) review + **payment widget (web component, shadow DOM)** + accept terms + confirm. Back/next preserves state. Overlap → `409` → inline error. | ACT, AST, NET, POM, SHD |
+| `/book/:number` | Multi-step booking wizard: 1) dates + guests (adults/children steppers) 2) extras (checkboxes: breakfast, parking, late check-out) 3) review + **payment widget (web component, shadow DOM)** + accept terms + confirm. Back/next preserves state. Overlap → `409` → inline error. | ACT, AST, NET, POM, SHD |
 | `/my/bookings` | Table: room, dates, nights, total, **status badge** (live via SSE). Actions: cancel (native **`confirm()`** dialog), download invoice (**PDF/CSV**). Tabs: Upcoming / Past / Cancelled. | DLG, FILE (download), CTX, AST |
 | `/my/messages` | Own messages with status. | LOC |
 | `/my/profile` | Edit e-mail, **avatar upload** (preview), colour scheme (light/dark/system), language (EN/NL). | FILE (upload), EMU |

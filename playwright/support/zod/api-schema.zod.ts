@@ -54,9 +54,34 @@ export const Room = z.object({
   capacity: z.number(),
   amenities: z.array(z.string()),
   status: z.union([z.literal("AVAILABLE"), z.literal("OCCUPIED"), z.literal("MAINTENANCE")]),
+  featured: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
+
+export type PublicRoom = z.infer<typeof PublicRoom>;
+export const PublicRoom = z.intersection(
+  Room,
+  z.object({
+    bookedPeriods: z.array(
+      z.object({
+        checkIn: z.string(),
+        checkOut: z.string(),
+      }),
+    ),
+  }),
+);
+
+export type PageMeta = z.infer<typeof PageMeta>;
+export const PageMeta = z.object({
+  page: z.number(),
+  pageSize: z.number(),
+  total: z.number(),
+  totalPages: z.number(),
+});
+
+export type Extra = z.infer<typeof Extra>;
+export const Extra = z.union([z.literal("BREAKFAST"), z.literal("PARKING"), z.literal("LATE_CHECKOUT")]);
 
 export type RoomInput = z.infer<typeof RoomInput>;
 export const RoomInput = z.object({
@@ -66,6 +91,7 @@ export const RoomInput = z.object({
   capacity: z.number().optional(),
   amenities: z.array(z.string()).optional(),
   status: z.union([z.literal("AVAILABLE"), z.literal("OCCUPIED"), z.literal("MAINTENANCE")]).optional(),
+  featured: z.boolean().optional(),
 });
 
 export type Booking = z.infer<typeof Booking>;
@@ -76,6 +102,11 @@ export const Booking = z.object({
   checkIn: z.string(),
   checkOut: z.string(),
   status: z.union([z.literal("PENDING"), z.literal("CONFIRMED"), z.literal("CANCELLED"), z.literal("COMPLETED")]),
+  adults: z.number(),
+  children: z.number(),
+  extras: z.array(Extra),
+  nights: z.number(),
+  totalPrice: z.number(),
   createdAt: z.string(),
   updatedAt: z.string(),
   user: z.union([UserSummary, z.undefined()]).optional(),
@@ -139,6 +170,16 @@ export const Branding = z.object({
   updatedAt: z.string(),
 });
 
+export type PublicBranding = z.infer<typeof PublicBranding>;
+export const PublicBranding = z.object({
+  name: z.string(),
+  logoUrl: z.string(),
+  description: z.string(),
+  contact: BrandingContact,
+  map: BrandingMap,
+  theme: BrandingTheme,
+});
+
 export type BrandingInput = z.infer<typeof BrandingInput>;
 export const BrandingInput = z.object({
   name: z.string().optional(),
@@ -168,6 +209,68 @@ export const RecordCounts = z.object({
     messages: z.number(),
   }),
 });
+
+export type get_Apipublicrooms = typeof get_Apipublicrooms;
+export const get_Apipublicrooms = {
+  method: z.literal("GET"),
+  path: z.literal("/api/public/rooms"),
+  requestFormat: z.literal("json"),
+  parameters: z.object({
+    query: z.object({
+      type: z.array(z.union([z.literal("STANDARD"), z.literal("DELUXE"), z.literal("SUITE")])).optional(),
+      minPrice: z.number().optional(),
+      maxPrice: z.number().optional(),
+      capacity: z.number().optional(),
+      featured: z.boolean().optional(),
+      checkIn: z.string().optional(),
+      checkOut: z.string().optional(),
+      sort: z
+        .union([
+          z.literal("number"),
+          z.literal("price"),
+          z.literal("-price"),
+          z.literal("capacity"),
+          z.literal("-capacity"),
+        ])
+        .optional(),
+      page: z.number().optional(),
+      pageSize: z.number().optional(),
+    }),
+  }),
+  response: z.object({
+    success: z.boolean(),
+    data: z.array(Room),
+    meta: PageMeta,
+  }),
+};
+
+export type get_ApipublicroomsId = typeof get_ApipublicroomsId;
+export const get_ApipublicroomsId = {
+  method: z.literal("GET"),
+  path: z.literal("/api/public/rooms/{id}"),
+  requestFormat: z.literal("json"),
+  parameters: z.object({
+    path: z.object({
+      id: z.string(),
+    }),
+  }),
+  response: z.object({
+    success: z.boolean(),
+    data: PublicRoom,
+  }),
+};
+
+export type get_Apipublicbranding = typeof get_Apipublicbranding;
+export const get_Apipublicbranding = {
+  method: z.literal("GET"),
+  path: z.literal("/api/public/branding"),
+  requestFormat: z.literal("json"),
+  parameters: z.never(),
+  response: z.object({
+    success: z.boolean(),
+    data: PublicBranding,
+  }),
+};
 
 export type post_Apiauthlogin = typeof post_Apiauthlogin;
 export const post_Apiauthlogin = {
@@ -303,6 +406,9 @@ export const post_Apibookings = {
       roomId: z.string(),
       checkIn: z.string(),
       checkOut: z.string(),
+      adults: z.union([z.number(), z.undefined()]).optional(),
+      children: z.union([z.number(), z.undefined()]).optional(),
+      extras: z.union([z.array(Extra), z.undefined()]).optional(),
     }),
   }),
   response: z.object({
@@ -696,19 +802,10 @@ export const put_Apitestingflags = {
 
 // <EndpointByMethod>
 export const EndpointByMethod = {
-  post: {
-    "/api/auth/login": post_Apiauthlogin,
-    "/api/auth/register": post_Apiauthregister,
-    "/api/auth/logout": post_Apiauthlogout,
-    "/api/rooms": post_Apirooms,
-    "/api/bookings": post_Apibookings,
-    "/api/messages": post_Apimessages,
-    "/api/reports/generate": post_Apireportsgenerate,
-    "/api/branding/reset": post_Apibrandingreset,
-    "/api/testing/reset": post_Apitestingreset,
-    "/api/testing/seed": post_Apitestingseed,
-  },
   get: {
+    "/api/public/rooms": get_Apipublicrooms,
+    "/api/public/rooms/{id}": get_ApipublicroomsId,
+    "/api/public/branding": get_Apipublicbranding,
     "/api/rooms": get_Apirooms,
     "/api/rooms/{id}": get_ApiroomsId,
     "/api/bookings": get_Apibookings,
@@ -721,6 +818,18 @@ export const EndpointByMethod = {
     "/api/reports/{id}": get_ApireportsId,
     "/api/branding": get_Apibranding,
     "/api/testing/flags": get_Apitestingflags,
+  },
+  post: {
+    "/api/auth/login": post_Apiauthlogin,
+    "/api/auth/register": post_Apiauthregister,
+    "/api/auth/logout": post_Apiauthlogout,
+    "/api/rooms": post_Apirooms,
+    "/api/bookings": post_Apibookings,
+    "/api/messages": post_Apimessages,
+    "/api/reports/generate": post_Apireportsgenerate,
+    "/api/branding/reset": post_Apibrandingreset,
+    "/api/testing/reset": post_Apitestingreset,
+    "/api/testing/seed": post_Apitestingseed,
   },
   put: {
     "/api/rooms/{id}": put_ApiroomsId,
@@ -741,8 +850,8 @@ export type EndpointByMethod = typeof EndpointByMethod;
 // </EndpointByMethod>
 
 // <EndpointByMethod.Shorthands>
-export type PostEndpoints = EndpointByMethod["post"];
 export type GetEndpoints = EndpointByMethod["get"];
+export type PostEndpoints = EndpointByMethod["post"];
 export type PutEndpoints = EndpointByMethod["put"];
 export type DeleteEndpoints = EndpointByMethod["delete"];
 export type AllEndpoints = EndpointByMethod[keyof EndpointByMethod];
@@ -805,15 +914,6 @@ export class ApiClient {
     return this;
   }
 
-  // <ApiClient.post>
-  post<Path extends keyof PostEndpoints, TEndpoint extends PostEndpoints[Path]>(
-    path: Path,
-    ...params: MaybeOptionalArg<z.infer<TEndpoint["parameters"]>>
-  ): Promise<z.infer<TEndpoint["response"]>> {
-    return this.fetcher("post", this.baseUrl + path, params[0]) as Promise<z.infer<TEndpoint["response"]>>;
-  }
-  // </ApiClient.post>
-
   // <ApiClient.get>
   get<Path extends keyof GetEndpoints, TEndpoint extends GetEndpoints[Path]>(
     path: Path,
@@ -822,6 +922,15 @@ export class ApiClient {
     return this.fetcher("get", this.baseUrl + path, params[0]) as Promise<z.infer<TEndpoint["response"]>>;
   }
   // </ApiClient.get>
+
+  // <ApiClient.post>
+  post<Path extends keyof PostEndpoints, TEndpoint extends PostEndpoints[Path]>(
+    path: Path,
+    ...params: MaybeOptionalArg<z.infer<TEndpoint["parameters"]>>
+  ): Promise<z.infer<TEndpoint["response"]>> {
+    return this.fetcher("post", this.baseUrl + path, params[0]) as Promise<z.infer<TEndpoint["response"]>>;
+  }
+  // </ApiClient.post>
 
   // <ApiClient.put>
   put<Path extends keyof PutEndpoints, TEndpoint extends PutEndpoints[Path]>(

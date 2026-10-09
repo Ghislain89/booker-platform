@@ -21,14 +21,14 @@ const users = [
 const rooms = [
   { number: "101", type: "STANDARD", price: 95, capacity: 2, amenities: ["WiFi", "TV", "Desk"] },
   { number: "102", type: "STANDARD", price: 95, capacity: 2, amenities: ["WiFi", "TV", "Safe"] },
-  { number: "103", type: "STANDARD", price: 110, capacity: 3, amenities: ["WiFi", "TV", "Desk", "Safe"] },
+  { number: "103", type: "STANDARD", price: 110, capacity: 3, amenities: ["WiFi", "TV", "Desk", "Safe"], featured: true },
   { number: "104", type: "STANDARD", price: 85, capacity: 1, amenities: ["WiFi"], status: "MAINTENANCE" },
-  { number: "201", type: "DELUXE", price: 160, capacity: 2, amenities: ["WiFi", "TV", "Mini Bar", "Balcony"] },
+  { number: "201", type: "DELUXE", price: 160, capacity: 2, amenities: ["WiFi", "TV", "Mini Bar", "Balcony"], featured: true },
   { number: "202", type: "DELUXE", price: 175, capacity: 3, amenities: ["WiFi", "TV", "Mini Bar", "Ocean View"] },
   { number: "203", type: "DELUXE", price: 175, capacity: 3, amenities: ["WiFi", "TV", "Mini Bar", "Mountain View"] },
   { number: "204", type: "DELUXE", price: 190, capacity: 4, amenities: ["WiFi", "TV", "Mini Bar", "Balcony", "Ocean View"] },
   { number: "301", type: "SUITE", price: 280, capacity: 2, amenities: ["WiFi", "TV", "Mini Bar", "Ocean View", "Jacuzzi"], status: "OCCUPIED" },
-  { number: "302", type: "SUITE", price: 320, capacity: 4, amenities: ["WiFi", "TV", "Mini Bar", "Kitchen", "Living Room"] },
+  { number: "302", type: "SUITE", price: 320, capacity: 4, amenities: ["WiFi", "TV", "Mini Bar", "Kitchen", "Living Room"], featured: true },
   { number: "303", type: "SUITE", price: 350, capacity: 4, amenities: ["WiFi", "TV", "Mini Bar", "Kitchen", "Living Room", "Balcony"] },
   { number: "304", type: "SUITE", price: 450, capacity: 6, amenities: ["WiFi", "TV", "Mini Bar", "Kitchen", "Living Room", "Jacuzzi", "Ocean View"] },
 ];
@@ -36,10 +36,10 @@ const rooms = [
 const bookings = [
   { id: "seed-booking-1", username: "user", room: "101", from: -30, to: -27, status: "COMPLETED" },
   { id: "seed-booking-2", username: "user", room: "203", from: -60, to: -58, status: "CANCELLED" },
-  { id: "seed-booking-3", username: "user", room: "302", from: 0, to: 3, status: "CONFIRMED" },
+  { id: "seed-booking-3", username: "user", room: "302", from: 0, to: 3, status: "CONFIRMED", adults: 2, children: 2, extras: ["BREAKFAST"] },
   { id: "seed-booking-4", username: "user", room: "102", from: 7, to: 9, status: "CANCELLED" },
-  { id: "seed-booking-5", username: "user", room: "201", from: 14, to: 17, status: "CONFIRMED" },
-  { id: "seed-booking-6", username: "user", room: "202", from: 30, to: 32, status: "PENDING" },
+  { id: "seed-booking-5", username: "user", room: "201", from: 14, to: 17, status: "CONFIRMED", adults: 2, extras: ["PARKING", "LATE_CHECKOUT"] },
+  { id: "seed-booking-6", username: "user", room: "202", from: 30, to: 32, status: "PENDING", adults: 2, children: 1 },
   { id: "seed-booking-7", username: "admin", room: "301", from: -2, to: 2, status: "CONFIRMED" },
 ];
 
@@ -64,8 +64,8 @@ export async function seedDatabase(prisma: PrismaClient) {
   }
 
   const roomIds: Record<string, string> = {};
-  for (const { amenities, status = "AVAILABLE", ...room } of rooms) {
-    const data = { ...room, status, amenities: JSON.stringify(amenities) };
+  for (const { amenities, status = "AVAILABLE", featured = false, ...room } of rooms) {
+    const data = { ...room, status, featured, amenities: JSON.stringify(amenities) };
     const saved = await prisma.room.upsert({
       where: { number: room.number },
       update: data,
@@ -74,8 +74,11 @@ export async function seedDatabase(prisma: PrismaClient) {
     roomIds[room.number] = saved.id;
   }
 
-  for (const { id, username, room, from, to, status } of bookings) {
+  for (const { id, username, room, from, to, status, adults = 1, children = 0, extras = [] } of bookings) {
     const data = {
+      adults,
+      children,
+      extras: JSON.stringify(extras),
       userId: userIds[username],
       roomId: roomIds[room],
       checkIn: daysFromToday(from),

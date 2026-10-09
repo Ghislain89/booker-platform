@@ -17,6 +17,8 @@ export interface Room {
   capacity: number;
   amenities: string[];
   status: RoomStatus;
+  /** Shown on the home page */
+  featured: boolean;
   createdAt: string;
   updatedAt: string;
 }
