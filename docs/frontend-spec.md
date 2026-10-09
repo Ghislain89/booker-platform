@@ -163,26 +163,21 @@ Off by default; toggled via `/api/testing/flags`, header `x-booker-flags`, or a 
 
 ## 8. Assignment mapping
 
-Current workshop assignments mapped to the new app, plus new ones.
+Numbered in the order of the UI deck (`ui.md` in [playwright-training-slides](https://github.com/Ghislain89/playwright-training-slides)).
 
 | # | Assignment | Topics |
 |---|---|---|
-| 1A | Record (codegen) a test: register a new user, log in, see "No bookings yet". | Codegen, LOC |
+| 1A | Record (codegen) or write a test: register a new user, log in, see "No bookings yet". | Codegen, LOC |
 | 1B | HTML reporter + traces, duplicate the test, run in parallel → discover data collisions; fix with generated data. | Config, parallelism |
-| 2 | Mock `POST /api/bookings` → `409` and assert the "Room not available" alert. Bonus: patch the rooms response to add a fake room. | NET |
-| 3 | Setup project storing `user` and `admin` storageState; use per project. | AUTH |
-| 4 | Refactor to page objects + fixtures; bonus: complete the booking wizard and verify in My bookings. | POM |
-| 5 | Screenshot home page, mask "deal of the day"; then hide it via `stylePath`. | VIS |
-| 6 | axe scan on the booking wizard; enable `bug-a11y` and compare. | A11Y |
-| 7 | GitHub Actions workflow (sharded, HTML report artifact). | CI |
-| 8 *(new)* | Cancel a booking (native confirm dialog) and download its invoice; assert file name + CSV content. | DLG, FILE |
-| 9 *(new)* | Admin uploads a room image and reorders rooms via drag & drop; verify order on the public page. | FILE, DND |
-| 10 *(new)* | Two contexts: guest books, admin approves, guest sees the status change live. | CTX |
-| 11 *(new)* | `page.clock`: check-in countdown and "check-in opens at 15:00" button enabling. | CLK |
-| 12 *(new)* | Hybrid: seed room + booking via API, verify in UI; or act in UI, verify via API. Per-worker data fixture. | HYB |
-| 13 *(new)* | Map iframe, terms in a new tab, payment widget in shadow DOM. | FRAME, TAB, SHD |
-| 14 *(new)* | Mobile project + NL locale + dark mode screenshots. | EMU |
-| 15 *(new)* | Flaky-test clinic: enable `slow-rooms`, `flaky-booking`, `random-order`, `popup-cookie`; make the suite stable. | Debugging |
+| 2 | Refactor to page objects + fixtures; bonus: complete the booking wizard and verify in My bookings. | POM |
+| 3 | Setup project storing `user` and `admin` storageState; use per project. Bonus: log in via the API and set `booker.token`. | AUTH |
+| 4 | Network: mock `POST /api/bookings` → `409` and assert the "Room not available" alert; bonus: patch the rooms response to add a fake room. Hybrid: seed room + booking via API, verify in UI, or act in UI and verify via API; bonus: per-worker data fixture. | NET, HYB |
+| 5 | Pick one: cancel a booking (native confirm dialog) and download its invoice · two contexts (guest books, admin approves, guest sees the status change live) · `page.clock` check-in at 15:00 · mobile project + NL locale + dark mode · admin room image upload + drag & drop reorder · terms in a new tab + payment widget in shadow DOM. | DLG, FILE, CTX, CLK, EMU, DND, TAB, SHD |
+| 6 | Screenshot home page, mask "deal of the day"; then hide it via `stylePath`; bonus: WebP. | VIS |
+| 7 | axe scan on the booking wizard, attach the results; bonus: aria snapshots. Trainer variant: enable `bug-a11y` and compare. | A11Y |
+| 8 | GitHub Actions workflow (HTML report artifact; bonus: sharded + merged reports). | CI |
+| 9 *(optional)* | Test agents: plan and generate "cancel a booking", then review the result. | AI |
+| 10 | Flaky-test clinic: enable `slow-rooms`, `flaky-booking`, `random-order`, `popup-cookie`; make the suite stable. | Debugging |
 
 ---
 
@@ -193,15 +188,15 @@ A1–A6, A16; test-support endpoints (§5). Existing API assignment still passes
 
 **Phase 1 – MVP replacing the todo app (2–3 days)**
 Scaffold `web/`, single-port serving, auth pages, `/rooms` (filters + pagination), room detail, booking wizard (without shadow DOM), My bookings (cancel + confirm), admin rooms (CRUD, no DnD), deterministic mode.
-✅ Done when assignments 1–7 can be completed and reference solutions pass with `fullyParallel: true` on Chromium, Firefox and WebKit.
+✅ Done when assignments 1A–4 and 6–9 can be completed and reference solutions pass with `fullyParallel: true` on Chromium, Firefox and WebKit.
 
 **Phase 2 – Advanced topics (2–3 days)**
 SSE + notifications, invoice download, uploads, drag & drop, iframe map + branding preview, terms tab, shadow DOM payment widget, clock countdown, i18n, dark mode, responsive layout.
-✅ Done when assignments 8–14 have reference solutions.
+✅ Done when all options of assignment 5 have reference solutions.
 
 **Phase 3 – Trainer tooling (1–2 days)**
 Feature flags + `/__trainer` panel, optional Docker image, preparation page update.
-✅ Done when assignment 15 works and the full suite passes on a fresh clone (macOS, Windows, Linux).
+✅ Done when assignment 10 works and the full suite passes on a fresh clone (macOS, Windows, Linux).
 
 ---
 

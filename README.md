@@ -71,7 +71,7 @@ Make sure to add assertions on status codes, the response body and headers.
 
 - Register a new (random) user.
 - Log in as that user.
-- Validate that the token you received is valid.
+- Log out with the token you received.
 
 ### Assignment 2 (Rooms & Bookings)
 
