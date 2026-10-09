@@ -5,15 +5,9 @@
  * API of the Booker hotel, the test object for the DeTesters Playwright training. Log in with `admin` / `password123` or `user` / `password123` and click Authorize.
  * OpenAPI spec version: 1.0.0
  */
-import type { UserRole } from './userRole';
+import type { Message } from './message';
 
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: UserRole;
-  /** @nullable */
-  avatarUrl: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+export type PostApiPublicMessages201 = {
+  success: boolean;
+  data: Message;
+};

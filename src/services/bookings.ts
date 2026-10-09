@@ -16,6 +16,21 @@ import {
   EXTRAS,
 } from "../lib/pricing";
 import { toRoom } from "./rooms";
+import { EventType, publish } from "../lib/events";
+
+const announce = (type: EventType, booking: Booking) =>
+  publish(
+    type,
+    {
+      id: booking.id,
+      status: booking.status,
+      roomNumber: booking.room?.number,
+      checkIn: booking.checkIn,
+      checkOut: booking.checkOut,
+      username: booking.user?.username,
+    },
+    { userId: booking.userId },
+  );
 
 export const bookingInclude = {
   user: { select: { id: true, username: true, email: true } },
@@ -137,7 +152,9 @@ class BookingsService {
         include: bookingInclude,
       });
     });
-    return toBooking(booking);
+    const created = toBooking(booking);
+    announce("booking.created", created);
+    return created;
   }
 
   async updateStatus(id: string, status: BookingStatus): Promise<Booking> {
@@ -148,7 +165,9 @@ class BookingsService {
       data: { status },
       include: bookingInclude,
     });
-    return toBooking(booking);
+    const updated = toBooking(booking);
+    if (existing.status !== status) announce("booking.updated", updated);
+    return updated;
   }
 
   async cancel(id: string, requester: AuthUser): Promise<Booking> {

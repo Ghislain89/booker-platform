@@ -18,7 +18,9 @@ export const getApiMessagesResponse = zod.object({
   "success": zod.boolean(),
   "data": zod.array(zod.object({
   "id": zod.string(),
-  "userId": zod.string(),
+  "userId": zod.string().nullable().describe('`null` for messages sent with the public contact form'),
+  "name": zod.string().nullable().describe('Contact form only'),
+  "email": zod.string().nullable().describe('Contact form only'),
   "subject": zod.string(),
   "content": zod.string(),
   "status": zod.enum(['UNREAD', 'READ', 'ARCHIVED']),
@@ -28,7 +30,7 @@ export const getApiMessagesResponse = zod.object({
   "id": zod.string(),
   "username": zod.string(),
   "email": zod.string()
-}).optional()
+}).nullish()
 }))
 })
 
@@ -51,7 +53,9 @@ export const getApiMessagesMyMessagesResponse = zod.object({
   "success": zod.boolean(),
   "data": zod.array(zod.object({
   "id": zod.string(),
-  "userId": zod.string(),
+  "userId": zod.string().nullable().describe('`null` for messages sent with the public contact form'),
+  "name": zod.string().nullable().describe('Contact form only'),
+  "email": zod.string().nullable().describe('Contact form only'),
   "subject": zod.string(),
   "content": zod.string(),
   "status": zod.enum(['UNREAD', 'READ', 'ARCHIVED']),
@@ -61,7 +65,7 @@ export const getApiMessagesMyMessagesResponse = zod.object({
   "id": zod.string(),
   "username": zod.string(),
   "email": zod.string()
-}).optional()
+}).nullish()
 }))
 })
 
@@ -73,7 +77,9 @@ export const getApiMessagesIdResponse = zod.object({
   "success": zod.boolean(),
   "data": zod.object({
   "id": zod.string(),
-  "userId": zod.string(),
+  "userId": zod.string().nullable().describe('`null` for messages sent with the public contact form'),
+  "name": zod.string().nullable().describe('Contact form only'),
+  "email": zod.string().nullable().describe('Contact form only'),
   "subject": zod.string(),
   "content": zod.string(),
   "status": zod.enum(['UNREAD', 'READ', 'ARCHIVED']),
@@ -83,7 +89,7 @@ export const getApiMessagesIdResponse = zod.object({
   "id": zod.string(),
   "username": zod.string(),
   "email": zod.string()
-}).optional()
+}).nullish()
 })
 })
 
@@ -98,7 +104,9 @@ export const putApiMessagesIdResponse = zod.object({
   "success": zod.boolean(),
   "data": zod.object({
   "id": zod.string(),
-  "userId": zod.string(),
+  "userId": zod.string().nullable().describe('`null` for messages sent with the public contact form'),
+  "name": zod.string().nullable().describe('Contact form only'),
+  "email": zod.string().nullable().describe('Contact form only'),
   "subject": zod.string(),
   "content": zod.string(),
   "status": zod.enum(['UNREAD', 'READ', 'ARCHIVED']),
@@ -108,7 +116,7 @@ export const putApiMessagesIdResponse = zod.object({
   "id": zod.string(),
   "username": zod.string(),
   "email": zod.string()
-}).optional()
+}).nullish()
 })
 })
 

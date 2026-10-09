@@ -70,7 +70,7 @@ components:
           type: string
     User:
       type: object
-      required: [id, username, email, role, createdAt, updatedAt]
+      required: [id, username, email, role, avatarUrl, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -81,6 +81,10 @@ components:
         role:
           type: string
           enum: [ROLE_USER, ROLE_ADMIN]
+        avatarUrl:
+          type: string
+          nullable: true
+          example: /uploads/1791552967476-f9qq9yoh.png
         createdAt:
           type: string
           format: date-time
@@ -97,6 +101,22 @@ components:
           type: string
         email:
           type: string
+    UserResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: "#/components/schemas/User"
+    RoomResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: "#/components/schemas/Room"
     AuthResponse:
       type: object
       required: [success, data]
@@ -113,7 +133,7 @@ components:
               $ref: "#/components/schemas/User"
     Room:
       type: object
-      required: [id, number, type, price, capacity, amenities, status, featured, createdAt, updatedAt]
+      required: [id, number, type, price, capacity, amenities, status, featured, imageUrl, position, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -141,6 +161,13 @@ components:
         featured:
           type: boolean
           description: Shown on the home page
+        imageUrl:
+          type: string
+          nullable: true
+          description: Photo uploaded with `POST /api/rooms/{id}/image`
+        position:
+          type: integer
+          description: Order in the admin room list; set with `PUT /api/rooms/order`
         createdAt:
           type: string
           format: date-time
@@ -264,12 +291,22 @@ components:
           $ref: "#/components/schemas/Room"
     Message:
       type: object
-      required: [id, userId, subject, content, status, createdAt, updatedAt]
+      required: [id, userId, name, email, subject, content, status, createdAt, updatedAt]
       properties:
         id:
           type: string
         userId:
           type: string
+          nullable: true
+          description: "`null` for messages sent with the public contact form"
+        name:
+          type: string
+          nullable: true
+          description: Contact form only
+        email:
+          type: string
+          nullable: true
+          description: Contact form only
         subject:
           type: string
         content:
@@ -284,7 +321,9 @@ components:
           type: string
           format: date-time
         user:
-          $ref: "#/components/schemas/UserSummary"
+          allOf:
+            - $ref: "#/components/schemas/UserSummary"
+          nullable: true
     Report:
       type: object
       required: [id, type, data, period, generatedAt]
@@ -418,6 +457,8 @@ tags:
   - name: Reports
     description: Admin only
   - name: Branding
+  - name: Events
+    description: Live updates for the web UI (Server-Sent Events)
 
 paths:
   /api/public/rooms:
@@ -557,6 +598,109 @@ paths:
                   data:
                     $ref: "#/components/schemas/PublicBranding"
 
+  /api/public/messages:
+    post:
+      summary: Send a message with the contact form (no token needed)
+      tags: [Public]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, subject, content]
+              properties:
+                name:
+                  type: string
+                  maxLength: 100
+                  example: Sam Visitor
+                email:
+                  type: string
+                  format: email
+                  example: sam@example.com
+                subject:
+                  type: string
+                  maxLength: 200
+                  example: Group booking
+                content:
+                  type: string
+                  maxLength: 5000
+                  example: Do you offer discounts for groups of ten?
+      responses:
+        "201":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Message"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/public/flags:
+    get:
+      summary: Trainer flags that apply to this request
+      description: Runtime flags plus the `x-booker-flags` request header. Always empty when the test API is off. The web UI reads them on start-up.
+      tags: [Public]
+      security: []
+      responses:
+        "200":
+          description: Enabled flags
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    required: [enabled]
+                    properties:
+                      enabled:
+                        type: array
+                        items:
+                          type: string
+                        example: [popup-cookie]
+
+  /api/events:
+    get:
+      summary: Live updates (Server-Sent Events)
+      description: |
+        A `text/event-stream` that stays open. `EventSource` cannot send headers, so pass the token as `?token=`
+        (an `Authorization` header works too). Events:
+
+        - `ready`: sent once after connecting
+        - `booking.created`, `booking.updated`: `{ id, status, roomNumber, checkIn, checkOut, username }`; sent to the guest of the booking and to admins
+        - `message.created`: `{ id, subject, from }`; admins only
+      tags: [Events]
+      security: []
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
+          description: JWT from `/api/auth/login`
+      responses:
+        "200":
+          description: Event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                example: "event: booking.updated\ndata: {\"id\":\"seed-booking-6\",\"status\":\"CONFIRMED\"}\n\n"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
   /api/auth/login:
     post:
       summary: Log in
@@ -654,6 +798,86 @@ paths:
                   success:
                     type: boolean
 
+  /api/auth/me:
+    get:
+      summary: Get your profile
+      tags: [Auth]
+      responses:
+        "200":
+          description: The logged-in user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    put:
+      summary: Change your e-mail address
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: new-address@example.com
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/auth/me/avatar:
+    post:
+      summary: Upload your avatar
+      description: PNG, JPEG, GIF or WebP; at most 2 MB. Replaces the previous avatar.
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [avatar]
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Avatar saved; `avatarUrl` points to the image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
   /api/rooms:
     get:
       summary: List all rooms
@@ -715,6 +939,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+
+  /api/rooms/order:
+    put:
+      summary: Save the room order (admin only)
+      description: Used by drag and drop in the admin room list. Rooms get positions 1..n in the given order.
+      tags: [Rooms]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roomIds]
+              properties:
+                roomIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: All rooms, in the new order
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Room"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
   /api/rooms/{id}:
     parameters:
@@ -800,6 +1063,56 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+
+  /api/rooms/{id}/image:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    post:
+      summary: Upload a room photo (admin only)
+      description: PNG, JPEG, GIF or WebP; at most 2 MB. Replaces the previous photo.
+      tags: [Rooms]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image]
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Photo saved; `imageUrl` points to the image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoomResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      summary: Remove the room photo (admin only)
+      tags: [Rooms]
+      responses:
+        "200":
+          description: Photo removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoomResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
   /api/bookings:
     get:
@@ -1002,6 +1315,47 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+
+  /api/bookings/{id}/invoice:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      summary: Download the invoice of a booking
+      description: Only the guest or an admin may download it. Sent as an attachment (`Content-Disposition`).
+      tags: [Bookings]
+      parameters:
+        - in: query
+          name: format
+          schema:
+            type: string
+            enum: [pdf, csv]
+            default: pdf
+      responses:
+        "200":
+          description: The invoice
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            text/csv:
+              schema:
+                type: string
+                example: "description,quantity,unit_price,amount\nRoom 201 (2026-10-23 to 2026-10-26),3,160,480\nTotal,,,480\n"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Cancelled bookings have no invoice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /api/messages:
     get:

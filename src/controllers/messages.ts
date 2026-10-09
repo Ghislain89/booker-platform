@@ -18,6 +18,10 @@ class MessagesController {
     return messagesService.create(message, userId);
   }
 
+  createPublic(message: { name: string; email: string; subject: string; content: string }): Promise<Message> {
+    return messagesService.createPublic(message);
+  }
+
   updateStatus(id: string, status: MessageStatus): Promise<Message> {
     return messagesService.updateStatus(id, status);
   }

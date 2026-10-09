@@ -16,6 +16,7 @@ model User {
   email     String    @unique
   password  String
   role      String    @default("USER")
+  avatarUrl String?
   bookings  Booking[]
   messages  Message[]
   createdAt DateTime  @default(now())
@@ -31,6 +32,8 @@ model Room {
   amenities   String    // JSON string of string array
   status      String    @default("AVAILABLE")
   featured    Boolean   @default(false)
+  imageUrl    String?
+  position    Int       @default(0) // order in the admin room list (drag & drop)
   bookings    Booking[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -54,11 +57,13 @@ model Booking {
 
 model Message {
   id        String    @id @default(uuid())
-  userId    String
+  userId    String?   // null for messages sent with the public contact form
+  name      String?   // contact form only
+  email     String?   // contact form only
   subject   String
   content   String
   status    String    @default("UNREAD")
-  user      User      @relation(fields: [userId], references: [id])
+  user      User?     @relation(fields: [userId], references: [id])
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }

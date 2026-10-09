@@ -44,6 +44,8 @@ export const getApiBookingsResponse = zod.object({
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
+  "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
+  "position": zod.number().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 }).optional()
@@ -111,6 +113,8 @@ export const getApiBookingsMyBookingsResponse = zod.object({
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
+  "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
+  "position": zod.number().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 }).optional()
@@ -151,6 +155,8 @@ export const getApiBookingsIdResponse = zod.object({
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
+  "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
+  "position": zod.number().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 }).optional()
@@ -194,6 +200,8 @@ export const putApiBookingsIdResponse = zod.object({
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
+  "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
+  "position": zod.number().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 }).optional()
@@ -207,5 +215,15 @@ export const putApiBookingsIdResponse = zod.object({
 export const deleteApiBookingsIdResponse = zod.object({
   "success": zod.boolean(),
   "message": zod.string()
+})
+
+/**
+ * Only the guest or an admin may download it. Sent as an attachment (`Content-Disposition`).
+ * @summary Download the invoice of a booking
+ */
+export const getApiBookingsIdInvoiceQueryFormatDefault = "pdf";
+
+export const getApiBookingsIdInvoiceQueryParams = zod.object({
+  "format": zod.enum(['pdf', 'csv']).default(getApiBookingsIdInvoiceQueryFormatDefault)
 })
 

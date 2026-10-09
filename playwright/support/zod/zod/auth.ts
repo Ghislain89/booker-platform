@@ -28,6 +28,7 @@ export const postApiAuthLoginResponse = zod.object({
   "username": zod.string(),
   "email": zod.string(),
   "role": zod.enum(['ROLE_USER', 'ROLE_ADMIN']),
+  "avatarUrl": zod.string().nullable(),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 })
@@ -60,5 +61,62 @@ export const postApiAuthRegisterBody = zod.object({
  */
 export const postApiAuthLogoutResponse = zod.object({
   "success": zod.boolean()
+})
+
+/**
+ * @summary Get your profile
+ */
+export const getApiAuthMeResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "username": zod.string(),
+  "email": zod.string(),
+  "role": zod.enum(['ROLE_USER', 'ROLE_ADMIN']),
+  "avatarUrl": zod.string().nullable(),
+  "createdAt": zod.string().datetime(),
+  "updatedAt": zod.string().datetime()
+})
+})
+
+/**
+ * @summary Change your e-mail address
+ */
+export const putApiAuthMeBody = zod.object({
+  "email": zod.string().email()
+})
+
+export const putApiAuthMeResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "username": zod.string(),
+  "email": zod.string(),
+  "role": zod.enum(['ROLE_USER', 'ROLE_ADMIN']),
+  "avatarUrl": zod.string().nullable(),
+  "createdAt": zod.string().datetime(),
+  "updatedAt": zod.string().datetime()
+})
+})
+
+/**
+ * PNG, JPEG, GIF or WebP; at most 2 MB. Replaces the previous avatar.
+ * @summary Upload your avatar
+ */
+export const postApiAuthMeAvatarBody = zod.object({
+  "avatar": zod.instanceof(File)
+})
+
+export const postApiAuthMeAvatarResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "username": zod.string(),
+  "email": zod.string(),
+  "role": zod.enum(['ROLE_USER', 'ROLE_ADMIN']),
+  "avatarUrl": zod.string().nullable(),
+  "createdAt": zod.string().datetime(),
+  "updatedAt": zod.string().datetime()
+})
 })
 

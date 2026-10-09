@@ -25,6 +25,7 @@ export const User = z.object({
   username: z.string(),
   email: z.string(),
   role: z.union([z.literal("ROLE_USER"), z.literal("ROLE_ADMIN")]),
+  avatarUrl: z.union([z.string(), z.null()]),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -36,13 +37,10 @@ export const UserSummary = z.object({
   email: z.string(),
 });
 
-export type AuthResponse = z.infer<typeof AuthResponse>;
-export const AuthResponse = z.object({
+export type UserResponse = z.infer<typeof UserResponse>;
+export const UserResponse = z.object({
   success: z.boolean(),
-  data: z.object({
-    token: z.string(),
-    user: User,
-  }),
+  data: User,
 });
 
 export type Room = z.infer<typeof Room>;
@@ -55,8 +53,25 @@ export const Room = z.object({
   amenities: z.array(z.string()),
   status: z.union([z.literal("AVAILABLE"), z.literal("OCCUPIED"), z.literal("MAINTENANCE")]),
   featured: z.boolean(),
+  imageUrl: z.union([z.string(), z.null()]),
+  position: z.number(),
   createdAt: z.string(),
   updatedAt: z.string(),
+});
+
+export type RoomResponse = z.infer<typeof RoomResponse>;
+export const RoomResponse = z.object({
+  success: z.boolean(),
+  data: Room,
+});
+
+export type AuthResponse = z.infer<typeof AuthResponse>;
+export const AuthResponse = z.object({
+  success: z.boolean(),
+  data: z.object({
+    token: z.string(),
+    user: User,
+  }),
 });
 
 export type PublicRoom = z.infer<typeof PublicRoom>;
@@ -116,13 +131,15 @@ export const Booking = z.object({
 export type Message = z.infer<typeof Message>;
 export const Message = z.object({
   id: z.string(),
-  userId: z.string(),
+  userId: z.union([z.string(), z.null()]),
+  name: z.union([z.string(), z.null()]),
+  email: z.union([z.string(), z.null()]),
   subject: z.string(),
   content: z.string(),
   status: z.union([z.literal("UNREAD"), z.literal("READ"), z.literal("ARCHIVED")]),
   createdAt: z.string(),
   updatedAt: z.string(),
-  user: z.union([UserSummary, z.undefined()]).optional(),
+  user: z.union([UserSummary, z.null(), z.undefined()]).optional(),
 });
 
 export type Report = z.infer<typeof Report>;
@@ -272,6 +289,52 @@ export const get_Apipublicbranding = {
   }),
 };
 
+export type post_Apipublicmessages = typeof post_Apipublicmessages;
+export const post_Apipublicmessages = {
+  method: z.literal("POST"),
+  path: z.literal("/api/public/messages"),
+  requestFormat: z.literal("json"),
+  parameters: z.object({
+    body: z.object({
+      name: z.string(),
+      email: z.string(),
+      subject: z.string(),
+      content: z.string(),
+    }),
+  }),
+  response: z.object({
+    success: z.boolean(),
+    data: Message,
+  }),
+};
+
+export type get_Apipublicflags = typeof get_Apipublicflags;
+export const get_Apipublicflags = {
+  method: z.literal("GET"),
+  path: z.literal("/api/public/flags"),
+  requestFormat: z.literal("json"),
+  parameters: z.never(),
+  response: z.object({
+    success: z.boolean(),
+    data: z.object({
+      enabled: z.array(z.string()),
+    }),
+  }),
+};
+
+export type get_Apievents = typeof get_Apievents;
+export const get_Apievents = {
+  method: z.literal("GET"),
+  path: z.literal("/api/events"),
+  requestFormat: z.literal("json"),
+  parameters: z.object({
+    query: z.object({
+      token: z.string().optional(),
+    }),
+  }),
+  response: z.unknown(),
+};
+
 export type post_Apiauthlogin = typeof post_Apiauthlogin;
 export const post_Apiauthlogin = {
   method: z.literal("POST"),
@@ -312,6 +375,41 @@ export const post_Apiauthlogout = {
   }),
 };
 
+export type get_Apiauthme = typeof get_Apiauthme;
+export const get_Apiauthme = {
+  method: z.literal("GET"),
+  path: z.literal("/api/auth/me"),
+  requestFormat: z.literal("json"),
+  parameters: z.never(),
+  response: UserResponse,
+};
+
+export type put_Apiauthme = typeof put_Apiauthme;
+export const put_Apiauthme = {
+  method: z.literal("PUT"),
+  path: z.literal("/api/auth/me"),
+  requestFormat: z.literal("json"),
+  parameters: z.object({
+    body: z.object({
+      email: z.string(),
+    }),
+  }),
+  response: UserResponse,
+};
+
+export type post_Apiauthmeavatar = typeof post_Apiauthmeavatar;
+export const post_Apiauthmeavatar = {
+  method: z.literal("POST"),
+  path: z.literal("/api/auth/me/avatar"),
+  requestFormat: z.literal("form-data"),
+  parameters: z.object({
+    body: z.object({
+      avatar: z.string(),
+    }),
+  }),
+  response: UserResponse,
+};
+
 export type get_Apirooms = typeof get_Apirooms;
 export const get_Apirooms = {
   method: z.literal("GET"),
@@ -335,6 +433,22 @@ export const post_Apirooms = {
   response: z.object({
     success: z.boolean(),
     data: Room,
+  }),
+};
+
+export type put_Apiroomsorder = typeof put_Apiroomsorder;
+export const put_Apiroomsorder = {
+  method: z.literal("PUT"),
+  path: z.literal("/api/rooms/order"),
+  requestFormat: z.literal("json"),
+  parameters: z.object({
+    body: z.object({
+      roomIds: z.array(z.string()),
+    }),
+  }),
+  response: z.object({
+    success: z.boolean(),
+    data: z.array(Room),
   }),
 };
 
@@ -382,6 +496,35 @@ export const delete_ApiroomsId = {
     }),
   }),
   response: SuccessMessage,
+};
+
+export type post_ApiroomsIdimage = typeof post_ApiroomsIdimage;
+export const post_ApiroomsIdimage = {
+  method: z.literal("POST"),
+  path: z.literal("/api/rooms/{id}/image"),
+  requestFormat: z.literal("form-data"),
+  parameters: z.object({
+    path: z.object({
+      id: z.string(),
+    }),
+    body: z.object({
+      image: z.string(),
+    }),
+  }),
+  response: RoomResponse,
+};
+
+export type delete_ApiroomsIdimage = typeof delete_ApiroomsIdimage;
+export const delete_ApiroomsIdimage = {
+  method: z.literal("DELETE"),
+  path: z.literal("/api/rooms/{id}/image"),
+  requestFormat: z.literal("json"),
+  parameters: z.object({
+    path: z.object({
+      id: z.string(),
+    }),
+  }),
+  response: RoomResponse,
 };
 
 export type get_Apibookings = typeof get_Apibookings;
@@ -475,6 +618,22 @@ export const delete_ApibookingsId = {
     }),
   }),
   response: SuccessMessage,
+};
+
+export type get_ApibookingsIdinvoice = typeof get_ApibookingsIdinvoice;
+export const get_ApibookingsIdinvoice = {
+  method: z.literal("GET"),
+  path: z.literal("/api/bookings/{id}/invoice"),
+  requestFormat: z.literal("json"),
+  parameters: z.object({
+    query: z.object({
+      format: z.union([z.literal("pdf"), z.literal("csv")]).optional(),
+    }),
+    path: z.object({
+      id: z.string(),
+    }),
+  }),
+  response: z.unknown(),
 };
 
 export type get_Apimessages = typeof get_Apimessages;
@@ -806,11 +965,15 @@ export const EndpointByMethod = {
     "/api/public/rooms": get_Apipublicrooms,
     "/api/public/rooms/{id}": get_ApipublicroomsId,
     "/api/public/branding": get_Apipublicbranding,
+    "/api/public/flags": get_Apipublicflags,
+    "/api/events": get_Apievents,
+    "/api/auth/me": get_Apiauthme,
     "/api/rooms": get_Apirooms,
     "/api/rooms/{id}": get_ApiroomsId,
     "/api/bookings": get_Apibookings,
     "/api/bookings/my-bookings": get_ApibookingsmyBookings,
     "/api/bookings/{id}": get_ApibookingsId,
+    "/api/bookings/{id}/invoice": get_ApibookingsIdinvoice,
     "/api/messages": get_Apimessages,
     "/api/messages/my-messages": get_ApimessagesmyMessages,
     "/api/messages/{id}": get_ApimessagesId,
@@ -820,10 +983,13 @@ export const EndpointByMethod = {
     "/api/testing/flags": get_Apitestingflags,
   },
   post: {
+    "/api/public/messages": post_Apipublicmessages,
     "/api/auth/login": post_Apiauthlogin,
     "/api/auth/register": post_Apiauthregister,
     "/api/auth/logout": post_Apiauthlogout,
+    "/api/auth/me/avatar": post_Apiauthmeavatar,
     "/api/rooms": post_Apirooms,
+    "/api/rooms/{id}/image": post_ApiroomsIdimage,
     "/api/bookings": post_Apibookings,
     "/api/messages": post_Apimessages,
     "/api/reports/generate": post_Apireportsgenerate,
@@ -832,6 +998,8 @@ export const EndpointByMethod = {
     "/api/testing/seed": post_Apitestingseed,
   },
   put: {
+    "/api/auth/me": put_Apiauthme,
+    "/api/rooms/order": put_Apiroomsorder,
     "/api/rooms/{id}": put_ApiroomsId,
     "/api/bookings/{id}": put_ApibookingsId,
     "/api/messages/{id}": put_ApimessagesId,
@@ -840,6 +1008,7 @@ export const EndpointByMethod = {
   },
   delete: {
     "/api/rooms/{id}": delete_ApiroomsId,
+    "/api/rooms/{id}/image": delete_ApiroomsIdimage,
     "/api/bookings/{id}": delete_ApibookingsId,
     "/api/messages/{id}": delete_ApimessagesId,
     "/api/reports/{id}": delete_ApireportsId,

@@ -19,6 +19,13 @@ export interface Room {
   status: RoomStatus;
   /** Shown on the home page */
   featured: boolean;
+  /**
+   * Photo uploaded with `POST /api/rooms/{id}/image`
+   * @nullable
+   */
+  imageUrl: string | null;
+  /** Order in the admin room list; set with `PUT /api/rooms/order` */
+  position: number;
   createdAt: string;
   updatedAt: string;
 }

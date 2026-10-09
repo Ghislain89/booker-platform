@@ -3,10 +3,11 @@ import { prisma } from "../lib/prisma";
 import { forbidden, notFound } from "../lib/http";
 import { isAdmin } from "../middleware/auth";
 import { AuthUser, Message, MessageStatus, UserSummary } from "../types";
+import { publish } from "../lib/events";
 
 const include = { user: { select: { id: true, username: true, email: true } } } as const;
 
-const toMessage = (message: DbMessage & { user: UserSummary }): Message => ({
+const toMessage = (message: DbMessage & { user: UserSummary | null }): Message => ({
   ...message,
   status: message.status as MessageStatus,
 });
@@ -38,7 +39,22 @@ class MessagesService {
       data: { ...input, userId, status: "UNREAD" },
       include,
     });
-    return toMessage(message);
+    return this.announce(toMessage(message));
+  }
+
+  /** Contact form: a message from a guest without an account. */
+  async createPublic(input: { name: string; email: string; subject: string; content: string }): Promise<Message> {
+    const message = await prisma.message.create({ data: { ...input, status: "UNREAD" }, include });
+    return this.announce(toMessage(message));
+  }
+
+  private announce(message: Message) {
+    publish("message.created", {
+      id: message.id,
+      subject: message.subject,
+      from: message.user?.username ?? message.name,
+    });
+    return message;
   }
 
   async updateStatus(id: string, status: MessageStatus): Promise<Message> {

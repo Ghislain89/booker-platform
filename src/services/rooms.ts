@@ -1,6 +1,7 @@
 import { Prisma, Room as DbRoom } from "@prisma/client";
 import { prisma } from "../lib/prisma";
-import { conflict, notFound } from "../lib/http";
+import { badRequest, conflict, notFound } from "../lib/http";
+import { removeUpload } from "../lib/uploads";
 import {
   PageMeta,
   PublicRoom,
@@ -53,6 +54,10 @@ export const toRoom = (room: DbRoom): Room => ({
   status: room.status as RoomStatus,
   amenities: parseAmenities(room.amenities),
 });
+
+/** Position for a new room: after all existing rooms. */
+export const nextRoomPosition = async () =>
+  ((await prisma.room.aggregate({ _max: { position: true } }))._max.position ?? 0) + 1;
 
 const isUniqueViolation = (error: unknown) =>
   error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -139,7 +144,11 @@ class RoomsService {
   async create(room: RoomInput): Promise<Room> {
     try {
       const created = await prisma.room.create({
-        data: { ...room, amenities: JSON.stringify(room.amenities ?? []) },
+        data: {
+          ...room,
+          amenities: JSON.stringify(room.amenities ?? []),
+          position: await nextRoomPosition(),
+        },
       });
       return toRoom(created);
     } catch (error) {
@@ -170,10 +179,33 @@ class RoomsService {
   }
 
   async delete(id: string): Promise<void> {
-    await this.getById(id);
+    const room = await this.getById(id);
     const bookings = await prisma.booking.count({ where: { roomId: id } });
     if (bookings > 0) throw conflict("Room has bookings and cannot be deleted");
     await prisma.room.delete({ where: { id } });
+    removeUpload(room.imageUrl);
+  }
+
+  async setImage(id: string, imageUrl: string | null): Promise<Room> {
+    const room = await this.getById(id);
+    const updated = await prisma.room.update({ where: { id }, data: { imageUrl } });
+    if (room.imageUrl !== imageUrl) removeUpload(room.imageUrl);
+    return toRoom(updated);
+  }
+
+  /** Saves the drag-and-drop order: rooms get positions 1..n in the given order. */
+  async reorder(roomIds: string[]): Promise<Room[]> {
+    if (new Set(roomIds).size !== roomIds.length) {
+      throw badRequest({ roomIds: "roomIds must not contain duplicates" });
+    }
+    const existing = await prisma.room.findMany({ where: { id: { in: roomIds } }, select: { id: true } });
+    const known = new Set(existing.map((room) => room.id));
+    const unknown = roomIds.filter((id) => !known.has(id));
+    if (unknown.length > 0) throw badRequest({ roomIds: `Unknown room id(s): ${unknown.join(", ")}` });
+    await prisma.$transaction(
+      roomIds.map((id, index) => prisma.room.update({ where: { id }, data: { position: index + 1 } })),
+    );
+    return (await prisma.room.findMany({ orderBy: [{ position: "asc" }, { number: "asc" }] })).map(toRoom);
   }
 }
 

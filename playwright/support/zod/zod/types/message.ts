@@ -6,15 +6,30 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { MessageStatus } from './messageStatus';
-import type { UserSummary } from './userSummary';
+import type { MessageUser } from './messageUser';
 
 export interface Message {
   id: string;
-  userId: string;
+  /**
+   * `null` for messages sent with the public contact form
+   * @nullable
+   */
+  userId: string | null;
+  /**
+   * Contact form only
+   * @nullable
+   */
+  name: string | null;
+  /**
+   * Contact form only
+   * @nullable
+   */
+  email: string | null;
   subject: string;
   content: string;
   status: MessageStatus;
   createdAt: string;
   updatedAt: string;
-  user?: UserSummary;
+  /** @nullable */
+  user?: MessageUser;
 }

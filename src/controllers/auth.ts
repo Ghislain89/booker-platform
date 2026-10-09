@@ -1,4 +1,4 @@
-import { AuthRequest, AuthResponse, RegisterRequest } from "../types";
+import { AuthRequest, AuthResponse, RegisterRequest, User } from "../types";
 import { authService } from "../services/auth";
 
 class AuthController {
@@ -8,6 +8,18 @@ class AuthController {
 
   register(userData: RegisterRequest): Promise<AuthResponse> {
     return authService.register(userData);
+  }
+
+  getProfile(userId: string): Promise<User> {
+    return authService.getProfile(userId);
+  }
+
+  updateProfile(userId: string, input: { email?: string }): Promise<User> {
+    return authService.updateProfile(userId, input);
+  }
+
+  setAvatar(userId: string, avatarUrl: string): Promise<User> {
+    return authService.setAvatar(userId, avatarUrl);
   }
 
   logout(): Promise<void> {

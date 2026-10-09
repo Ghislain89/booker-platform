@@ -47,6 +47,8 @@ export const getApiPublicRoomsResponse = zod.object({
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
+  "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
+  "position": zod.number().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 })),
@@ -76,6 +78,8 @@ export const getApiPublicRoomsIdResponse = zod.object({
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
+  "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
+  "position": zod.number().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 }).and(zod.object({
@@ -123,6 +127,32 @@ export const getApiPublicBrandingResponse = zod.object({
   "primaryColor": zod.string().regex(getApiPublicBrandingResponseDataThemePrimaryColorRegExp).optional(),
   "secondaryColor": zod.string().regex(getApiPublicBrandingResponseDataThemeSecondaryColorRegExp).optional()
 })
+})
+})
+
+/**
+ * @summary Send a message with the contact form (no token needed)
+ */
+export const postApiPublicMessagesBodyNameMax = 100;
+export const postApiPublicMessagesBodySubjectMax = 200;
+export const postApiPublicMessagesBodyContentMax = 5000;
+
+
+export const postApiPublicMessagesBody = zod.object({
+  "name": zod.string().max(postApiPublicMessagesBodyNameMax),
+  "email": zod.string().email(),
+  "subject": zod.string().max(postApiPublicMessagesBodySubjectMax),
+  "content": zod.string().max(postApiPublicMessagesBodyContentMax)
+})
+
+/**
+ * Runtime flags plus the `x-booker-flags` request header. Always empty when the test API is off. The web UI reads them on start-up.
+ * @summary Trainer flags that apply to this request
+ */
+export const getApiPublicFlagsResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "enabled": zod.array(zod.string())
 })
 })
 
