@@ -54,7 +54,7 @@ export const postApiRoomsBody = zod.object({
 }))
 
 /**
- * Used by drag and drop in the admin room list. Rooms get positions 1..n in the given order.
+ * Used by drag and drop in the admin room list. Rooms get positions 1..n in the given order. Ids of rooms that no longer exist are skipped, so a room deleted in the meantime does not block the new order.
  * @summary Save the room order (admin only)
  */
 export const putApiRoomsOrderBody = zod.object({

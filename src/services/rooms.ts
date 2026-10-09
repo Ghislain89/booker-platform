@@ -200,10 +200,12 @@ class RoomsService {
     }
     const existing = await prisma.room.findMany({ where: { id: { in: roomIds } }, select: { id: true } });
     const known = new Set(existing.map((room) => room.id));
-    const unknown = roomIds.filter((id) => !known.has(id));
-    if (unknown.length > 0) throw badRequest({ roomIds: `Unknown room id(s): ${unknown.join(", ")}` });
+    // Rooms deleted after the admin opened the dialog are skipped, so a concurrent
+    // delete doesn't throw away the new order.
     await prisma.$transaction(
-      roomIds.map((id, index) => prisma.room.update({ where: { id }, data: { position: index + 1 } })),
+      roomIds
+        .filter((id) => known.has(id))
+        .map((id, index) => prisma.room.update({ where: { id }, data: { position: index + 1 } })),
     );
     return (await prisma.room.findMany({ orderBy: [{ position: "asc" }, { number: "asc" }] })).map(toRoom);
   }
