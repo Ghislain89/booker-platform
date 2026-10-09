@@ -15,6 +15,7 @@ Before the workshop, install Git, Node.js (LTS), VS Code and the Playwright VS C
 git clone https://github.com/Ghislain89/booker-platform.git
 cd booker-platform
 npm install
+npx playwright install   # downloads the browsers
 npm run setup   # creates and seeds the local SQLite database
 npm run dev     # starts the server on http://localhost:3000
 ```
