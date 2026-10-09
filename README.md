@@ -306,10 +306,12 @@ All assignments are worked out on the [`solutions`](https://github.com/Ghislain8
 | 2 | `support/pages/*` (page objects), `support/fixtures/ui.fixture.ts` (fixtures), `assignment2.spec.ts` |
 | 3 | `auth.setup.ts` (user through the form, admin through the API), the `setup`, `*-user` and `*-admin` projects in `playwright.config.ts`, `assignment3*.spec.ts` |
 | 4 | `assignment4.network.spec.ts` (mock and patch), `assignment4.hybrid.spec.ts`; the `seed` fixture creates data through the test support API and removes it afterwards |
+| 5 | One file per option: `assignment5.downloads.spec.ts` (confirm dialog, PDF/CSV invoices), `assignment5.contexts.spec.ts` (guest and admin in two contexts, live updates), `assignment5.clock.spec.ts` (`page.clock.setFixedTime`), `assignment5.mobile.spec.ts` (the `mobile` project: Pixel 7, `nl-NL`, dark), `assignment5.upload-dnd.admin.spec.ts` (`setInputFiles`, `dragTo`, keyboard), `assignment5.tabs-shadow.spec.ts` (popup, shadow DOM payment form). The payment step is in the `BookingWizard` page object |
 | 6 | `assignment6.visual.spec.ts` and `visual.css`. Baselines are kept for Chromium on macOS and Linux; the "Update snapshots" workflow regenerates the Linux ones |
 | 7 | `assignment7.a11y.spec.ts` (axe per wizard step, attached to the report; aria snapshots) |
 | 8 | `.github/workflows/playwright.yml`: all browsers, 4 shards, merged HTML report |
 | 9 | `specs/cancel-booking.md` (plan) and `assignment9.cancel-booking.spec.ts` |
+| 10 | `assignment10.chaos.spec.ts` in the opt-in `chaos` project (`extraHTTPHeaders` with the chaos flags): `addLocatorHandler` for the cookie banner, locators by name, and `toPass` around the one step a real user would retry |
 
 Extra admin examples: `rooms.admin.spec.ts` and `bookings.admin.spec.ts`.
 
@@ -317,6 +319,7 @@ Extra admin examples: `rooms.admin.spec.ts` and `bookings.admin.spec.ts`.
 npx playwright test                                   # API + Chromium
 npx playwright test --project "*"                     # API + Chromium, Firefox and WebKit
 npx playwright test --project "ui-*" --repeat-each 5  # check that the tests are independent
+npx playwright test --project chaos                   # assignment 10
 ```
 
 ## Licence

@@ -12,6 +12,10 @@ const browsers = [
   { prefix: "webkit", device: devices["Desktop Safari"], isDefault: false },
 ];
 
+// Specs that need their own project (see the end of the file).
+const MOBILE_SPECS = /.*\.mobile\.spec\.ts/;
+const CHAOS_SPECS = /.*\.chaos\.spec\.ts/;
+
 export default defineConfig({
   testDir: "./playwright/tests",
   fullyParallel: true,
@@ -49,7 +53,7 @@ export default defineConfig({
       {
         name: `${prefix}-user`,
         testDir: "./playwright/tests/ui",
-        testIgnore: /.*\.admin\.spec\.ts/,
+        testIgnore: [/.*\.admin\.spec\.ts/, MOBILE_SPECS, CHAOS_SPECS],
         use: { ...device, storageState: USER_STATE },
         dependencies: ["setup"],
         default: isDefault,
@@ -63,5 +67,34 @@ export default defineConfig({
         default: isDefault,
       },
     ]),
+    // Assignment 5 (emulation): a Dutch phone in dark mode.
+    {
+      name: "mobile",
+      testDir: "./playwright/tests/ui",
+      testMatch: MOBILE_SPECS,
+      use: {
+        ...devices["Pixel 7"],
+        locale: "nl-NL",
+        colorScheme: "dark",
+        storageState: USER_STATE,
+      },
+      dependencies: ["setup"],
+    },
+    // Assignment 10 (flaky-test clinic): every request switches on the chaos flags.
+    // Opt-in: `npx playwright test --project chaos`.
+    {
+      name: "chaos",
+      testDir: "./playwright/tests/ui",
+      testMatch: CHAOS_SPECS,
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: USER_STATE,
+        extraHTTPHeaders: {
+          "x-booker-flags": "slow-rooms,flaky-booking,random-order,popup-cookie",
+        },
+      },
+      dependencies: ["setup"],
+      default: false,
+    },
   ],
 });
