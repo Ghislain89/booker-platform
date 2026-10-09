@@ -190,9 +190,10 @@ A1–A6, A16; test-support endpoints (§5). Existing API assignment still passes
 **Phase 1 – MVP replacing the todo app (2–3 days)**
 Scaffold `web/`, single-port serving, auth pages, `/rooms` (filters + pagination), room detail, booking wizard (without shadow DOM), My bookings (cancel + confirm), admin rooms (CRUD, no DnD), deterministic mode.
 ✅ Done when assignments 1A–4 and 6–9 can be completed and reference solutions pass with `fullyParallel: true` on Chromium, Firefox and WebKit.
+✅ Done. Rooms and bookings in the UI use the room number (`/rooms/101`, `/book/101`). The API gained public endpoints (`/api/public/rooms` with search and availability, `/api/public/rooms/{idOrNumber}`, `/api/public/branding`), booking guests and extras with a server-side `totalPrice`, and a `featured` flag on rooms. Not in this phase: contact form, gallery, messages, profile, admin messages/reports/branding pages and the header notifications; they follow in phase 2. Reference solutions are on the `solutions` branch; CI runs them on all three browsers.
 
 **Phase 2 – Advanced topics (2–3 days)**
-SSE + notifications, invoice download, uploads, drag & drop, iframe map + branding preview, terms tab, shadow DOM payment widget, clock countdown, i18n, dark mode, responsive layout.
+SSE + notifications, invoice download, uploads, drag & drop, iframe map + branding preview, terms tab, shadow DOM payment widget, clock countdown, i18n, dark mode, responsive layout. Also the pages that phase 1 skipped: contact form, room gallery, my messages, profile, admin messages, reports and branding.
 ✅ Done when all options of assignment 5 have reference solutions.
 
 **Phase 3 – Trainer tooling (1–2 days)**
