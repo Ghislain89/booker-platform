@@ -75,6 +75,8 @@ The seed also creates 12 rooms (101–104 standard, 201–204 deluxe, 301–304 
 | Room management | `/admin/rooms` | admin |
 | Booking management (approve or reject) | `/admin/bookings` | admin |
 
+Notifications ("Booking cancelled." and so on) appear in a region named "Notifications": `page.getByRole('region', { name: 'Notifications' })`.
+
 The web app stores the JWT in `localStorage` under `booker.token`, so you can log in through `POST /api/auth/login` and put the token there.
 
 Add `?test=1` to any URL to switch on test mode for that browser. It's remembered in a cookie until you open a URL with `?test=0`. Test mode turns off animations and the blinking cursor, shows the same "deal of the day" every time and keeps notifications open until you dismiss them.
@@ -188,6 +190,7 @@ Put your UI tests in `playwright/tests/ui/`. `example.spec.ts` shows how a test 
 
 - Take a screenshot of the home page and run the test twice. Does it pass?
 - Mask the "deal of the day" banner, then hide it with `stylePath` instead. Which do you prefer?
+- Screenshots differ per operating system. To get Linux baselines for CI, run the "Update snapshots" workflow in the Actions tab of your fork.
 
 ### Assignment 7 (Accessibility)
 
