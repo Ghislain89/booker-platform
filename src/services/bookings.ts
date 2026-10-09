@@ -16,6 +16,22 @@ import {
   EXTRAS,
 } from "../lib/pricing";
 import { toRoom } from "./rooms";
+import { EventType, publish } from "../lib/events";
+
+const announce = (type: EventType, booking: Booking, actor?: string) =>
+  publish(
+    type,
+    {
+      id: booking.id,
+      status: booking.status,
+      roomNumber: booking.room?.number,
+      checkIn: booking.checkIn,
+      checkOut: booking.checkOut,
+      username: booking.user?.username,
+      actor: actor ?? booking.user?.username,
+    },
+    { userId: booking.userId },
+  );
 
 export const bookingInclude = {
   user: { select: { id: true, username: true, email: true } },
@@ -137,10 +153,13 @@ class BookingsService {
         include: bookingInclude,
       });
     });
-    return toBooking(booking);
+    const created = toBooking(booking);
+    announce("booking.created", created);
+    return created;
   }
 
-  async updateStatus(id: string, status: BookingStatus): Promise<Booking> {
+  /** `actor` is the username that made the change; the web UI skips notifications about your own actions. */
+  async updateStatus(id: string, status: BookingStatus, actor?: string): Promise<Booking> {
     const existing = await prisma.booking.findUnique({ where: { id } });
     if (!existing) throw notFound("Booking not found");
     const booking = await prisma.booking.update({
@@ -148,13 +167,15 @@ class BookingsService {
       data: { status },
       include: bookingInclude,
     });
-    return toBooking(booking);
+    const updated = toBooking(booking);
+    if (existing.status !== status) announce("booking.updated", updated, actor);
+    return updated;
   }
 
   async cancel(id: string, requester: AuthUser): Promise<Booking> {
     const booking = await this.getById(id, requester);
     if (booking.status === "CANCELLED") return booking;
-    return this.updateStatus(id, "CANCELLED");
+    return this.updateStatus(id, "CANCELLED", requester.username);
   }
 }
 

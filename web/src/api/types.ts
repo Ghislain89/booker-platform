@@ -14,6 +14,10 @@ export interface Room {
   amenities?: string[];
   status?: RoomStatus;
   featured?: boolean;
+  /** Uploaded photo (/uploads/...), or null: the UI then shows placeholder photos per room type. */
+  imageUrl?: string | null;
+  /** Manual order set by drag & drop in Room management. */
+  position?: number;
 }
 
 export interface PublicRoom extends Room {
@@ -62,7 +66,40 @@ export interface Branding {
   theme: { primaryColor: string; secondaryColor: string };
 }
 
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  role: Role;
+  avatarUrl?: string | null;
+}
+
 export interface AuthResponse {
   token: string;
-  user: { id: string; username: string; email: string; role: Role };
+  user: User;
+}
+
+export type MessageStatus = "UNREAD" | "READ" | "ARCHIVED";
+
+export interface Message {
+  id: string;
+  userId: string | null;
+  name: string | null;
+  email: string | null;
+  subject: string;
+  content: string;
+  status: MessageStatus;
+  createdAt: string;
+  updatedAt: string;
+  user?: { id: string; username: string; email: string } | null;
+}
+
+export type ReportType = "OCCUPANCY" | "REVENUE" | "CUSTOMER_SATISFACTION";
+
+export interface Report {
+  id: string;
+  type: ReportType;
+  data: Record<string, unknown>;
+  period: { start: string; end: string };
+  generatedAt: string;
 }

@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { UNAUTHORIZED_EVENT } from "../api/client";
+import { hasFlag } from "./flags";
 import {
   clearToken,
   decodeToken,
@@ -30,6 +31,9 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState(() => decodeToken(getToken()));
+  const [crashed, setCrashed] = useState(false);
+  // Bug mode `bug-auth`: a 401 crashes the app instead of logging out: a blank page.
+  if (crashed) throw new Error("Unhandled 401 (bug-auth)");
 
   const login = useCallback(
     (token: string) => {
@@ -47,7 +51,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [queryClient]);
 
   useEffect(() => {
-    window.addEventListener(UNAUTHORIZED_EVENT, logout);
+    const onUnauthorized = () =>
+      hasFlag("bug-auth") ? setCrashed(true) : logout();
+    window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
     // Logging in or out in another tab.
     const onStorage = (event: StorageEvent) => {
       if (event.key === TOKEN_KEY || event.key === null)
@@ -55,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener("storage", onStorage);
     return () => {
-      window.removeEventListener(UNAUTHORIZED_EVENT, logout);
+      window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
       window.removeEventListener("storage", onStorage);
     };
   }, [logout]);

@@ -1,7 +1,9 @@
 import express from "express";
 import { bookingsController } from "../controllers/bookings";
 import { authenticate, authorizeAdmin } from "../middleware/auth";
-import { asyncHandler, HttpError } from "../lib/http";
+import { asyncHandler, conflict, HttpError } from "../lib/http";
+import { invoiceCsv, invoiceFileName, invoicePdf } from "../lib/invoice";
+import { brandingService } from "../services/branding";
 import { hasFlag } from "../lib/flags";
 import { asBody, Validator } from "../lib/validation";
 import { EXTRAS, Extra } from "../lib/pricing";
@@ -22,6 +24,22 @@ router.get("/my-bookings", authenticate, asyncHandler(async (req, res) => {
 router.get("/:id", authenticate, asyncHandler(async (req, res) => {
   const booking = await bookingsController.getById(req.params.id, req.user!);
   res.json({ success: true, data: booking });
+}));
+
+router.get("/:id/invoice", authenticate, asyncHandler(async (req, res) => {
+  const format = req.query.format ?? "pdf";
+  if (format !== "pdf" && format !== "csv") {
+    throw new HttpError(400, "Validation failed", { format: "format must be pdf or csv" });
+  }
+  const booking = await bookingsController.getById(req.params.id, req.user!);
+  if (booking.status === "CANCELLED") throw conflict("Cancelled bookings have no invoice");
+  res.setHeader("Content-Disposition", `attachment; filename="${invoiceFileName(booking, format)}"`);
+  if (format === "csv") {
+    res.type("text/csv").send(invoiceCsv(booking));
+  } else {
+    const { name } = await brandingService.get();
+    res.type("application/pdf").send(invoicePdf(booking, name));
+  }
 }));
 
 router.post("/", authenticate, asyncHandler(async (req, res) => {
@@ -53,7 +71,7 @@ router.put("/:id", authenticate, authorizeAdmin, asyncHandler(async (req, res) =
   const status = v.oneOf("status", BOOKING_STATUSES);
   v.assertValid();
 
-  const booking = await bookingsController.updateStatus(req.params.id, status!);
+  const booking = await bookingsController.updateStatus(req.params.id, status!, req.user!.username);
   res.json({ success: true, data: booking });
 }));
 

@@ -1,4 +1,5 @@
 import type { Role } from "../api/types";
+import { hasFlag } from "./flags";
 
 // The JWT lives in localStorage, so Playwright's storageState picks it up.
 export const TOKEN_KEY = "booker.token";
@@ -22,7 +23,9 @@ export function decodeToken(token: string | null): SessionUser | null {
     const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
     const user = JSON.parse(atob(payload)) as SessionUser;
     if (!user.username || !user.role) return null;
-    if (user.exp && user.exp * 1000 < Date.now()) return null;
+    // Bug mode `bug-auth`: expired tokens are treated as valid.
+    if (user.exp && user.exp * 1000 < Date.now() && !hasFlag("bug-auth"))
+      return null;
     return user;
   } catch {
     return null;

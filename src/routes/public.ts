@@ -3,6 +3,9 @@ import { asyncHandler, badRequest, FieldErrors } from "../lib/http";
 import { hasFlag, sleep } from "../lib/flags";
 import { roomsService } from "../services/rooms";
 import { brandingService } from "../services/branding";
+import { messagesController } from "../controllers/messages";
+import { asBody, Validator } from "../lib/validation";
+import { TEST_API_ENABLED } from "../config/env";
 import {
   ROOM_SORTS,
   ROOM_TYPES,
@@ -132,5 +135,37 @@ router.get(
     });
   }),
 );
+
+router.post(
+  "/messages",
+  asyncHandler(async (req, res) => {
+    const v = new Validator(asBody(req.body));
+    const name = v.string("name", { max: 100 });
+    const email = v.string("email", {
+      max: 254,
+      pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      patternMessage: "email must be a valid e-mail address",
+    });
+    const subject = v.string("subject", { max: 200 });
+    const content = v.string("content", { max: 5000 });
+    v.assertValid();
+    const message = await messagesController.createPublic({
+      name: name!,
+      email: email!,
+      subject: subject!,
+      content: content!,
+    });
+    res.status(201).json({ success: true, data: message });
+  }),
+);
+
+// Trainer flags that apply to this request (runtime flags + x-booker-flags header). The web UI
+// reads them on start-up for the UI-side bugs. Always empty when the test API is off.
+router.get("/flags", (req, res) => {
+  res.json({
+    success: true,
+    data: { enabled: TEST_API_ENABLED ? [...(req.flags ?? [])] : [] },
+  });
+});
 
 export default router;

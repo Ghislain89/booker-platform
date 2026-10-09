@@ -195,16 +195,18 @@ Scaffold `web/`, single-port serving, auth pages, `/rooms` (filters + pagination
 **Phase 2 – Advanced topics (2–3 days)**
 SSE + notifications, invoice download, uploads, drag & drop, iframe map + branding preview, terms tab, shadow DOM payment widget, clock countdown, i18n, dark mode, responsive layout. Also the pages that phase 1 skipped: contact form, room gallery, my messages, profile, admin messages, reports and branding.
 ✅ Done when all options of assignment 5 have reference solutions.
+✅ Done. The API gained `actor` on booking events, so the UI only notifies other people's changes. Deviations from §6: room order is changed in a separate *Change order* dialog (drag & drop or keyboard) instead of by dragging table rows, and only the admin *Order* column uses it; the check-in countdown is on *My bookings*, not in the header; the map is an offline SVG page (`/map.html`) so tests never depend on a tile server; bulk maintenance is left out; i18n covers the header, footer, home, room cards, contact and profile pages. The card widget is `<booker-payment>` with an open shadow root and a mocked payment (300 ms; card `4000 0000 0000 0002` is declined).
 
 **Phase 3 – Trainer tooling (1–2 days)**
 Feature flags + `/__trainer` panel, optional Docker image, preparation page update.
 ✅ Done when assignment 10 works and the full suite passes on a fresh clone (macOS, Windows, Linux).
+✅ Done. The UI reads its flags from `GET /api/public/flags` before the first render, so `x-booker-flags` via `extraHTTPHeaders` works per test. `/__trainer` (admin) toggles flags and resets the database. The `Dockerfile` serves the production build; CI builds it and checks `/health`. The *Fresh clone* workflow runs `npm ci`, `npm run setup` and the tests on Ubuntu, macOS and Windows every week.
 
 ---
 
 ## 10. Open decisions
 
 1. ~~**Register duplicate status:**~~ Decided: `409` (implemented in phase 0).
-2. **Public endpoints:** new `/api/public/*` (recommended, non-breaking) vs make existing `GET /rooms` anonymous.
-3. **Token storage:** `localStorage` (simple, visible in storageState) vs httpOnly cookie (realistic). Recommendation: localStorage, cover cookies in the slides.
-4. **Licence:** e.g. MIT for code, CC BY-NC-SA for training material (as Tim does).
+2. ~~**Public endpoints:**~~ Decided: new `/api/public/*` (implemented in phase 1).
+3. ~~**Token storage:**~~ Decided: `localStorage` (visible in storageState); cookies are covered in the slides.
+4. ~~**Licence:**~~ Decided: MIT for booker-platform, CC BY-NC-SA 4.0 for the slides.

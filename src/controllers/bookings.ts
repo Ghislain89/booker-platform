@@ -18,8 +18,8 @@ class BookingsController {
     return bookingsService.create(booking, userId);
   }
 
-  updateStatus(id: string, status: BookingStatus): Promise<Booking> {
-    return bookingsService.updateStatus(id, status);
+  updateStatus(id: string, status: BookingStatus, actor?: string): Promise<Booking> {
+    return bookingsService.updateStatus(id, status, actor);
   }
 
   cancel(id: string, requester: AuthUser): Promise<Booking> {

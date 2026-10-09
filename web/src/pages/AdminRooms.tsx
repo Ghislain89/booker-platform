@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { DragEvent, FormEvent, useId, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError, DataResponse } from "../api/client";
 import type { Room, RoomInput, RoomStatus, RoomType } from "../api/types";
@@ -14,7 +14,7 @@ const STATUS_LABELS: Record<RoomStatus, string> = {
   MAINTENANCE: "Maintenance",
 };
 
-type SortKey = "number" | "type" | "price" | "capacity" | "status";
+type SortKey = "position" | "number" | "type" | "price" | "capacity" | "status";
 const PAGE_SIZE = 10;
 
 const emptyRoom: RoomInput = {
@@ -39,6 +39,7 @@ export function AdminRooms() {
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<Room | "new" | null>(null);
   const [deleting, setDeleting] = useState<Room | null>(null);
+  const [reordering, setReordering] = useState(false);
 
   const rooms = useQuery({
     queryKey: ["private", "admin-rooms"],
@@ -115,13 +116,23 @@ export function AdminRooms() {
     <>
       <div className="page-header">
         <h1>Room management</h1>
-        <button
-          type="button"
-          className="button"
-          onClick={() => setEditing("new")}
-        >
-          Add room
-        </button>
+        <div className="row-actions">
+          <button
+            type="button"
+            className="button button-secondary"
+            onClick={() => setReordering(true)}
+            disabled={!rooms.data}
+          >
+            Change order
+          </button>
+          <button
+            type="button"
+            className="button"
+            onClick={() => setEditing("new")}
+          >
+            Add room
+          </button>
+        </div>
       </div>
 
       <div className="field search">
@@ -154,6 +165,7 @@ export function AdminRooms() {
               <caption className="visually-hidden">Rooms</caption>
               <thead>
                 <tr>
+                  {header("position", "Order")}
                   {header("number", "Number")}
                   {header("type", "Type")}
                   {header("price", "Price")}
@@ -168,13 +180,18 @@ export function AdminRooms() {
               <tbody>
                 {visible.map((room) => (
                   <tr key={room.id} data-testid="room-row">
-                    <td>{room.number}</td>
-                    <td>{roomTypeLabel(room.type)}</td>
-                    <td>{formatPrice(room.price)}</td>
-                    <td>{room.capacity}</td>
-                    <td>{room.status ? STATUS_LABELS[room.status] : ""}</td>
-                    <td>{room.featured ? "Yes" : "No"}</td>
-                    <td>
+                    <td data-label="Order">{room.position ?? ""}</td>
+                    <td data-label="Number">{room.number}</td>
+                    <td data-label="Type">{roomTypeLabel(room.type)}</td>
+                    <td data-label="Price">{formatPrice(room.price)}</td>
+                    <td data-label="Capacity">{room.capacity}</td>
+                    <td data-label="Status">
+                      {room.status ? STATUS_LABELS[room.status] : ""}
+                    </td>
+                    <td data-label="Featured">
+                      {room.featured ? "Yes" : "No"}
+                    </td>
+                    <td className="actions-cell">
                       <div className="row-actions">
                         <button
                           type="button"
@@ -201,7 +218,7 @@ export function AdminRooms() {
                 ))}
                 {visible.length === 0 && (
                   <tr>
-                    <td colSpan={7}>No rooms match your search.</td>
+                    <td colSpan={8}>No rooms match your search.</td>
                   </tr>
                 )}
               </tbody>
@@ -245,6 +262,16 @@ export function AdminRooms() {
             room={editing === "new" ? null : editing}
             onDone={() => setEditing(null)}
           />
+        )}
+      </Dialog>
+
+      <Dialog
+        open={reordering}
+        title="Change room order"
+        onClose={() => setReordering(false)}
+      >
+        {reordering && rooms.data && (
+          <RoomOrder rooms={rooms.data} onDone={() => setReordering(false)} />
         )}
       </Dialog>
 
@@ -435,6 +462,7 @@ function RoomForm({ room, onDone }: { room: Room | null; onDone: () => void }) {
           ))}
         </select>
       </div>
+      {room && <RoomPhoto room={room} />}
       <div className="checkbox">
         <input
           id="room-featured"
@@ -459,5 +487,243 @@ function RoomForm({ room, onDone }: { room: Room | null; onDone: () => void }) {
         </button>
       </div>
     </form>
+  );
+}
+
+const byPosition = (a: Room, b: Room) =>
+  (a.position ?? 0) - (b.position ?? 0) ||
+  a.number.localeCompare(b.number, "en", { numeric: true });
+
+/**
+ * Drag & drop with the HTML5 drag events (practise `locator.dragTo()`), plus the
+ * arrow keys on the handle as the keyboard alternative.
+ */
+function RoomOrder({ rooms, onDone }: { rooms: Room[]; onDone: () => void }) {
+  const queryClient = useQueryClient();
+  const notify = useToast();
+  const [order, setOrder] = useState(() => [...rooms].sort(byPosition));
+  const [dragged, setDragged] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState("");
+
+  const move = (id: string, to: number) => {
+    setOrder((current) => {
+      const from = current.findIndex((room) => room.id === id);
+      if (from === -1 || to < 0 || to >= current.length || from === to)
+        return current;
+      const next = [...current];
+      const [room] = next.splice(from, 1);
+      next.splice(to, 0, room);
+      setAnnouncement(
+        `Room ${room.number} moved to position ${to + 1} of ${next.length}.`,
+      );
+      return next;
+    });
+  };
+
+  const save = useMutation({
+    mutationFn: () =>
+      api<DataResponse<Room[]>>("/rooms/order", {
+        method: "PUT",
+        body: { roomIds: order.map((room) => room.id) },
+      }),
+    onSuccess: () => {
+      notify("Room order saved.");
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      queryClient.invalidateQueries({ queryKey: ["private", "admin-rooms"] });
+      onDone();
+    },
+  });
+
+  const onDrop = (event: DragEvent, index: number) => {
+    event.preventDefault();
+    const id = dragged ?? event.dataTransfer.getData("text/plain");
+    if (id) move(id, index);
+    setDragged(null);
+  };
+
+  return (
+    <>
+      <p className="hint">
+        Drag the rooms into the order you want, or focus a handle and use the
+        arrow keys.
+      </p>
+      {save.isError && (
+        <p className="alert alert-error" role="alert">
+          {save.error.message}
+        </p>
+      )}
+      <ol className="sortable" aria-label="Room order">
+        {order.map((room, index) => (
+          <li
+            key={room.id}
+            data-testid="sortable-room"
+            className={dragged === room.id ? "dragging" : undefined}
+            draggable
+            onDragStart={(event) => {
+              setDragged(room.id);
+              event.dataTransfer.setData("text/plain", room.id);
+              event.dataTransfer.effectAllowed = "move";
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "move";
+            }}
+            onDrop={(event) => onDrop(event, index)}
+            onDragEnd={() => setDragged(null)}
+          >
+            <button
+              type="button"
+              className="drag-handle"
+              aria-label={`Move room ${room.number}`}
+              aria-describedby="sortable-hint"
+              onKeyDown={(event) => {
+                const delta =
+                  event.key === "ArrowUp" ? -1 : event.key === "ArrowDown" ? 1 : 0;
+                if (!delta) return;
+                event.preventDefault();
+                move(room.id, index + delta);
+                // Keep focus on the handle of the moved room.
+                requestAnimationFrame(() =>
+                  (
+                    document.querySelector(
+                      `[aria-label="Move room ${room.number}"]`,
+                    ) as HTMLElement | null
+                  )?.focus(),
+                );
+              }}
+            >
+              <span aria-hidden="true">⠿</span>
+            </button>
+            <span>
+              Room {room.number}{" "}
+              <span className="meta">({roomTypeLabel(room.type)})</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+      <p id="sortable-hint" className="visually-hidden">
+        Use the up and down arrow keys to move the room.
+      </p>
+      <p className="visually-hidden" aria-live="assertive">
+        {announcement}
+      </p>
+      <div className="dialog-actions">
+        <button type="button" className="button button-secondary" onClick={onDone}>
+          Cancel
+        </button>
+        <button
+          type="button"
+          className="button"
+          disabled={save.isPending}
+          onClick={() => save.mutate()}
+        >
+          Save order
+        </button>
+      </div>
+    </>
+  );
+}
+
+/** Upload with `setInputFiles()`; the photo shows up on the room card and detail page. */
+function RoomPhoto({ room }: { room: Room }) {
+  const queryClient = useQueryClient();
+  const notify = useToast();
+  const inputId = useId();
+  const [imageUrl, setImageUrl] = useState(room.imageUrl ?? null);
+  const [file, setFile] = useState<File | null>(null);
+  const [error, setError] = useState<string>();
+
+  const refresh = (updated: Room) => {
+    setImageUrl(updated.imageUrl ?? null);
+    queryClient.invalidateQueries({ queryKey: ["rooms"] });
+    queryClient.invalidateQueries({ queryKey: ["private", "admin-rooms"] });
+  };
+
+  const upload = useMutation({
+    mutationFn: (image: File) => {
+      const form = new FormData();
+      form.append("image", image);
+      return api<DataResponse<Room>>(`/rooms/${room.id}/image`, {
+        method: "POST",
+        form,
+      });
+    },
+    onSuccess: (response) => {
+      refresh(response.data);
+      setFile(null);
+      notify(`Photo of room ${room.number} uploaded.`);
+    },
+    onError: (failure) =>
+      setError(
+        failure instanceof ApiError && failure.details?.image
+          ? failure.details.image
+          : failure.message,
+      ),
+  });
+
+  const removePhoto = useMutation({
+    mutationFn: () =>
+      api<DataResponse<Room>>(`/rooms/${room.id}/image`, { method: "DELETE" }),
+    onSuccess: (response) => {
+      refresh(response.data);
+      notify(`Photo of room ${room.number} removed.`);
+    },
+    onError: (failure) => setError(failure.message),
+  });
+
+  return (
+    <fieldset className="room-photo-field">
+      <legend>Photo</legend>
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={`Current photo of room ${room.number}`}
+          width={200}
+          height={125}
+          className="room-photo-preview"
+        />
+      ) : (
+        <p className="hint">No photo uploaded; guests see placeholder photos.</p>
+      )}
+      <div className="field">
+        <label htmlFor={inputId}>Room photo</label>
+        <input
+          id={inputId}
+          type="file"
+          accept="image/png,image/jpeg,image/gif,image/webp"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${inputId}-error` : undefined}
+          onChange={(event) => {
+            setError(undefined);
+            setFile(event.target.files?.[0] ?? null);
+          }}
+        />
+        {error && (
+          <p className="field-error" id={`${inputId}-error`}>
+            {error}
+          </p>
+        )}
+      </div>
+      <div className="row-actions">
+        <button
+          type="button"
+          className="button button-secondary button-small"
+          disabled={!file || upload.isPending}
+          onClick={() => file && upload.mutate(file)}
+        >
+          Upload photo
+        </button>
+        {imageUrl && (
+          <button
+            type="button"
+            className="button button-danger button-small"
+            disabled={removePhoto.isPending}
+            onClick={() => removePhoto.mutate()}
+          >
+            Remove photo
+          </button>
+        )}
+      </div>
+    </fieldset>
   );
 }

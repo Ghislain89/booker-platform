@@ -16,6 +16,8 @@ import reportsRouter from "./routes/reports";
 import brandingRouter from "./routes/branding";
 import testingRouter from "./routes/testing";
 import publicRouter from "./routes/public";
+import eventsRouter from "./routes/events";
+import { UPLOAD_DIR } from "./lib/uploads";
 
 const app = express();
 
@@ -50,8 +52,12 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+// Uploaded images (room photos, avatars)
+app.use("/uploads", express.static(UPLOAD_DIR), (req, res) => res.status(404).end());
+
 // Routes
 app.use("/api/public", publicRouter);
+app.use("/api/events", eventsRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/rooms", roomsRouter);
 app.use("/api/bookings", bookingsRouter);

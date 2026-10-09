@@ -21,6 +21,8 @@ export interface User {
   username: string;
   email: string;
   role: Role;
+  /** Uploaded with POST /api/auth/me/avatar. */
+  avatarUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -42,6 +44,10 @@ export interface Room {
   status: RoomStatus;
   /** Shown on the home page. */
   featured: boolean;
+  /** Uploaded with POST /api/rooms/{id}/image. */
+  imageUrl: string | null;
+  /** Order in the admin room list; changed with PUT /api/rooms/order. */
+  position: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -110,13 +116,18 @@ export interface PageMeta {
 
 export interface Message {
   id: string;
-  userId: string;
+  /** Null for messages sent with the public contact form. */
+  userId: string | null;
+  /** Contact form only. */
+  name: string | null;
+  /** Contact form only. */
+  email: string | null;
   subject: string;
   content: string;
   status: MessageStatus;
   createdAt: Date;
   updatedAt: Date;
-  user?: UserSummary;
+  user?: UserSummary | null;
 }
 
 export interface Report {

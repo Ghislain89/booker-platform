@@ -1,7 +1,8 @@
 import bcrypt from "bcryptjs";
 import { Prisma, User as DbUser } from "@prisma/client";
 import { prisma } from "../lib/prisma";
-import { conflict, HttpError } from "../lib/http";
+import { conflict, HttpError, notFound } from "../lib/http";
+import { removeUpload } from "../lib/uploads";
 import { signToken } from "../middleware/auth";
 import { AuthRequest, AuthResponse, RegisterRequest, Role, User } from "../types";
 
@@ -12,6 +13,7 @@ export const toUser = (user: DbUser): User => ({
   username: user.username,
   email: user.email,
   role: toRole(user.role),
+  avatarUrl: user.avatarUrl,
   createdAt: user.createdAt,
   updatedAt: user.updatedAt,
 });
@@ -60,6 +62,28 @@ class AuthService {
       }
       throw error;
     }
+  }
+
+  async getProfile(userId: string): Promise<User> {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw notFound("User not found");
+    return toUser(user);
+  }
+
+  async updateProfile(userId: string, input: { email?: string }): Promise<User> {
+    await this.getProfile(userId);
+    if (input.email) {
+      const taken = await prisma.user.findFirst({ where: { email: input.email, NOT: { id: userId } } });
+      if (taken) throw conflict("Email already exists");
+    }
+    return toUser(await prisma.user.update({ where: { id: userId }, data: input }));
+  }
+
+  async setAvatar(userId: string, avatarUrl: string): Promise<User> {
+    const current = await this.getProfile(userId);
+    const user = await prisma.user.update({ where: { id: userId }, data: { avatarUrl } });
+    removeUpload(current.avatarUrl);
+    return toUser(user);
   }
 
   async logout(): Promise<void> {

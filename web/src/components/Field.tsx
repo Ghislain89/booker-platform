@@ -1,4 +1,5 @@
 import { InputHTMLAttributes, ReactNode, useId } from "react";
+import { hasFlag } from "../lib/flags";
 
 interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -16,7 +17,12 @@ export function Field({ label, error, hint, id, ...input }: FieldProps) {
     [hint && hintId, error && errorId].filter(Boolean).join(" ") || undefined;
   return (
     <div className="field">
-      <label htmlFor={inputId}>{label}</label>
+      {hasFlag("bug-a11y") ? (
+        // Bug mode: looks the same, but the input has no accessible name.
+        <span className="label">{label}</span>
+      ) : (
+        <label htmlFor={inputId}>{label}</label>
+      )}
       <input
         id={inputId}
         aria-invalid={error ? true : undefined}

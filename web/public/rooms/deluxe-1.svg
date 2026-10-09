@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250">
+  <rect width="400" height="250" fill="#efe3f3"/>
+  <rect x="90" y="150" width="220" height="70" rx="8" fill="#b79fcf"/>
+  <rect x="90" y="120" width="40" height="100" rx="6" fill="#b79fcf" opacity=".8"/>
+  <rect x="140" y="135" width="60" height="25" rx="10" fill="#fff" opacity=".85"/>
+  <rect x="210" y="135" width="60" height="25" rx="10" fill="#fff" opacity=".85"/>
+  <rect x="300" y="80" width="50" height="40" rx="4" fill="#fff" opacity=".6"/>
+  <text x="20" y="235" font-family="system-ui, sans-serif" font-size="14" fill="#333" opacity=".7">Deluxe · Bedroom</text>
+</svg>

@@ -15,6 +15,7 @@ import {
 import { countNights } from "../lib/pricing";
 import { useTitle } from "../lib/useTitle";
 import { NotFound } from "./NotFound";
+import { Gallery } from "../components/Gallery";
 
 export function RoomDetail() {
   const { number = "" } = useParams();
@@ -62,14 +63,9 @@ export function RoomDetail() {
       </p>
       <div className="detail-layout">
         <section aria-labelledby="room-heading">
-          <div
-            className={`room-visual room-visual-large room-visual-${data.type.toLowerCase()}`}
-            aria-hidden="true"
-          >
-            <span>{data.number}</span>
-          </div>
           <h1 id="room-heading">Room {data.number}</h1>
           <p className="room-type">{roomTypeLabel(data.type)}</p>
+          <Gallery room={data} />
           <dl className="facts">
             <dt>Price</dt>
             <dd>{formatPrice(data.price)} per night</dd>

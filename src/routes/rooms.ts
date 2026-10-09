@@ -2,6 +2,7 @@ import express from "express";
 import { roomsController } from "../controllers/rooms";
 import { authenticate, authorizeAdmin } from "../middleware/auth";
 import { asyncHandler } from "../lib/http";
+import { publicUrl, removeUpload, singleImage } from "../lib/uploads";
 import { hasFlag, sleep } from "../lib/flags";
 import { asBody, Validator } from "../lib/validation";
 import { ROOM_STATUSES, ROOM_TYPES, RoomInput } from "../types";
@@ -29,6 +30,14 @@ router.get("/", authenticate, asyncHandler(async (req, res) => {
   res.json({ success: true, data: rooms });
 }));
 
+router.put("/order", authenticate, authorizeAdmin, asyncHandler(async (req, res) => {
+  const v = new Validator(asBody(req.body));
+  const roomIds = v.stringArray("roomIds", { required: true });
+  v.assertValid();
+  const rooms = await roomsController.reorder(roomIds!);
+  res.json({ success: true, data: rooms });
+}));
+
 router.get("/:id", authenticate, asyncHandler(async (req, res) => {
   const room = await roomsController.getById(req.params.id);
   res.json({ success: true, data: room });
@@ -47,6 +56,21 @@ router.put("/:id", authenticate, authorizeAdmin, asyncHandler(async (req, res) =
 router.delete("/:id", authenticate, authorizeAdmin, asyncHandler(async (req, res) => {
   await roomsController.delete(req.params.id);
   res.json({ success: true, message: "Room deleted successfully" });
+}));
+
+router.post("/:id/image", authenticate, authorizeAdmin, singleImage("image"), asyncHandler(async (req, res) => {
+  try {
+    const room = await roomsController.setImage(req.params.id, publicUrl(req.file!));
+    res.json({ success: true, data: room });
+  } catch (error) {
+    removeUpload(publicUrl(req.file!));
+    throw error;
+  }
+}));
+
+router.delete("/:id/image", authenticate, authorizeAdmin, asyncHandler(async (req, res) => {
+  const room = await roomsController.setImage(req.params.id, null);
+  res.json({ success: true, data: room });
 }));
 
 export default router;

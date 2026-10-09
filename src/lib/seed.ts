@@ -51,21 +51,26 @@ const messages = [
   { id: "seed-message-5", username: "user", subject: "Thank you", content: "Thanks for a great stay!", status: "ARCHIVED", daysAgo: 25 },
 ];
 
+// Sent with the public contact form: no user, but a name and e-mail address.
+const contactMessages = [
+  { id: "seed-message-6", name: "Sam Visitor", email: "sam@example.com", subject: "Group booking", content: "Do you offer discounts for groups of ten?", status: "UNREAD", daysAgo: 3 },
+];
+
 export async function seedDatabase(prisma: PrismaClient) {
   const password = await bcrypt.hash(SEED_PASSWORD, 10);
   const userIds: Record<string, string> = {};
   for (const user of users) {
     const saved = await prisma.user.upsert({
       where: { username: user.username },
-      update: { email: user.email, role: user.role, password },
+      update: { email: user.email, role: user.role, password, avatarUrl: null },
       create: { ...user, password },
     });
     userIds[user.username] = saved.id;
   }
 
   const roomIds: Record<string, string> = {};
-  for (const { amenities, status = "AVAILABLE", featured = false, ...room } of rooms) {
-    const data = { ...room, status, featured, amenities: JSON.stringify(amenities) };
+  for (const [index, { amenities, status = "AVAILABLE", featured = false, ...room }] of rooms.entries()) {
+    const data = { ...room, status, featured, amenities: JSON.stringify(amenities), imageUrl: null, position: index + 1 };
     const saved = await prisma.room.upsert({
       where: { number: room.number },
       update: data,
@@ -92,12 +97,16 @@ export async function seedDatabase(prisma: PrismaClient) {
     const data = { ...message, userId: userIds[username], createdAt: daysFromToday(-daysAgo) };
     await prisma.message.upsert({ where: { id }, update: data, create: { id, ...data } });
   }
+  for (const { id, daysAgo, ...message } of contactMessages) {
+    const data = { ...message, createdAt: daysFromToday(-daysAgo) };
+    await prisma.message.upsert({ where: { id }, update: data, create: { id, ...data } });
+  }
 
   return {
     users: users.length,
     rooms: rooms.length,
     bookings: bookings.length,
-    messages: messages.length,
+    messages: messages.length + contactMessages.length,
   };
 }
 

@@ -26,6 +26,8 @@ export const getApiRoomsResponse = zod.object({
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
+  "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
+  "position": zod.number().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 }))
@@ -52,6 +54,32 @@ export const postApiRoomsBody = zod.object({
 }))
 
 /**
+ * Used by drag and drop in the admin room list. Rooms get positions 1..n in the given order.
+ * @summary Save the room order (admin only)
+ */
+export const putApiRoomsOrderBody = zod.object({
+  "roomIds": zod.array(zod.string())
+})
+
+export const putApiRoomsOrderResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.array(zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
+  "price": zod.number().describe('Price per night'),
+  "capacity": zod.number(),
+  "amenities": zod.array(zod.string()),
+  "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
+  "featured": zod.boolean().describe('Shown on the home page'),
+  "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
+  "position": zod.number().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.string().datetime(),
+  "updatedAt": zod.string().datetime()
+}))
+})
+
+/**
  * @summary Get a room
  */
 export const getApiRoomsIdResponse = zod.object({
@@ -65,6 +93,8 @@ export const getApiRoomsIdResponse = zod.object({
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
+  "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
+  "position": zod.number().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 })
@@ -100,6 +130,8 @@ export const putApiRoomsIdResponse = zod.object({
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
+  "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
+  "position": zod.number().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
   "createdAt": zod.string().datetime(),
   "updatedAt": zod.string().datetime()
 })
@@ -111,5 +143,52 @@ export const putApiRoomsIdResponse = zod.object({
 export const deleteApiRoomsIdResponse = zod.object({
   "success": zod.boolean(),
   "message": zod.string()
+})
+
+/**
+ * PNG, JPEG, GIF or WebP; at most 2 MB. Replaces the previous photo.
+ * @summary Upload a room photo (admin only)
+ */
+export const postApiRoomsIdImageBody = zod.object({
+  "image": zod.instanceof(File)
+})
+
+export const postApiRoomsIdImageResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
+  "price": zod.number().describe('Price per night'),
+  "capacity": zod.number(),
+  "amenities": zod.array(zod.string()),
+  "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
+  "featured": zod.boolean().describe('Shown on the home page'),
+  "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
+  "position": zod.number().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.string().datetime(),
+  "updatedAt": zod.string().datetime()
+})
+})
+
+/**
+ * @summary Remove the room photo (admin only)
+ */
+export const deleteApiRoomsIdImageResponse = zod.object({
+  "success": zod.boolean(),
+  "data": zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
+  "price": zod.number().describe('Price per night'),
+  "capacity": zod.number(),
+  "amenities": zod.array(zod.string()),
+  "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
+  "featured": zod.boolean().describe('Shown on the home page'),
+  "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
+  "position": zod.number().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.string().datetime(),
+  "updatedAt": zod.string().datetime()
+})
 })
 

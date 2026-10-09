@@ -6,7 +6,8 @@ import { FLAGS, getGlobalFlags, isFlag, setGlobalFlags } from "../lib/flags";
 import { resetDatabase } from "../lib/seed";
 import { asBody, Validator } from "../lib/validation";
 import { issueToken } from "../services/auth";
-import { toRoom } from "../services/rooms";
+import { nextRoomPosition, toRoom } from "../services/rooms";
+import { clearUploads } from "../lib/uploads";
 import { bookingInclude, toBooking } from "../services/bookings";
 import { BOOKING_STATUSES, ROOM_STATUSES, ROOM_TYPES } from "../types";
 
@@ -22,6 +23,7 @@ const asArray = (value: unknown): unknown[] => (Array.isArray(value) ? value : [
 router.post("/reset", asyncHandler(async (req, res) => {
   setGlobalFlags([]);
   const counts = await resetDatabase(prisma);
+  clearUploads();
   res.json({ success: true, data: counts });
 }));
 
@@ -105,7 +107,7 @@ router.post("/seed", asyncHandler(async (req, res) => {
     const room = await prisma.room.upsert({
       where: { number: data.number },
       update: data,
-      create: data,
+      create: { ...data, position: await nextRoomPosition() },
     });
     rooms.push(toRoom(room));
   }

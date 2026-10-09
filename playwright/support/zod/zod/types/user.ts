@@ -12,6 +12,8 @@ export interface User {
   username: string;
   email: string;
   role: UserRole;
+  /** @nullable */
+  avatarUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }
