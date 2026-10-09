@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  username  String    @unique
+  email     String    @unique
+  password  String
+  role      String    @default("USER")
+  bookings  Booking[]
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Room {
+  id          String    @id @default(uuid())
+  number      String    @unique
+  type        String
+  price       Float
+  capacity    Int
+  amenities   String    // JSON string of string array
+  status      String    @default("AVAILABLE")
+  bookings    Booking[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Booking {
+  id        String    @id @default(uuid())
+  userId    String
+  roomId    String
+  checkIn   DateTime
+  checkOut  DateTime
+  status    String    @default("PENDING") // PENDING, CONFIRMED, CANCELLED, COMPLETED
+  user      User      @relation(fields: [userId], references: [id])
+  room      Room      @relation(fields: [roomId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Message {
+  id        String    @id @default(uuid())
+  userId    String
+  subject   String
+  content   String
+  status    String    @default("UNREAD")
+  user      User      @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Report {
+  id          String    @id @default(uuid())
+  type        String
+  data        String    // JSON string of report data
+  period      String    // JSON string of period data
+  generatedAt DateTime  @default(now())
+}
+
+model Branding {
+  id          String    @id @default(uuid())
+  name        String
+  logoUrl     String
+  description String
+  contact     String    // JSON string of contact data
+  map         String    // JSON string of map data
+  theme       String    // JSON string of theme data
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
