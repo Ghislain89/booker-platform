@@ -163,7 +163,7 @@ Off by default; toggled via `/api/testing/flags`, header `x-booker-flags`, or a 
 
 ## 8. Assignment mapping
 
-Numbered in the order of the UI deck (`ui.md` in [playwright-training-slides](https://github.com/Ghislain89/playwright-training-slides)).
+Numbered in the order of the UI deck (`ui.md` in [presentations](https://github.com/Ghislain89/presentations/tree/main/decks/playwright-training)).
 
 | # | Assignment | Topics |
 |---|---|---|

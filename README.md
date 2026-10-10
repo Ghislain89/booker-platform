@@ -301,4 +301,4 @@ All assignments are worked out on the [`solutions`](https://github.com/Ghislain8
 ## Licence
 
 The code is licensed under the [MIT licence](LICENSE): fork it, copy it and use it in your own projects.
-The training slides live in [playwright-training-slides](https://github.com/Ghislain89/playwright-training-slides) and are licensed under CC BY-NC-SA 4.0.
+The training slides live in [presentations](https://github.com/Ghislain89/presentations/tree/main/decks/playwright-training) and are licensed under CC BY-NC-SA 4.0.
