@@ -7,7 +7,7 @@ A small hotel booking platform that runs entirely on your own machine. It's the 
 
 The roadmap for the web app is in [docs/frontend-spec.md](docs/frontend-spec.md).
 
-> This repository replaces [PlaywrightWorkshop](https://github.com/Ghislain89/PlaywrightWorkshop) (the Next.js todo app) and [playwright-api-assignment](https://github.com/Ghislain89/playwright-api-assignment).
+> This repository replaces the archived (private) repos `PlaywrightWorkshop` (the Next.js todo app) and `playwright-api-assignment`.
 
 ## Getting started
 
