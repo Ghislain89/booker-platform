@@ -17,7 +17,7 @@ Before the workshop, install Git, Node.js (LTS), VS Code and the Playwright VS C
 git clone https://github.com/Ghislain89/booker-platform.git
 cd booker-platform
 npm install
-npx playwright install chromium   # downloads the browser; add firefox webkit if you want those too
+npx playwright install chromium   # downloads the browser
 npm run setup   # creates and seeds the local SQLite database
 npm run dev     # starts the web app and the API on http://localhost:3000
 ```
@@ -27,8 +27,6 @@ Run the tests in a second terminal:
 ```bash
 npx playwright test                          # all tests (API + chromium)
 npx playwright test --project API            # only the API tests
-npx playwright test --project webkit         # firefox and webkit only run when you ask for them
-                                             # (install them first: npx playwright install firefox webkit)
 npx playwright test assignment1.spec.ts      # a single file
 npx playwright test --ui                     # UI mode
 ```

@@ -30,19 +30,6 @@ export default defineConfig({
       testDir: "./playwright/tests/ui",
       use: { ...devices["Desktop Chrome"] },
     },
-    // Opt-in browsers: run them with `--project firefox` or `--project webkit`.
-    {
-      name: "firefox",
-      testDir: "./playwright/tests/ui",
-      use: { ...devices["Desktop Firefox"] },
-      default: false,
-    },
-    {
-      name: "webkit",
-      testDir: "./playwright/tests/ui",
-      use: { ...devices["Desktop Safari"] },
-      default: false,
-    },
     // The code examples from the UI slides, checked against the app. CI runs them;
     // you don't need to: `npx playwright test --project slides`.
     {
