@@ -7,7 +7,11 @@ interface PasswordFieldProps
   hint?: string;
 }
 
-/** Password input with a show/hide toggle. The toggle is a pressed/unpressed button named "Show". */
+/**
+ * Password input with a show/hide toggle. The toggle is a pressed/unpressed button named after
+ * its field ("Show password", "Show confirm password"). The field name is visually hidden text,
+ * not an aria-label: an aria-label would make `getByLabel("Password")` match the button too.
+ */
 export function PasswordField({
   label,
   error,
@@ -39,6 +43,7 @@ export function PasswordField({
           onClick={() => setVisible(!visible)}
         >
           Show
+          <span className="visually-hidden"> {label.toLowerCase()}</span>
         </button>
       </div>
       {hint && (

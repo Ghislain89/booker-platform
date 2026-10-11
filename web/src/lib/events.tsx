@@ -14,7 +14,7 @@ import { hasFlag } from "./flags";
 import { STATUS_LABELS } from "./format";
 import type { BookingStatus } from "../api/types";
 
-// Live updates over Server-Sent Events (GET /api/events). Assignment 5b opens two browser
+// Live updates over Server-Sent Events (GET /api/events). Assignment 6 opens two browser
 // contexts: the admin approves a booking and the guest's page updates without a reload.
 
 export interface Notification {

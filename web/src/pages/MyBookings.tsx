@@ -99,7 +99,7 @@ export function MyBookings() {
         <div className="empty card">
           <p>No bookings yet</p>
           <Link to="/rooms" className="button">
-            Browse rooms
+            Find a room
           </Link>
         </div>
       )}
@@ -264,7 +264,7 @@ const pad = (value: number) => String(value).padStart(2, "0");
 
 /**
  * Check-in opens at 15:00 local time on the day of arrival. Driven by Date.now() and a
- * one-second interval, so `page.clock` controls it completely (assignment 5c).
+ * one-second interval, so `page.clock` controls it completely (assignment 6).
  */
 function CheckInCountdowns({ bookings }: { bookings: Booking[] }) {
   const [now, setNow] = useState(() => Date.now());

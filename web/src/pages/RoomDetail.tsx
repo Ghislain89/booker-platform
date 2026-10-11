@@ -59,7 +59,7 @@ export function RoomDetail() {
   return (
     <>
       <p>
-        <Link to="/rooms">← All rooms</Link>
+        <Link to="/rooms">← Room overview</Link>
       </p>
       <div className="detail-layout">
         <section aria-labelledby="room-heading">

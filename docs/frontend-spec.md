@@ -29,6 +29,7 @@ Decided: local-only (no hosted copy for participants); new repo `booker-platform
 | Principle | Rule |
 |---|---|
 | Accessible first | Every interactive element has a role + accessible name (visible `<label>`, button text). `getByRole` / `getByLabel` must work everywhere. No clickable `div`/`span`, no `<button>` inside `<a>`. |
+| Unique names | On a page, no accessible name contains another one by accident ("Show" twice, "Message" in "Send us a message"), so locators don't hit strict mode violations. Lists and tables repeat names on purpose (scope to the card or row). Two deliberate exceptions for assignment 1A: `getByLabel('Password')` on `/register` and the two "Register" links on `/login`. `playwright/tests/slides` checks both. |
 | Test ids sparingly | `data-testid` only where no user-facing locator exists (e.g. list rows, charts). Convention: `kebab-case`. |
 | Visible network | SPA + REST: every action is an observable `fetch` to `/api/*` (good for `waitForResponse`, `route`, HAR). |
 | Explicit states | Loading, empty, error and success states are rendered and announced (`role="status"` / `role="alert"`). Toasts stay until dismissed in test mode. |
@@ -163,21 +164,21 @@ Off by default; toggled via `/api/testing/flags`, header `x-booker-flags`, or a 
 
 ## 8. Assignment mapping
 
-Numbered in the order of the UI deck (`ui.md` in [playwright-training-slides](https://github.com/Ghislain89/playwright-training-slides)).
+Numbered in the order of the UI deck ([`ui.md`](https://github.com/Ghislain89/ghislain.dev/blob/main/decks/playwright-training/ui.md) in ghislain.dev). The workshop takes two evenings; assignments 6–10 are *Going further*, for after the workshop.
 
-| # | Assignment | Topics |
-|---|---|---|
-| 1A | Record (codegen) or write a test: register a new user, log in, see "No bookings yet". | Codegen, LOC |
-| 1B | HTML reporter + traces, duplicate the test, run in parallel → discover data collisions; fix with generated data. | Config, parallelism |
-| 2 | Refactor to page objects + fixtures; bonus: complete the booking wizard and verify in My bookings. | POM |
-| 3 | Setup project storing `user` and `admin` storageState; use per project. Bonus: log in via the API and set `booker.token`. | AUTH |
-| 4 | Network: mock `POST /api/bookings` → `409` and assert the "Room not available" alert; bonus: patch the rooms response to add a fake room. Hybrid: seed room + booking via API, verify in UI, or act in UI and verify via API; bonus: per-worker data fixture. | NET, HYB |
-| 5 | Pick one: cancel a booking (native confirm dialog) and download its invoice · two contexts (guest books, admin approves, guest sees the status change live) · `page.clock` check-in at 15:00 · mobile project + NL locale + dark mode · admin room image upload + drag & drop reorder · terms in a new tab + payment widget in shadow DOM. | DLG, FILE, CTX, CLK, EMU, DND, TAB, SHD |
-| 6 | Screenshot home page, mask "deal of the day"; then hide it via `stylePath`; bonus: WebP. | VIS |
-| 7 | axe scan on the booking wizard, attach the results; bonus: aria snapshots. Trainer variant: enable `bug-a11y` and compare. | A11Y |
-| 8 | GitHub Actions workflow (HTML report artifact; bonus: sharded + merged reports). | CI |
-| 9 *(optional)* | Test agents: plan and generate "cancel a booking", then review the result. | AI |
-| 10 | Flaky-test clinic: enable `slow-rooms`, `flaky-booking`, `random-order`, `popup-cookie`; make the suite stable. | Debugging |
+| # | When | Assignment | Topics |
+|---|---|---|---|
+| 1A | Evening 1 | Start on `/login`, register a new user, log in, see "No bookings yet". Meets two deliberate strict mode violations. | Codegen, LOC |
+| 1B | Evening 1 | HTML reporter + traces, duplicate the test, run in parallel → discover data collisions; fix with generated data. | Config, parallelism |
+| 2 | Evening 2 | Finish the starter page objects + fixtures; bonus: complete the booking wizard and verify in My bookings. | POM |
+| 3 | Evening 2 | Setup project storing `user` and `admin` storageState; use per project. Bonus: log in via the API and set `booker.token`. | AUTH |
+| 4 | Evening 2 | Network: mock `POST /api/bookings` → `409` and assert the "Room not available" alert; bonus: patch the rooms response to add a fake room. Hybrid: seed room + booking via API, verify in UI, or act in UI and verify via API; bonus: per-worker data fixture. | NET, HYB |
+| 5 | Evening 2 | Flaky-test clinic: enable `slow-rooms`, `flaky-booking`, `random-order`, `popup-cookie`; make the suite stable. | Debugging |
+| 6 | Going further | Pick one: cancel a booking (native confirm dialog) and download its invoice · two contexts (guest books, admin approves, guest sees the status change live) · `page.clock` check-in at 15:00 · mobile project + NL locale + dark mode · admin room image upload + drag & drop reorder · terms in a new tab + payment widget in shadow DOM. | DLG, FILE, CTX, CLK, EMU, DND, TAB, SHD |
+| 7 | Going further | Screenshot home page, mask "deal of the day"; then hide it via `stylePath`; then test mode `?test=1`; bonus: WebP. | VIS |
+| 8 | Going further | axe scan on the booking wizard, attach the results; bonus: aria snapshots. Trainer variant: enable `bug-a11y` and compare. | A11Y |
+| 9 | Going further | GitHub Actions workflow (HTML report artifact; bonus: sharded + merged reports). | CI |
+| 10 *(optional)* | Going further | Test agents: plan and generate "cancel a booking", then review the result. | AI |
 
 ---
 
@@ -195,7 +196,7 @@ Scaffold `web/`, single-port serving, auth pages, `/rooms` (filters + pagination
 **Phase 2 – Advanced topics (2–3 days)**
 SSE + notifications, invoice download, uploads, drag & drop, iframe map + branding preview, terms tab, shadow DOM payment widget, clock countdown, i18n, dark mode, responsive layout. Also the pages that phase 1 skipped: contact form, room gallery, my messages, profile, admin messages, reports and branding.
 ✅ Done when all options of assignment 5 have reference solutions.
-✅ Done. The API gained `actor` on booking events, so the UI only notifies other people's changes. Deviations from §6: room order is changed in a separate *Change order* dialog (drag & drop or keyboard) instead of by dragging table rows, and only the admin *Order* column uses it; the check-in countdown is on *My bookings*, not in the header; the map is an offline SVG page (`/map.html`) so tests never depend on a tile server; bulk maintenance is left out; i18n covers the header, footer, home, room cards, contact and profile pages. The card widget is `<booker-payment>` with an open shadow root and a mocked payment (300 ms; card `4000 0000 0000 0002` is declined).
+✅ Done. The API gained `actor` on booking events, so the UI only notifies other people's changes. Deviations from §6: room order is changed in a separate *Change order* dialog (drag & drop or keyboard) instead of by dragging table rows, and only the admin *Position* column uses it; the check-in countdown is on *My bookings*, not in the header; the map is an offline SVG page (`/map.html`) so tests never depend on a tile server; bulk maintenance is left out; i18n covers the header, footer, home, room cards, contact and profile pages. The card widget is `<booker-payment>` with an open shadow root and a mocked payment (300 ms; card `4000 0000 0000 0002` is declined).
 
 **Phase 3 – Trainer tooling (1–2 days)**
 Feature flags + `/__trainer` panel, optional Docker image, preparation page update.

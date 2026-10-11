@@ -96,5 +96,13 @@ export default defineConfig({
       dependencies: ["setup"],
       default: false,
     },
+    // The code examples from the UI slides, checked against the app. CI runs them;
+    // you don't need to: `npx playwright test --project slides`.
+    {
+      name: "slides",
+      testDir: "./playwright/tests/slides",
+      use: { ...devices["Desktop Chrome"] },
+      default: false,
+    },
   ],
 });
