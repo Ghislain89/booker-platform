@@ -67,7 +67,7 @@ export default defineConfig({
         default: isDefault,
       },
     ]),
-    // Assignment 5 (emulation): a Dutch phone in dark mode.
+    // Assignment 6 (emulation): a Dutch phone in dark mode.
     {
       name: "mobile",
       testDir: "./playwright/tests/ui",
@@ -80,7 +80,7 @@ export default defineConfig({
       },
       dependencies: ["setup"],
     },
-    // Assignment 10 (flaky-test clinic): every request switches on the chaos flags.
+    // Assignment 5 (flaky-test clinic): every request switches on the chaos flags.
     // Opt-in: `npx playwright test --project chaos`.
     {
       name: "chaos",

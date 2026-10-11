@@ -6,7 +6,7 @@ test.use({ storageState: LOGGED_OUT });
 
 // Screenshots differ per browser and operating system, so we keep baselines for
 // Chromium only (macOS for local runs, Linux for CI). Update them with
-// `npx playwright test assignment6 --update-snapshots`, and on CI with the
+// `npx playwright test assignment7 --update-snapshots`, and on CI with the
 // "Update snapshots" workflow.
 test.beforeEach(async ({ page, browserName }) => {
   test.skip(
@@ -18,7 +18,7 @@ test.beforeEach(async ({ page, browserName }) => {
 });
 
 test(
-  "Assignment 6: home page with the deal of the day masked",
+  "Assignment 7: home page with the deal of the day masked",
   { tag: "@visual" },
   async ({ page }) => {
     await expect(page).toHaveScreenshot("home-masked.png", {
@@ -29,7 +29,7 @@ test(
 );
 
 test(
-  "Assignment 6: home page with the deal of the day hidden",
+  "Assignment 7: home page with the deal of the day hidden",
   { tag: "@visual" },
   async ({ page }) => {
     await expect(page).toHaveScreenshot("home-hidden.png", {

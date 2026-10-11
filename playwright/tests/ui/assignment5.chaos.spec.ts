@@ -1,4 +1,4 @@
-// Assignment 10: flaky-test clinic. Runs in the `chaos` project, which sends
+// Assignment 5: flaky-test clinic. Runs in the `chaos` project, which sends
 // `x-booker-flags: slow-rooms,flaky-booking,random-order,popup-cookie` with every
 // request:  npx playwright test --project chaos
 import { test, expect } from "../../support/fixtures/ui.fixture";

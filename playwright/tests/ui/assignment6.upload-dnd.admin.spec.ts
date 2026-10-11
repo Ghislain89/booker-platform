@@ -1,4 +1,4 @@
-// Assignment 5, option "Uploads and drag & drop". Runs as admin.
+// Assignment 6, option "Uploads and drag & drop". Runs as admin.
 import { test, expect } from "../../support/fixtures/ui.fixture";
 
 // A 1×1 PNG. setInputFiles also takes a path, but a buffer keeps the test self-contained.

@@ -1,7 +1,7 @@
 # Cancel a booking
 
-Test plan written by the Playwright planner agent (`npx playwright init-agents`), used for assignment 9.
-The generated test is `playwright/tests/ui/assignment9.cancel-booking.spec.ts`.
+Test plan written by the Playwright planner agent (`npx playwright init-agents`), used for assignment 10.
+The generated test is `playwright/tests/ui/assignment10.cancel-booking.spec.ts`.
 
 ## Setup
 

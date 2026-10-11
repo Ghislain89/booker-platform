@@ -19,7 +19,7 @@ async function expectNoViolations(
   );
 }
 
-test("Assignment 7: every step of the booking wizard is accessible", async ({
+test("Assignment 8: every step of the booking wizard is accessible", async ({
   page,
   bookingWizard,
 }, testInfo) => {
@@ -42,7 +42,7 @@ test("Assignment 7: every step of the booking wizard is accessible", async ({
   await expectNoViolations(page, testInfo, "step 3");
 });
 
-test("Assignment 7 bonus: aria snapshots of the navigation and the booking summary", async ({
+test("Assignment 8 bonus: aria snapshots of the navigation and the booking summary", async ({
   page,
   bookingWizard,
 }) => {

@@ -1,4 +1,4 @@
-// Assignment 5, option "Clock": check-in opens at 15:00 on the day of arrival.
+// Assignment 6, option "Clock": check-in opens at 15:00 on the day of arrival.
 import { test, expect } from "../../support/fixtures/ui.fixture";
 
 /** yyyy-mm-dd in local time, the same "today" the browser uses. */

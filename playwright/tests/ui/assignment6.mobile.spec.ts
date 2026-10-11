@@ -1,11 +1,11 @@
-// Assignment 5, option "Emulation". Runs in the `mobile` project:
+// Assignment 6, option "Emulation". Runs in the `mobile` project:
 // a Pixel 7 with `locale: 'nl-NL'` and `colorScheme: 'dark'`.
 import { test, expect } from "../../support/fixtures/ui.fixture";
 
 test("menu button on a phone", async ({ page }) => {
   await page.goto("/");
   const nav = page.getByRole("navigation", { name: "Main" });
-  const menu = page.getByRole("button", { name: "Menu", exact: true });
+  const menu = page.getByRole("button", { name: "Menu" });
 
   await expect(nav).toBeHidden();
   await expect(menu).toHaveAttribute("aria-expanded", "false");
@@ -24,7 +24,7 @@ test("Dutch texts follow the browser locale", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Uitgelichte kamers" }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Bekijk alle kamers" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Vind je kamer" })).toBeVisible();
 });
 
 test("dark mode follows the device", async ({ page }) => {

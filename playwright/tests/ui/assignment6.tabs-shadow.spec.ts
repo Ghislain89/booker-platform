@@ -1,4 +1,4 @@
-// Assignment 5, option "Tabs and shadow DOM".
+// Assignment 6, option "Tabs and shadow DOM".
 import { test, expect } from "../../support/fixtures/ui.fixture";
 import { DECLINED_CARD, VALID_CARD } from "../../support/pages/BookingWizard";
 

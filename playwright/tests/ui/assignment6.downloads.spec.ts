@@ -1,4 +1,4 @@
-// Assignment 5, option "Dialogs and downloads".
+// Assignment 6, option "Dialogs and downloads".
 import { readFile } from "node:fs/promises";
 import { test, expect } from "../../support/fixtures/ui.fixture";
 

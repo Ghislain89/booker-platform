@@ -1,4 +1,4 @@
-// Assignment 5, option "Multiple contexts": the guest sees the admin's decision live.
+// Assignment 6, option "Multiple contexts": the guest sees the admin's decision live.
 import { faker } from "@faker-js/faker";
 import { ADMIN_STATE } from "../../support/auth";
 import type { Page } from "@playwright/test";
