@@ -27,6 +27,8 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Run Playwright tests
         run: npx playwright test
+      - name: Run the code examples from the UI slides
+        run: npx playwright test --project slides --reporter list
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

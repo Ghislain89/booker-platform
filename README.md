@@ -17,7 +17,7 @@ Before the workshop, install Git, Node.js (LTS), VS Code and the Playwright VS C
 git clone https://github.com/Ghislain89/booker-platform.git
 cd booker-platform
 npm install
-npx playwright install   # downloads the browsers
+npx playwright install chromium   # downloads the browser; add firefox webkit if you want those too
 npm run setup   # creates and seeds the local SQLite database
 npm run dev     # starts the web app and the API on http://localhost:3000
 ```
@@ -28,6 +28,7 @@ Run the tests in a second terminal:
 npx playwright test                          # all tests (API + chromium)
 npx playwright test --project API            # only the API tests
 npx playwright test --project webkit         # firefox and webkit only run when you ask for them
+                                             # (install them first: npx playwright install firefox webkit)
 npx playwright test assignment1.spec.ts      # a single file
 npx playwright test --ui                     # UI mode
 ```
@@ -112,6 +113,8 @@ The payment form accepts any valid card number (Luhn check), for example `4242 4
 
 Notifications ("Booking cancelled." and so on) appear in a region named "Notifications": `page.getByRole('region', { name: 'Notifications' })`.
 
+Accessible names are unique on every page, so `getByRole` and `getByLabel` find one element, except in lists and tables (scope to the card or row) and two deliberate duplicates for assignment 1A: on `/register`, `getByLabel('Password')` also matches "Confirm password", and `/login` has two "Register" links (in the header and below the form). Keep it that way when you change the app: `playwright/tests/slides` checks it.
+
 The web app stores the JWT in `localStorage` under `booker.token`, so you can log in through `POST /api/auth/login` and put the token there.
 
 Add `?test=1` to any URL to switch on test mode for that browser. It's remembered in a cookie until you open a URL with `?test=0`. Test mode turns off animations and the blinking cursor, shows the same "deal of the day" every time and keeps notifications open until you dismiss them.
@@ -163,13 +166,16 @@ Set them for everyone on the trainer panel (`/__trainer`, log in as `admin`) or 
 ├── prisma/                  # Database schema, migrations and seed data
 ├── docs/                    # Specs and design notes
 ├── playwright/
+│   ├── fixtures/            # Files for tests, such as avatar.png for uploads
 │   ├── support/
 │   │   ├── datafactories/   # Functions that create test data
-│   │   ├── fixtures/        # Fixtures for setting up and tearing down tests
+│   │   ├── fixtures/        # Fixtures for setting up and tearing down tests (ui.fixture.ts: UI starter)
 │   │   ├── helpers/         # Helper functions used across tests
+│   │   ├── pages/           # Page objects (starters for UI assignment 2)
 │   │   └── zod/             # Zod schemas for validating API responses
 │   ├── tests/
 │   │   ├── api/             # API workshop assignments
+│   │   ├── slides/          # The code examples from the UI slides, checked in CI (not an assignment)
 │   │   └── ui/              # UI workshop tests
 │   └── types/               # Shared TypeScript types
 └── playwright.config.ts
@@ -203,40 +209,56 @@ Make sure to add assertions on status codes, the response body and headers.
 
 ## UI assignments
 
-Put your UI tests in `playwright/tests/ui/`. `example.spec.ts` shows how a test looks. Prefer `getByRole` and `getByLabel`, and use web-first assertions.
+The UI workshop takes two evenings. Put your UI tests in `playwright/tests/ui/`. `example.spec.ts` shows how a test looks. Prefer `getByRole` and `getByLabel`, and use web-first assertions. The slides and the hints for every assignment are on [ghislain.dev/playwright](https://ghislain.dev/playwright/assignments.html).
 
-### Assignment 1A (Your first test)
+### Evening 1: your first stable tests
 
-- Register a new user.
+#### Assignment 1A (Your first test)
+
+Start on the login page (`/login`):
+
+- Follow the link to *Register* and register a new user.
 - Log in with that user.
 - Assert that "No bookings yet" is shown.
 
-### Assignment 1B (Parallel runs)
+Expect a strict mode violation or two along the way. Read the error before you fix it.
+
+#### Assignment 1B (Parallel runs)
 
 - Configure the HTML reporter and set `trace: 'on'`.
 - Duplicate your test a few times, enable `fullyParallel` and run with `--repeat-each 5`. What breaks, and why?
-- Fix it with unique test data per test.
+- Fix it with unique test data per test, for example `createRandomUser()` from `playwright/support/datafactories`.
 - Open the report and a trace: which step is the slowest?
 
-### Assignment 2 (Page objects and fixtures)
+### Evening 2: scale up your suite
 
-- Create `LoginPage` and `RegisterPage` page objects and refactor your test to use them.
-- Expose the page objects as fixtures with `test.extend`.
+#### Assignment 2 (Page objects and fixtures)
+
+- Finish the starter page objects in `playwright/support/pages/` (`LoginPage`, `RegisterPage`) and refactor your test to use them.
+- Expose them as fixtures in `playwright/support/fixtures/ui.fixture.ts`.
 - Bonus: add a `BookingWizard` page object, book a room and verify it in *My bookings*.
 
-### Assignment 3 (Authentication)
+#### Assignment 3 (Authentication)
 
 - Write `auth.setup.ts` that saves the state for `user` and `admin`.
 - Add `ui-user` and `ui-admin` projects that depend on `setup` and make your tests start logged in.
 - Bonus: log in with `POST /api/auth/login` and set `booker.token` instead of using the login form.
 
-### Assignment 4 (Network and hybrid tests)
+#### Assignment 4 (Network and hybrid tests)
 
 - Mock `POST /api/bookings` to return `409` and assert the "Room not available" alert.
 - Seed a room (as admin) and a booking (as user) via the API, then verify them in the UI. Or book in the UI and verify via `GET /api/bookings/my-bookings`.
 - Bonus: patch the rooms response so a fake room shows up, and move the seeding into a fixture.
 
-### Assignment 5 (Pick one)
+#### Assignment 5 (Flaky-test clinic)
+
+- Add a `chaos` project that sends `x-booker-flags: slow-rooms,flaky-booking,random-order,popup-cookie` with `extraHTTPHeaders`, and run your suite with it.
+- What fails, and why? Use traces to find out.
+- Make the suite stable without `waitForTimeout`: web-first assertions, `page.addLocatorHandler` for the cookie banner, locators that don't depend on the order, and retries only where a real user would retry.
+
+### Going further (after the workshop)
+
+#### Assignment 6 (Pick one)
 
 Choose one of these, or more if you have time:
 
@@ -247,31 +269,26 @@ Choose one of these, or more if you have time:
 - **Uploads and drag & drop:** upload a room photo as admin, then drag a room to a new position in *Change order*.
 - **Tabs and shadow DOM:** open the terms from the booking wizard in a new tab, then fill the payment form (it's inside a shadow root) and finish the booking.
 
-### Assignment 6 (Visual testing)
+#### Assignment 7 (Visual testing)
 
 - Take a screenshot of the home page and run the test twice. Does it pass?
 - Mask the "deal of the day" banner, then hide it with `stylePath` instead. Which do you prefer?
+- Open the page with `?test=1` (test mode). Do you still need either?
 - Screenshots differ per operating system. To get Linux baselines for CI, run the "Update snapshots" workflow in the Actions tab of your fork.
 
-### Assignment 7 (Accessibility)
+#### Assignment 8 (Accessibility)
 
 - Run an axe scan (`@axe-core/playwright` is installed) on each step of the booking wizard and attach the results to the report.
 - Bonus: add an aria snapshot of the main navigation and the booking summary.
 
-### Assignment 8 (CI)
+#### Assignment 9 (CI)
 
 - Fork this repository and add a GitHub Actions workflow that runs your UI tests and uploads the HTML report.
 - Bonus: shard over two jobs and merge the reports.
 
-### Assignment 9 (optional, AI agents)
+#### Assignment 10 (optional, AI agents)
 
 - Run `npx playwright init-agents`, let the planner write a plan for "cancel a booking" and generate the test. Would you merge it?
-
-### Assignment 10 (Flaky-test clinic)
-
-- Add a `chaos` project that sends `x-booker-flags: slow-rooms,flaky-booking,random-order,popup-cookie` with `extraHTTPHeaders`, and run your suite with it.
-- What fails, and why? Use traces to find out.
-- Make the suite stable without `waitForTimeout`: web-first assertions, `page.addLocatorHandler` for the cookie banner, locators that don't depend on the order, and retries only where a real user would retry.
 
 ## Documentation
 
@@ -301,4 +318,4 @@ All assignments are worked out on the [`solutions`](https://github.com/Ghislain8
 ## Licence
 
 The code is licensed under the [MIT licence](LICENSE): fork it, copy it and use it in your own projects.
-The training slides live in [presentations](https://github.com/Ghislain89/presentations/tree/main/decks/playwright-training) and are licensed under CC BY-NC-SA 4.0.
+The training slides live in [ghislain.dev](https://github.com/Ghislain89/ghislain.dev/tree/main/decks/playwright-training) and are licensed under CC BY-NC-SA 4.0.

@@ -5,7 +5,7 @@ const KEY = "booker.cookie-consent";
 
 /**
  * Chaos flag `popup-cookie`: a consent dialog that appears after a random delay and
- * blocks the page. Handle it with `page.addLocatorHandler()` (assignment 10).
+ * blocks the page. Handle it with `page.addLocatorHandler()` (assignment 5, the flaky-test clinic).
  */
 export function CookieConsent() {
   const [open, setOpen] = useState(false);

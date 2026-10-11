@@ -1,6 +1,6 @@
 // <booker-payment>: a card form inside an open shadow root, like the payment widgets of
 // real payment providers. Playwright locators pierce open shadow roots, so
-// `page.getByLabel("Card number")` just works (assignment 5f). CSS and XPath selectors do not.
+// `page.getByLabel("Card number")` just works (assignment 6). CSS and XPath selectors do not.
 //
 // Test cards: 4242 4242 4242 4242 is accepted, 4000 0000 0000 0002 is declined.
 

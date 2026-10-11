@@ -101,7 +101,7 @@ function AccountSection({ user }: { user: User }) {
   );
 }
 
-/** File upload with a client-side preview: practise `setInputFiles()` (assignment 5e). */
+/** File upload with a client-side preview: practise `setInputFiles()` (assignment 6). */
 function AvatarSection({ user }: { user: User }) {
   const t = useT();
   const notify = useToast();
