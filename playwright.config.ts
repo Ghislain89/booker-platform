@@ -31,7 +31,8 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
     // The code examples from the UI slides, checked against the app. CI runs them;
-    // you don't need to: `npx playwright test --project slides`.
+    // you don't need to. They expect freshly seeded data (`npm run setup`):
+    // `npx playwright test --project slides`.
     {
       name: "slides",
       testDir: "./playwright/tests/slides",
