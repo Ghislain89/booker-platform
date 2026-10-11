@@ -3,15 +3,6 @@ import { defineConfig, devices } from "@playwright/test";
 const USER_STATE = "playwright/.auth/user.json";
 const ADMIN_STATE = "playwright/.auth/admin.json";
 
-// Every browser gets a project for the user tests and one for the admin tests
-// (`*.admin.spec.ts`). Chromium runs by default; firefox and webkit only when you
-// ask for them: `npx playwright test --project "firefox-*" --project "webkit-*"`.
-const browsers = [
-  { prefix: "ui", device: devices["Desktop Chrome"], isDefault: true },
-  { prefix: "firefox", device: devices["Desktop Firefox"], isDefault: false },
-  { prefix: "webkit", device: devices["Desktop Safari"], isDefault: false },
-];
-
 // Specs that need their own project (see the end of the file).
 const MOBILE_SPECS = /.*\.mobile\.spec\.ts/;
 const CHAOS_SPECS = /.*\.chaos\.spec\.ts/;
@@ -49,24 +40,21 @@ export default defineConfig({
       testMatch: /.*\.setup\.ts/,
       use: { ...devices["Desktop Chrome"] },
     },
-    ...browsers.flatMap(({ prefix, device, isDefault }) => [
-      {
-        name: `${prefix}-user`,
-        testDir: "./playwright/tests/ui",
-        testIgnore: [/.*\.admin\.spec\.ts/, MOBILE_SPECS, CHAOS_SPECS],
-        use: { ...device, storageState: USER_STATE },
-        dependencies: ["setup"],
-        default: isDefault,
-      },
-      {
-        name: `${prefix}-admin`,
-        testDir: "./playwright/tests/ui",
-        testMatch: /.*\.admin\.spec\.ts/,
-        use: { ...device, storageState: ADMIN_STATE },
-        dependencies: ["setup"],
-        default: isDefault,
-      },
-    ]),
+    // The user tests, and the admin tests (`*.admin.spec.ts`), each with their own storage state.
+    {
+      name: "ui-user",
+      testDir: "./playwright/tests/ui",
+      testIgnore: [/.*\.admin\.spec\.ts/, MOBILE_SPECS, CHAOS_SPECS],
+      use: { ...devices["Desktop Chrome"], storageState: USER_STATE },
+      dependencies: ["setup"],
+    },
+    {
+      name: "ui-admin",
+      testDir: "./playwright/tests/ui",
+      testMatch: /.*\.admin\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"], storageState: ADMIN_STATE },
+      dependencies: ["setup"],
+    },
     // Assignment 6 (emulation): a Dutch phone in dark mode.
     {
       name: "mobile",
@@ -97,7 +85,8 @@ export default defineConfig({
       default: false,
     },
     // The code examples from the UI slides, checked against the app. CI runs them;
-    // you don't need to: `npx playwright test --project slides`.
+    // you don't need to. They expect freshly seeded data (`npm run setup`):
+    // `npx playwright test --project slides`.
     {
       name: "slides",
       testDir: "./playwright/tests/slides",

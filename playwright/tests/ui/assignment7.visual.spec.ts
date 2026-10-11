@@ -4,15 +4,11 @@ import { LOGGED_OUT } from "../../support/auth";
 
 test.use({ storageState: LOGGED_OUT });
 
-// Screenshots differ per browser and operating system, so we keep baselines for
-// Chromium only (macOS for local runs, Linux for CI). Update them with
+// Screenshots differ per operating system, so we keep baselines for macOS (local
+// runs) and Linux (CI). Update them with
 // `npx playwright test assignment7 --update-snapshots`, and on CI with the
 // "Update snapshots" workflow.
-test.beforeEach(async ({ page, browserName }) => {
-  test.skip(
-    browserName !== "chromium",
-    "Visual baselines are kept for Chromium only",
-  );
+test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("article")).toHaveCount(3);
 });

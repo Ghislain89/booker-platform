@@ -29,10 +29,11 @@ jobs:
       - name: Set up database
         run: npm run setup
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-      # All projects: the API tests and the UI tests in Chromium, Firefox and WebKit
+        run: npx playwright install --with-deps chromium
+      # Every project except slides: main's CI runs those on a fresh database,
+      # because the API solutions add rooms that move the seeded ones to page 2.
       - name: Run Playwright tests
-        run: npx playwright test --project "*" --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+        run: npx playwright test --project API --project "ui-*" --project mobile --project chaos --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
