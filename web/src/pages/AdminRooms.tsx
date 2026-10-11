@@ -165,7 +165,7 @@ export function AdminRooms() {
               <caption className="visually-hidden">Rooms</caption>
               <thead>
                 <tr>
-                  {header("position", "Order")}
+                  {header("position", "Position")}
                   {header("number", "Number")}
                   {header("type", "Type")}
                   {header("price", "Price")}
@@ -180,7 +180,7 @@ export function AdminRooms() {
               <tbody>
                 {visible.map((room) => (
                   <tr key={room.id} data-testid="room-row">
-                    <td data-label="Order">{room.position ?? ""}</td>
+                    <td data-label="Position">{room.position ?? ""}</td>
                     <td data-label="Number">{room.number}</td>
                     <td data-label="Type">{roomTypeLabel(room.type)}</td>
                     <td data-label="Price">{formatPrice(room.price)}</td>

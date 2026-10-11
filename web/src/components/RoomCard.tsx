@@ -44,11 +44,9 @@ export function RoomCard({ room }: { room: Room }) {
           <Link
             to={`/rooms/${room.number}`}
             className="button button-secondary"
+            aria-label={t("room.detailsLabel", { number: room.number })}
           >
             {t("room.details")}
-            <span className="visually-hidden">
-              {t("room.detailsOf", { number: room.number })}
-            </span>
           </Link>
           {!inMaintenance && (
             <Link to={`/book/${room.number}`} className="button">

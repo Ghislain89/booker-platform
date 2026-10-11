@@ -259,7 +259,7 @@ export function AdminReports() {
       )}
 
       <section aria-labelledby="reports-heading">
-        <h2 id="reports-heading">Generated reports</h2>
+        <h2 id="reports-heading">Report history</h2>
         {reports.isPending && <p role="status">Loading reports…</p>}
         {reports.isError && (
           <p className="alert alert-error" role="alert">
