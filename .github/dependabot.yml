@@ -1,0 +1,34 @@
+# Dependabot: every Monday, one grouped PR per ecosystem with all minor and patch updates,
+# and a separate PR for every major update. Minor and patch PRs merge themselves once the
+# required checks pass (workflows/dependabot-auto-merge.yml); majors wait for a review.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Amsterdam
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Amsterdam
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Amsterdam
+    groups:
+      actions-minor-and-patch:
+        update-types: [minor, patch]
