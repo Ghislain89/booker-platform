@@ -6,11 +6,11 @@ import { createRandomUser } from "../../support/datafactories/user.factory";
 import {
   getApiRoomsResponse,
   getApiRoomsIdResponse,
-} from "../../support/zod/zod/rooms";
+} from "../../support/generated/zod/rooms";
 import {
   getApiBookingsIdResponse,
   deleteApiBookingsIdResponse,
-} from "../../support/zod/zod/bookings";
+} from "../../support/generated/zod/bookings";
 
 test.describe("Bonus: Improve the overall setup", () => {
   let adminToken: string;
