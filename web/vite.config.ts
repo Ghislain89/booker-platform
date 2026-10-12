@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// The web UI is served by Express on port 3000 (see src/server.ts):
+// The web UI is served by Express on port 3000 (see server/server.ts):
 // `npm run dev` runs Vite in middleware mode, `npm start` serves the build in web/dist.
 export default defineConfig({
   root: __dirname,

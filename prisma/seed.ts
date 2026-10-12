@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { seedDatabase } from "../src/lib/seed";
+import { seedDatabase } from "../server/lib/seed";
 
 const prisma = new PrismaClient();
 

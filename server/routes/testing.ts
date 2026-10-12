@@ -11,7 +11,7 @@ import { clearUploads } from "../lib/uploads";
 import { bookingInclude, toBooking } from "../services/bookings";
 import { BOOKING_STATUSES, ROOM_STATUSES, ROOM_TYPES } from "../types";
 
-// Test-support endpoints. Only mounted when TEST_API_ENABLED (see src/config/env.ts).
+// Test-support endpoints. Only mounted when TEST_API_ENABLED (see server/config/env.ts).
 
 const router = express.Router();
 
