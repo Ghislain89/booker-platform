@@ -233,7 +233,7 @@ test.describe("Evening 1", () => {
     await expect(page.getByRole("link", { name: "My profile" })).toBeVisible();
 
     await page.goto("/my/profile");
-    await page.getByLabel("Choose a photo").setInputFiles("playwright/fixtures/avatar.png");
+    await page.getByLabel("Choose a photo").setInputFiles("playwright/test-data/avatar.png");
     await expect(page.getByLabel("Choose a photo")).toHaveValue(/avatar\.png$/);
   });
 

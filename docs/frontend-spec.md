@@ -43,7 +43,7 @@ Decided: local-only (no hosted copy for participants); new repo `booker-platform
 
 ```
 booker-platform/
-├── src/                 # existing Express API (unchanged structure)
+├── server/              # Express API (was src/)
 ├── web/                 # NEW – Vite + React + TypeScript SPA
 │   ├── src/pages/…
 │   ├── src/components/…
@@ -71,11 +71,11 @@ Findings from reviewing the current API, and what the UI needs.
 | # | Type | Change |
 |---|---|---|
 | A1 | Bug | Seed stores `amenities` as `"WiFi, TV"` but the service `JSON.parse`s it → seeded rooms return `[]`. Seed must store JSON arrays. |
-| A2 | Bug | `src/types` `Room`/`Booking` don't match the Prisma schema (`name`, `imageUrl`, `features`, `totalPrice` don't exist). Align types with schema. |
+| A2 | Bug | `server/types` `Room`/`Booking` don't match the Prisma schema (`name`, `imageUrl`, `features`, `totalPrice` don't exist). Align types with schema. |
 | A3 | Bug | `GET /bookings/:id` and `GET /messages/:id` return any user's data → restrict to owner or admin (403 otherwise). |
 | A4 | Bug | `POST /bookings` has no validation: check `checkOut > checkIn`, dates not in the past, room exists, **no overlap** with confirmed/pending bookings → `409 Room not available`. |
 | A5 | Bug | Prisma client instantiated twice (`services/auth.ts` creates its own) → use `lib/prisma`. |
-| A6 | Change | Register returns `400 Username already exists` for *any* error → `409` for duplicate username/email, `400` with field errors for validation. The `solutions` branch only asserts success codes, so it is unaffected; regenerate `swagger.json` / Zod schemas. |
+| A6 | Change | Register returns `400 Username already exists` for *any* error → `409` for duplicate username/email, `400` with field errors for validation. The `solutions` branch only asserts success codes, so it is unaffected; regenerate `openapi.json` / Zod schemas. |
 | A7 | New | Public read endpoints (no auth): `GET /api/public/rooms`, `GET /api/public/rooms/:id`, `GET /api/public/branding`. Existing authenticated endpoints keep their behaviour. |
 | A8 | New | Query params on public rooms: `?type=&minPrice=&maxPrice=&capacity=&checkIn=&checkOut=&sort=price\|-price\|number&page=&pageSize=` → `{ data, meta: { page, pageSize, total } }`. |
 | A9 | New | `Room.imageUrl` (nullable) + `POST /api/rooms/:id/image` (multipart, admin). |
@@ -186,7 +186,7 @@ Numbered in the order of the UI deck ([`ui.md`](https://github.com/Ghislain89/gh
 
 **Phase 0 – API fixes (½ day)**
 A1–A6, A16; test-support endpoints (§5). Existing API assignment still passes.
-✅ Done. Also fixed: `PUT /bookings/:id`, `PUT /messages/:id` and all branding routes always returned 500; booking/message responses leaked the user's password hash; report `data`/`period` were JSON strings; deleting a room with bookings returned a misleading 404 (now 409). All input is validated (400 + `details`), API docs moved to `src/docs/*.yaml`, and CI checks types and `swagger.json` drift. API-side effects of the `slow-rooms`, `random-order` and `flaky-booking` flags are in; the UI flags follow in phase 3.
+✅ Done. Also fixed: `PUT /bookings/:id`, `PUT /messages/:id` and all branding routes always returned 500; booking/message responses leaked the user's password hash; report `data`/`period` were JSON strings; deleting a room with bookings returned a misleading 404 (now 409). All input is validated (400 + `details`), API docs moved to `server/openapi/*.yaml`, and CI checks types and `swagger.json` drift. API-side effects of the `slow-rooms`, `random-order` and `flaky-booking` flags are in; the UI flags follow in phase 3.
 
 **Phase 1 – MVP replacing the todo app (2–3 days)**
 Scaffold `web/`, single-port serving, auth pages, `/rooms` (filters + pagination), room detail, booking wizard (without shadow DOM), My bookings (cancel + confirm), admin rooms (CRUD, no DnD), deterministic mode.

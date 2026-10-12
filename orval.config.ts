@@ -2,13 +2,15 @@ import { defineConfig } from "orval";
 import "dotenv/config";
 import path from "path";
 
+// Generates Zod schemas from the OpenAPI spec (`npm run swagger:export` writes it).
+// Everything in playwright/support/generated/ is generated: don't edit it by hand.
 const target = path.join(
   __dirname,
   "playwright",
   "support",
-  "zod",
-  "swagger.json",
-); // Path to OpenAPI spec file
+  "generated",
+  "openapi.json",
+);
 export default defineConfig({
   Zod: {
     input: {
@@ -17,8 +19,8 @@ export default defineConfig({
     },
     output: {
       mode: "tags",
-      target: "playwright/support/zod/zod/index.ts",
-      schemas: "playwright/support/zod/zod/types",
+      target: "playwright/support/generated/zod/index.ts",
+      schemas: "playwright/support/generated/zod/types",
       client: "zod",
       clean: true,
     },
