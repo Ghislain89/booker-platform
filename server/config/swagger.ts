@@ -2,7 +2,7 @@ import path from "path";
 import swaggerJsdoc from "swagger-jsdoc";
 import { PORT, TEST_API_ENABLED } from "./env";
 
-const docs = path.join(__dirname, "..", "docs");
+const openapiDir = path.join(__dirname, "..", "openapi");
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -31,7 +31,7 @@ const options: swaggerJsdoc.Options = {
     },
     security: [{ bearerAuth: [] }],
   },
-  apis: [path.join(docs, "api.yaml"), ...(TEST_API_ENABLED ? [path.join(docs, "testing.yaml")] : [])],
+  apis: [path.join(openapiDir, "api.yaml"), ...(TEST_API_ENABLED ? [path.join(openapiDir, "testing.yaml")] : [])],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);

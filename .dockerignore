@@ -12,3 +12,4 @@ playwright/.auth
 .git
 .github
 *.tmp.mjs
+.env

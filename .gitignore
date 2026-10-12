@@ -9,3 +9,6 @@ playwright/.cache/
 web/dist/
 playwright/.auth/
 uploads/
+
+# Local settings; copied from .env.example on npm install
+.env
