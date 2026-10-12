@@ -1,5 +1,5 @@
-# OpenAPI definitions for the Booker API, loaded by src/config/swagger.ts.
-# Keep this file in sync with src/routes/*.ts, then run `npm run swagger:export`.
+# OpenAPI definitions for the Booker API, loaded by server/config/swagger.ts.
+# Keep this file in sync with server/routes/*.ts, then run `npm run swagger:export`.
 
 components:
   responses:
