@@ -5,17 +5,17 @@
   "main": "dist/server.js",
   "scripts": {
     "setup": "prisma migrate reset --force",
-    "dev": "ts-node-dev --respawn --transpile-only --ignore-watch web src/server.ts",
+    "dev": "ts-node-dev --respawn --transpile-only --ignore-watch web server/server.ts",
     "build": "vite build --config web/vite.config.ts",
-    "start": "ts-node --transpile-only src/server.ts --static",
+    "start": "ts-node --transpile-only server/server.ts --static",
     "test": "playwright test",
     "lint": "eslint playwright",
     "typecheck": "tsc && tsc -p web",
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:reset": "npx prisma migrate reset --force",
     "codegen": "orval --config orval.config.ts",
-    "schema:generation": "typed-openapi ./playwright/support/zod/swagger.json -r zod --output ./playwright/support/zod/api-schema.zod.ts",
-    "swagger:export": "ts-node scripts/export-swagger.ts"
+    "swagger:export": "ts-node scripts/export-swagger.ts",
+    "postinstall": "node -e \"const fs=require('fs');if(!fs.existsSync('.env')&&fs.existsSync('.env.example'))fs.copyFileSync('.env.example','.env')\""
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -67,7 +67,6 @@
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typed-openapi": "^0.10.1",
     "typescript": "^5.3.3",
     "vite": "^6.4.4",
     "zod": "^3.24.2"

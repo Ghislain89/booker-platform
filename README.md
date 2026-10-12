@@ -148,6 +148,8 @@ Set them for everyone on the trainer panel (`/__trainer`, log in as `admin`) or 
 
 ### Environment variables
 
+`npm install` creates `.env` from [`.env.example`](.env.example). `.env` isn't committed, so local settings and secrets stay on your machine.
+
 | Variable | Default | Effect |
 | --- | --- | --- |
 | `PORT` | `3000` | Server port |
@@ -159,18 +161,18 @@ Set them for everyone on the trainer panel (`/__trainer`, log in as `admin`) or 
 ## Folder structure
 
 ```
+├── server/                  # API server (Express); OpenAPI docs in server/openapi/
 ├── web/                     # Web app (React + Vite)
-├── src/                     # API server (Express); OpenAPI docs in src/docs/
 ├── prisma/                  # Database schema, migrations and seed data
 ├── docs/                    # Specs and design notes
 ├── playwright/
-│   ├── fixtures/            # Files for tests, such as avatar.png for uploads
 │   ├── support/
 │   │   ├── datafactories/   # Functions that create test data
 │   │   ├── fixtures/        # Fixtures for setting up and tearing down tests (ui.fixture.ts: UI starter)
+│   │   ├── generated/       # Generated from the API: openapi.json and its Zod schemas (don't edit)
 │   │   ├── helpers/         # Helper functions used across tests
-│   │   ├── pages/           # Page objects (starters for UI assignment 2)
-│   │   └── zod/             # Zod schemas for validating API responses
+│   │   └── pages/           # Page objects (starters for UI assignment 2)
+│   ├── test-data/           # Files for tests, such as avatar.png for uploads
 │   ├── tests/
 │   │   ├── api/             # API workshop assignments
 │   │   ├── slides/          # The code examples from the UI slides, checked in CI (not an assignment)
@@ -298,16 +300,15 @@ Choose one of these, or more if you have time:
 
 ## Changing the API
 
-The API docs live in `src/docs/api.yaml` and `src/docs/testing.yaml`. After changing them:
+The API docs live in `server/openapi/api.yaml` and `server/openapi/testing.yaml`. After changing them:
 
 ```bash
-npm run swagger:export      # writes playwright/support/zod/swagger.json
-npm run codegen             # regenerates the zod schemas in playwright/support/zod/zod/
-npm run schema:generation   # regenerates playwright/support/zod/api-schema.zod.ts
+npm run swagger:export      # writes playwright/support/generated/openapi.json
+npm run codegen             # regenerates the Zod schemas in playwright/support/generated/zod/
 npm run typecheck
 ```
 
-CI fails when `swagger.json` is out of date.
+CI fails when `openapi.json` is out of date.
 
 ## Solutions
 

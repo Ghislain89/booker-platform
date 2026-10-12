@@ -25,7 +25,7 @@ jobs:
       - name: Type check
         run: npm run typecheck
       - name: Check swagger.json is up to date
-        run: npm run swagger:export && git diff --exit-code playwright/support/zod/swagger.json
+        run: npm run swagger:export && git diff --exit-code playwright/support/generated/openapi.json
       - name: Set up database
         run: npm run setup
       - name: Install Playwright browsers

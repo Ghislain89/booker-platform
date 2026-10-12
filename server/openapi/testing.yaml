@@ -1,5 +1,5 @@
-# Test-support endpoints (src/routes/testing.ts). Only documented and mounted when
-# the test API is enabled; see TEST_API_ENABLED in src/config/env.ts.
+# Test-support endpoints (server/routes/testing.ts). Only documented and mounted when
+# the test API is enabled; see TEST_API_ENABLED in server/config/env.ts.
 
 components:
   schemas:
