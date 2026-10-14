@@ -36,8 +36,11 @@ test("guest sees the approval without reloading", async ({
   const row = myBookings.rowFor(room.number);
   await expect(row.getByTestId("status-badge")).toHaveText("Pending");
 
-  // The admin, in a second context with its own storage state
-  const adminContext = await browser.newContext({ storageState: ADMIN_STATE });
+  // The admin, in a second context with its own storage state. `await using`
+  // closes it when the test ends, also when the test fails.
+  await using adminContext = await browser.newContext({
+    storageState: ADMIN_STATE,
+  });
   const admin = await adminContext.newPage();
   await admin.goto("/admin/bookings");
   await admin
@@ -48,7 +51,6 @@ test("guest sees the approval without reloading", async ({
   await expect(
     admin.getByRole("region", { name: "Notifications" }),
   ).toContainText(`Booking for room ${room.number} approved.`);
-  await adminContext.close();
 
   // Back to the guest: no reload, the server pushed the change.
   await expect(row.getByTestId("status-badge")).toHaveText("Confirmed");
@@ -65,7 +67,9 @@ test("admin's unread counter goes up when a guest sends a message", async ({
   browser,
   page,
 }) => {
-  const adminContext = await browser.newContext({ storageState: ADMIN_STATE });
+  await using adminContext = await browser.newContext({
+    storageState: ADMIN_STATE,
+  });
   const admin = await adminContext.newPage();
   await admin.goto("/admin/messages");
   await expect(admin.getByTestId("message").first()).toBeVisible();
@@ -88,5 +92,4 @@ test("admin's unread counter goes up when a guest sends a message", async ({
     admin.getByTestId("message").filter({ hasText: subject }),
   ).toBeVisible();
   await expect.poll(unread).toBeGreaterThan(before);
-  await adminContext.close();
 });

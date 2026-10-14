@@ -20,10 +20,7 @@ setup("log in as user through the login form", async ({ page }) => {
 setup("log in as admin through the API", async ({ page, request }) => {
   const token = await apiLogin(request, SEEDED_ADMIN);
   await page.goto("/");
-  await page.evaluate(
-    (value) => localStorage.setItem("booker.token", value),
-    token,
-  );
+  await page.localStorage.setItem("booker.token", token);
   await page.reload();
   await expect(
     page.getByRole("link", { name: "Room management" }),

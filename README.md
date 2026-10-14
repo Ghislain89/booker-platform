@@ -320,10 +320,10 @@ All assignments are worked out on the [`solutions`](https://github.com/Ghislain8
 | --- | --- |
 | 1A, 1B | `playwright/tests/ui/assignment1.spec.ts`, unique users from `support/datafactories/user.factory.ts` |
 | 2 | `support/pages/*` (page objects), `support/fixtures/ui.fixture.ts` (fixtures), `assignment2.spec.ts` |
-| 3 | `auth.setup.ts` (user through the form, admin through the API), the `setup`, `*-user` and `*-admin` projects in `playwright.config.ts`, `assignment3*.spec.ts` |
+| 3 | `auth.setup.ts` (user through the form, admin through the API and `page.localStorage`), the `setup`, `*-user` and `*-admin` projects in `playwright.config.ts`, `assignment3*.spec.ts` |
 | 4 | `assignment4.network.spec.ts` (mock and patch), `assignment4.hybrid.spec.ts`; the `seed` fixture creates data through the test support API and removes it afterwards |
 | 5 | `assignment5.chaos.spec.ts` in the opt-in `chaos` project (`extraHTTPHeaders` with the chaos flags): `addLocatorHandler` for the cookie banner, locators by name, and `toPass` around the one step a real user would retry |
-| 6 | One file per option: `assignment6.downloads.spec.ts` (confirm dialog, PDF/CSV invoices), `assignment6.contexts.spec.ts` (guest and admin in two contexts, live updates), `assignment6.clock.spec.ts` (`page.clock.setFixedTime`), `assignment6.mobile.spec.ts` (the `mobile` project: Pixel 7, `nl-NL`, dark), `assignment6.upload-dnd.admin.spec.ts` (`setInputFiles`, `dragTo`, keyboard), `assignment6.tabs-shadow.spec.ts` (popup, shadow DOM payment form). The payment step is in the `BookingWizard` page object |
+| 6 | One file per option: `assignment6.downloads.spec.ts` (confirm dialog, PDF/CSV invoices), `assignment6.contexts.spec.ts` (guest and admin in two contexts with `await using`, live updates), `assignment6.clock.spec.ts` (`page.clock.setFixedTime`), `assignment6.mobile.spec.ts` (the `mobile` project: Pixel 7, `nl-NL`, dark), `assignment6.upload-dnd.admin.spec.ts` (`setInputFiles`, `dragTo`, keyboard), `assignment6.tabs-shadow.spec.ts` (popup, shadow DOM payment form). The payment step is in the `BookingWizard` page object |
 | 7 | `assignment7.visual.spec.ts` and `visual.css`. Baselines are kept for Chromium on macOS and Linux; the "Update snapshots" workflow regenerates the Linux ones |
 | 8 | `assignment8.a11y.spec.ts` (axe per wizard step, attached to the report; aria snapshots) |
 | 9 | `.github/workflows/playwright.yml`: all browsers, 4 shards, merged HTML report |
