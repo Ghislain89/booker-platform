@@ -326,7 +326,7 @@ All assignments are worked out on the [`solutions`](https://github.com/Ghislain8
 | 6 | One file per option: `assignment6.downloads.spec.ts` (confirm dialog, PDF/CSV invoices), `assignment6.contexts.spec.ts` (guest and admin in two contexts with `await using`, live updates), `assignment6.clock.spec.ts` (`page.clock.setFixedTime`), `assignment6.mobile.spec.ts` (the `mobile` project: Pixel 7, `nl-NL`, dark), `assignment6.upload-dnd.admin.spec.ts` (`setInputFiles`, `dragTo`, keyboard), `assignment6.tabs-shadow.spec.ts` (popup, shadow DOM payment form). The payment step is in the `BookingWizard` page object |
 | 7 | `assignment7.visual.spec.ts` and `visual.css`. Baselines are kept for Chromium on macOS and Linux; the "Update snapshots" workflow regenerates the Linux ones |
 | 8 | `assignment8.a11y.spec.ts` (axe per wizard step, attached to the report; aria snapshots) |
-| 9 | `.github/workflows/playwright.yml`: all browsers, 4 shards, merged HTML report |
+| 9 | `.github/workflows/playwright.yml`: Chromium, 4 shards, merged HTML report |
 | 10 | `specs/cancel-booking.md` (plan) and `assignment10.cancel-booking.spec.ts` |
 
 Extra admin examples: `rooms.admin.spec.ts` and `bookings.admin.spec.ts`.
