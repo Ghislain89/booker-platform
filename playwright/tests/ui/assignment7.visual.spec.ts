@@ -34,3 +34,18 @@ test(
     });
   },
 );
+
+// Bonus: the masked screenshot again, as WebP. The baseline is lossless WebP, so
+// the comparison is just as strict; compare its size with the PNG next to it.
+// In Chromium the browser encodes the WebP itself, and for this page the file is
+// almost twice the size of the PNG. Measure before you switch.
+test(
+  "Assignment 7 bonus: home page with the deal of the day masked, as WebP",
+  { tag: "@visual" },
+  async ({ page }) => {
+    await expect(page).toHaveScreenshot("home-masked.webp", {
+      fullPage: true,
+      mask: [page.getByTestId("deal-of-the-day")],
+    });
+  },
+);
