@@ -444,8 +444,8 @@ test.describe("Going further", () => {
     await saveState(page, request, "user", userState);
     await saveState(page, request, "admin", adminState);
 
-    const guest = await browser.newContext({ storageState: userState });
-    const admin = await browser.newContext({ storageState: adminState });
+    await using guest = await browser.newContext({ storageState: userState });
+    await using admin = await browser.newContext({ storageState: adminState });
     const guestPage = await guest.newPage();
     const adminPage = await admin.newPage();
 
@@ -456,8 +456,6 @@ test.describe("Going further", () => {
 
     const booking = guestPage.getByRole("row", { name: `Room ${number}` });
     await expect(booking.getByTestId("status-badge")).toHaveText("Confirmed");
-    await guest.close();
-    await admin.close();
   });
 
   test("Dialogs, downloads & new tabs", async ({ page, browser, request, seed }) => {
@@ -493,6 +491,7 @@ test.describe("Going further", () => {
     await page.goto("/");
     const map = page.getByTitle("Map showing the hotel location").contentFrame();
     await expect(map.getByRole("button", { name: "Zoom in" })).toBeVisible();
+    await expect(page.frameLocator().getByRole("button", { name: "Zoom in" })).toBeVisible();
 
     await logIn(page, request);
     await fillWizard(page, "203");
