@@ -24,7 +24,7 @@
   "author": "Ghislain Gabriëlse",
   "license": "MIT",
   "dependencies": {
-    "@prisma/client": "^5.10.2",
+    "@prisma/client": "^7.10.0",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "bcryptjs": "^3.0.3",
