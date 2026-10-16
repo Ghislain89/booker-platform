@@ -20,14 +20,14 @@ export const GetApiRoomsResponse = zod.object({
   "number": zod.string(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().describe('Price per night'),
-  "capacity": zod.number().int(),
+  "capacity": zod.int(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
   "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
-  "position": zod.number().int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "position": zod.int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 }))
 })
 
@@ -46,13 +46,13 @@ export const PostApiRoomsBody = zod.object({
   "number": zod.string().max(postApiRoomsBodyOneNumberMax),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().min(postApiRoomsBodyOnePriceMin),
-  "capacity": zod.number().int().min(1).max(postApiRoomsBodyOneCapacityMax),
+  "capacity": zod.int().min(1).max(postApiRoomsBodyOneCapacityMax),
   "amenities": zod.array(zod.string()).optional(),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']).optional(),
   "featured": zod.boolean().optional()
-}).and(zod.object({
+}).and(zod.looseObject({
 
-}).passthrough())
+}))
 
 export const PostApiRoomsResponse = zod.object({
   "success": zod.boolean(),
@@ -61,14 +61,14 @@ export const PostApiRoomsResponse = zod.object({
   "number": zod.string(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().describe('Price per night'),
-  "capacity": zod.number().int(),
+  "capacity": zod.int(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
   "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
-  "position": zod.number().int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "position": zod.int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 })
 })
 
@@ -87,14 +87,14 @@ export const PutApiRoomsOrderResponse = zod.object({
   "number": zod.string(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().describe('Price per night'),
-  "capacity": zod.number().int(),
+  "capacity": zod.int(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
   "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
-  "position": zod.number().int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "position": zod.int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 }))
 })
 
@@ -112,14 +112,14 @@ export const GetApiRoomsIdResponse = zod.object({
   "number": zod.string(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().describe('Price per night'),
-  "capacity": zod.number().int(),
+  "capacity": zod.int(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
   "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
-  "position": zod.number().int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "position": zod.int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 })
 })
 
@@ -143,7 +143,7 @@ export const PutApiRoomsIdBody = zod.object({
   "number": zod.string().max(putApiRoomsIdBodyNumberMax).optional(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']).optional(),
   "price": zod.number().min(putApiRoomsIdBodyPriceMin).optional(),
-  "capacity": zod.number().int().min(1).max(putApiRoomsIdBodyCapacityMax).optional(),
+  "capacity": zod.int().min(1).max(putApiRoomsIdBodyCapacityMax).optional(),
   "amenities": zod.array(zod.string()).optional(),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']).optional(),
   "featured": zod.boolean().optional()
@@ -156,14 +156,14 @@ export const PutApiRoomsIdResponse = zod.object({
   "number": zod.string(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().describe('Price per night'),
-  "capacity": zod.number().int(),
+  "capacity": zod.int(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
   "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
-  "position": zod.number().int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "position": zod.int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 })
 })
 
@@ -198,14 +198,14 @@ export const PostApiRoomsIdImageResponse = zod.object({
   "number": zod.string(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().describe('Price per night'),
-  "capacity": zod.number().int(),
+  "capacity": zod.int(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
   "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
-  "position": zod.number().int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "position": zod.int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 })
 })
 
@@ -223,14 +223,14 @@ export const DeleteApiRoomsIdImageResponse = zod.object({
   "number": zod.string(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().describe('Price per night'),
-  "capacity": zod.number().int(),
+  "capacity": zod.int(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
   "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
-  "position": zod.number().int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "position": zod.int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 })
 })
 

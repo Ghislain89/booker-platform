@@ -5,9 +5,9 @@
  * API of the Booker hotel, the test object for the DeTesters Playwright training. Log in with `admin` / `password123` or `user` / `password123` and click Authorize.
  * OpenAPI spec version: 1.0.0
  */
-import type { PostApiTestingSeedBodyBookingsItem } from './postApiTestingSeedBodyBookingsItem';
-import type { PostApiTestingSeedBodyRoomsItem } from './postApiTestingSeedBodyRoomsItem';
-import type { PostApiTestingSeedBodyUsersItem } from './postApiTestingSeedBodyUsersItem';
+import type { PostApiTestingSeedBodyBookingsItem } from './postApiTestingSeedBodyBookingsItem.js';
+import type { PostApiTestingSeedBodyRoomsItem } from './postApiTestingSeedBodyRoomsItem.js';
+import type { PostApiTestingSeedBodyUsersItem } from './postApiTestingSeedBodyUsersItem.js';
 
 export type PostApiTestingSeedBody = {
   /** @pattern ^[A-Za-z0-9_]{1,30}$ */

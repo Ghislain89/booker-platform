@@ -27,8 +27,8 @@ export const PostApiAuthLoginResponse = zod.object({
   "email": zod.string(),
   "role": zod.enum(['ROLE_USER', 'ROLE_ADMIN']),
   "avatarUrl": zod.string().nullable(),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 })
 })
 })
@@ -49,7 +49,7 @@ export const postApiAuthRegisterBodyPasswordMax = 100;
 
 export const PostApiAuthRegisterBody = zod.object({
   "username": zod.string().min(postApiAuthRegisterBodyUsernameMin).max(postApiAuthRegisterBodyUsernameMax).regex(postApiAuthRegisterBodyUsernameRegExp),
-  "email": zod.string().email(),
+  "email": zod.email(),
   "password": zod.string().min(postApiAuthRegisterBodyPasswordMin).max(postApiAuthRegisterBodyPasswordMax)
 })
 
@@ -63,8 +63,8 @@ export const PostApiAuthRegisterResponse = zod.object({
   "email": zod.string(),
   "role": zod.enum(['ROLE_USER', 'ROLE_ADMIN']),
   "avatarUrl": zod.string().nullable(),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 })
 })
 })
@@ -88,8 +88,8 @@ export const GetApiAuthMeResponse = zod.object({
   "email": zod.string(),
   "role": zod.enum(['ROLE_USER', 'ROLE_ADMIN']),
   "avatarUrl": zod.string().nullable(),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 })
 })
 
@@ -97,7 +97,7 @@ export const GetApiAuthMeResponse = zod.object({
  * @summary Change your e-mail address
  */
 export const PutApiAuthMeBody = zod.object({
-  "email": zod.string().email()
+  "email": zod.email()
 })
 
 export const PutApiAuthMeResponse = zod.object({
@@ -108,8 +108,8 @@ export const PutApiAuthMeResponse = zod.object({
   "email": zod.string(),
   "role": zod.enum(['ROLE_USER', 'ROLE_ADMIN']),
   "avatarUrl": zod.string().nullable(),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 })
 })
 
@@ -129,8 +129,8 @@ export const PostApiAuthMeAvatarResponse = zod.object({
   "email": zod.string(),
   "role": zod.enum(['ROLE_USER', 'ROLE_ADMIN']),
   "avatarUrl": zod.string().nullable(),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 })
 })
 
