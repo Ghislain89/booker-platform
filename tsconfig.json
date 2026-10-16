@@ -1,17 +1,18 @@
 {
   "compilerOptions": {
     "target": "es2018",
-    "module": "commonjs",
+    "module": "nodenext",
     "noEmit": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "resolveJsonModule": true,
-    "baseUrl": ".",
+    "rootDir": ".",
+    "types": ["node"],
     "paths": {
-      "@/*": ["server/*"]
+      "@/*": ["./server/*"]
     }
   },
   "include": ["server/**/*", "scripts/**/*", "prisma/**/*", "playwright/**/*", "playwright.config.ts", "orval.config.ts"],
