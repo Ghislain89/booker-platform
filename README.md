@@ -11,7 +11,7 @@ The roadmap for the web app is in [docs/frontend-spec.md](docs/frontend-spec.md)
 
 ## Getting started
 
-Before the workshop, install Git, Node.js (LTS), VS Code and the Playwright VS Code extension. See the [preparation page](https://ghislain.dev/playwright/preparation.html) for details.
+Before the workshop, install Git, Node.js 22.22 or newer (the current LTS is fine), VS Code and the Playwright VS Code extension. See the [preparation page](https://ghislain.dev/playwright/preparation.html) for details.
 
 ```bash
 git clone https://github.com/Ghislain89/booker-platform.git
