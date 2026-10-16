@@ -19,10 +19,10 @@ export const GetApiReportsResponse = zod.object({
   "type": zod.enum(['OCCUPANCY', 'REVENUE', 'CUSTOMER_SATISFACTION']),
   "data": zod.record(zod.string(), zod.unknown()).describe('Report figures; the shape depends on the report type.'),
   "period": zod.object({
-  "start": zod.string().datetime({"offset":true}),
-  "end": zod.string().datetime({"offset":true})
+  "start": zod.iso.datetime({"offset":true}),
+  "end": zod.iso.datetime({"offset":true})
 }),
-  "generatedAt": zod.string().datetime({"offset":true})
+  "generatedAt": zod.iso.datetime({"offset":true})
 }))
 })
 
@@ -33,8 +33,8 @@ export const GetApiReportsResponse = zod.object({
 export const PostApiReportsGenerateBody = zod.object({
   "type": zod.enum(['OCCUPANCY', 'REVENUE', 'CUSTOMER_SATISFACTION']),
   "period": zod.object({
-  "start": zod.string().datetime({"offset":true}),
-  "end": zod.string().datetime({"offset":true})
+  "start": zod.iso.datetime({"offset":true}),
+  "end": zod.iso.datetime({"offset":true})
 })
 })
 
@@ -45,10 +45,10 @@ export const PostApiReportsGenerateResponse = zod.object({
   "type": zod.enum(['OCCUPANCY', 'REVENUE', 'CUSTOMER_SATISFACTION']),
   "data": zod.record(zod.string(), zod.unknown()).describe('Report figures; the shape depends on the report type.'),
   "period": zod.object({
-  "start": zod.string().datetime({"offset":true}),
-  "end": zod.string().datetime({"offset":true})
+  "start": zod.iso.datetime({"offset":true}),
+  "end": zod.iso.datetime({"offset":true})
 }),
-  "generatedAt": zod.string().datetime({"offset":true})
+  "generatedAt": zod.iso.datetime({"offset":true})
 })
 })
 
@@ -66,10 +66,10 @@ export const GetApiReportsIdResponse = zod.object({
   "type": zod.enum(['OCCUPANCY', 'REVENUE', 'CUSTOMER_SATISFACTION']),
   "data": zod.record(zod.string(), zod.unknown()).describe('Report figures; the shape depends on the report type.'),
   "period": zod.object({
-  "start": zod.string().datetime({"offset":true}),
-  "end": zod.string().datetime({"offset":true})
+  "start": zod.iso.datetime({"offset":true}),
+  "end": zod.iso.datetime({"offset":true})
 }),
-  "generatedAt": zod.string().datetime({"offset":true})
+  "generatedAt": zod.iso.datetime({"offset":true})
 })
 })
 

@@ -5,8 +5,8 @@
  * API of the Booker hotel, the test object for the DeTesters Playwright training. Log in with `admin` / `password123` or `user` / `password123` and click Authorize.
  * OpenAPI spec version: 1.0.0
  */
-import type { GetApiPublicRoomsSort } from './getApiPublicRoomsSort';
-import type { GetApiPublicRoomsTypeItem } from './getApiPublicRoomsTypeItem';
+import type { GetApiPublicRoomsSort } from './getApiPublicRoomsSort.js';
+import type { GetApiPublicRoomsTypeItem } from './getApiPublicRoomsTypeItem.js';
 
 export type GetApiPublicRoomsParams = {
 /**

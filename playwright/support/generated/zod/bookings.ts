@@ -18,16 +18,16 @@ export const GetApiBookingsResponse = zod.object({
   "id": zod.string(),
   "userId": zod.string(),
   "roomId": zod.string(),
-  "checkIn": zod.string().datetime({"offset":true}),
-  "checkOut": zod.string().datetime({"offset":true}),
+  "checkIn": zod.iso.datetime({"offset":true}),
+  "checkOut": zod.iso.datetime({"offset":true}),
   "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED']),
-  "adults": zod.number().int(),
-  "children": zod.number().int(),
+  "adults": zod.int(),
+  "children": zod.int(),
   "extras": zod.array(zod.enum(['BREAKFAST', 'PARKING', 'LATE_CHECKOUT']).describe('Breakfast: € 15 per guest per night · Parking: € 12 per night · Late check-out: € 25 per stay')),
-  "nights": zod.number().int().describe('Computed from checkIn and checkOut'),
+  "nights": zod.int().describe('Computed from checkIn and checkOut'),
   "totalPrice": zod.number().describe('Computed; nights × room price + extras'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true}),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true}),
   "user": zod.object({
   "id": zod.string(),
   "username": zod.string(),
@@ -38,14 +38,14 @@ export const GetApiBookingsResponse = zod.object({
   "number": zod.string(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().describe('Price per night'),
-  "capacity": zod.number().int(),
+  "capacity": zod.int(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
   "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
-  "position": zod.number().int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "position": zod.int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 }).optional()
 }))
 })
@@ -71,10 +71,10 @@ export const postApiBookingsBodyChildrenMax = 10;
 
 export const PostApiBookingsBody = zod.object({
   "roomId": zod.string(),
-  "checkIn": zod.string().datetime({"offset":true}),
-  "checkOut": zod.string().datetime({"offset":true}),
-  "adults": zod.number().int().min(1).max(postApiBookingsBodyAdultsMax).default(postApiBookingsBodyAdultsDefault),
-  "children": zod.number().int().min(postApiBookingsBodyChildrenMin).max(postApiBookingsBodyChildrenMax).default(postApiBookingsBodyChildrenDefault),
+  "checkIn": zod.iso.datetime({"offset":true}),
+  "checkOut": zod.iso.datetime({"offset":true}),
+  "adults": zod.int().min(1).max(postApiBookingsBodyAdultsMax).default(postApiBookingsBodyAdultsDefault),
+  "children": zod.int().min(postApiBookingsBodyChildrenMin).max(postApiBookingsBodyChildrenMax).default(postApiBookingsBodyChildrenDefault),
   "extras": zod.array(zod.enum(['BREAKFAST', 'PARKING', 'LATE_CHECKOUT']).describe('Breakfast: € 15 per guest per night · Parking: € 12 per night · Late check-out: € 25 per stay')).optional()
 })
 
@@ -84,16 +84,16 @@ export const PostApiBookingsResponse = zod.object({
   "id": zod.string(),
   "userId": zod.string(),
   "roomId": zod.string(),
-  "checkIn": zod.string().datetime({"offset":true}),
-  "checkOut": zod.string().datetime({"offset":true}),
+  "checkIn": zod.iso.datetime({"offset":true}),
+  "checkOut": zod.iso.datetime({"offset":true}),
   "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED']),
-  "adults": zod.number().int(),
-  "children": zod.number().int(),
+  "adults": zod.int(),
+  "children": zod.int(),
   "extras": zod.array(zod.enum(['BREAKFAST', 'PARKING', 'LATE_CHECKOUT']).describe('Breakfast: € 15 per guest per night · Parking: € 12 per night · Late check-out: € 25 per stay')),
-  "nights": zod.number().int().describe('Computed from checkIn and checkOut'),
+  "nights": zod.int().describe('Computed from checkIn and checkOut'),
   "totalPrice": zod.number().describe('Computed; nights × room price + extras'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true}),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true}),
   "user": zod.object({
   "id": zod.string(),
   "username": zod.string(),
@@ -104,14 +104,14 @@ export const PostApiBookingsResponse = zod.object({
   "number": zod.string(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().describe('Price per night'),
-  "capacity": zod.number().int(),
+  "capacity": zod.int(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
   "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
-  "position": zod.number().int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "position": zod.int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 }).optional()
 })
 })
@@ -125,16 +125,16 @@ export const GetApiBookingsMyBookingsResponse = zod.object({
   "id": zod.string(),
   "userId": zod.string(),
   "roomId": zod.string(),
-  "checkIn": zod.string().datetime({"offset":true}),
-  "checkOut": zod.string().datetime({"offset":true}),
+  "checkIn": zod.iso.datetime({"offset":true}),
+  "checkOut": zod.iso.datetime({"offset":true}),
   "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED']),
-  "adults": zod.number().int(),
-  "children": zod.number().int(),
+  "adults": zod.int(),
+  "children": zod.int(),
   "extras": zod.array(zod.enum(['BREAKFAST', 'PARKING', 'LATE_CHECKOUT']).describe('Breakfast: € 15 per guest per night · Parking: € 12 per night · Late check-out: € 25 per stay')),
-  "nights": zod.number().int().describe('Computed from checkIn and checkOut'),
+  "nights": zod.int().describe('Computed from checkIn and checkOut'),
   "totalPrice": zod.number().describe('Computed; nights × room price + extras'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true}),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true}),
   "user": zod.object({
   "id": zod.string(),
   "username": zod.string(),
@@ -145,14 +145,14 @@ export const GetApiBookingsMyBookingsResponse = zod.object({
   "number": zod.string(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().describe('Price per night'),
-  "capacity": zod.number().int(),
+  "capacity": zod.int(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
   "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
-  "position": zod.number().int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "position": zod.int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 }).optional()
 }))
 })
@@ -171,16 +171,16 @@ export const GetApiBookingsIdResponse = zod.object({
   "id": zod.string(),
   "userId": zod.string(),
   "roomId": zod.string(),
-  "checkIn": zod.string().datetime({"offset":true}),
-  "checkOut": zod.string().datetime({"offset":true}),
+  "checkIn": zod.iso.datetime({"offset":true}),
+  "checkOut": zod.iso.datetime({"offset":true}),
   "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED']),
-  "adults": zod.number().int(),
-  "children": zod.number().int(),
+  "adults": zod.int(),
+  "children": zod.int(),
   "extras": zod.array(zod.enum(['BREAKFAST', 'PARKING', 'LATE_CHECKOUT']).describe('Breakfast: € 15 per guest per night · Parking: € 12 per night · Late check-out: € 25 per stay')),
-  "nights": zod.number().int().describe('Computed from checkIn and checkOut'),
+  "nights": zod.int().describe('Computed from checkIn and checkOut'),
   "totalPrice": zod.number().describe('Computed; nights × room price + extras'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true}),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true}),
   "user": zod.object({
   "id": zod.string(),
   "username": zod.string(),
@@ -191,14 +191,14 @@ export const GetApiBookingsIdResponse = zod.object({
   "number": zod.string(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().describe('Price per night'),
-  "capacity": zod.number().int(),
+  "capacity": zod.int(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
   "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
-  "position": zod.number().int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "position": zod.int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 }).optional()
 })
 })
@@ -220,16 +220,16 @@ export const PutApiBookingsIdResponse = zod.object({
   "id": zod.string(),
   "userId": zod.string(),
   "roomId": zod.string(),
-  "checkIn": zod.string().datetime({"offset":true}),
-  "checkOut": zod.string().datetime({"offset":true}),
+  "checkIn": zod.iso.datetime({"offset":true}),
+  "checkOut": zod.iso.datetime({"offset":true}),
   "status": zod.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED']),
-  "adults": zod.number().int(),
-  "children": zod.number().int(),
+  "adults": zod.int(),
+  "children": zod.int(),
   "extras": zod.array(zod.enum(['BREAKFAST', 'PARKING', 'LATE_CHECKOUT']).describe('Breakfast: € 15 per guest per night · Parking: € 12 per night · Late check-out: € 25 per stay')),
-  "nights": zod.number().int().describe('Computed from checkIn and checkOut'),
+  "nights": zod.int().describe('Computed from checkIn and checkOut'),
   "totalPrice": zod.number().describe('Computed; nights × room price + extras'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true}),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true}),
   "user": zod.object({
   "id": zod.string(),
   "username": zod.string(),
@@ -240,14 +240,14 @@ export const PutApiBookingsIdResponse = zod.object({
   "number": zod.string(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().describe('Price per night'),
-  "capacity": zod.number().int(),
+  "capacity": zod.int(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
   "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
-  "position": zod.number().int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "position": zod.int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 }).optional()
 })
 })

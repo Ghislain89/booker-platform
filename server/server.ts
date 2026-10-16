@@ -117,14 +117,17 @@ async function attachWebApp(server: http.Server) {
       );
     }
     app.use(express.static(dist, { index: false }));
-    app.get("*", (req, res) => res.sendFile(index));
+    // Express 5 names wildcards; {*splat} also matches "/".
+    app.get("/{*splat}", (req, res) => res.sendFile(index));
     return;
   }
-  process.env.VITE_CJS_IGNORE_WARNING = "true";
   const { createServer } = await import("vite");
   const vite = await createServer({
     root: WEB_ROOT,
-    configFile: path.join(WEB_ROOT, "vite.config.ts"),
+    configFile: path.join(WEB_ROOT, "vite.config.mts"),
+    // Import the config directly: the default loader writes a temporary copy, and
+    // `node --watch` (npm run dev) would restart on every one.
+    configLoader: "native",
     server: { middlewareMode: true, hmr: { server } },
     appType: "spa",
   });
