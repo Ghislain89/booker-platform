@@ -132,6 +132,7 @@ test.describe("Evening 1", () => {
         await page.getByLabel("Username").fill("user");
         await page.getByLabel("Password").fill("password123");
       });
+
       await page.getByRole("button", { name: "Log in" }).click();
       await expect(page.getByRole("heading", { name: "My bookings" })).toBeVisible();
     });
