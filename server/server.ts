@@ -121,7 +121,6 @@ async function attachWebApp(server: http.Server) {
     app.get("/{*splat}", (req, res) => res.sendFile(index));
     return;
   }
-  process.env.VITE_CJS_IGNORE_WARNING = "true";
   const { createServer } = await import("vite");
   const vite = await createServer({
     root: WEB_ROOT,
