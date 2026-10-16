@@ -20,6 +20,9 @@
   "keywords": [],
   "author": "Ghislain Gabriëlse",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.22.0"
+  },
   "dependencies": {
     "@prisma/adapter-libsql": "^7.10.1",
     "@prisma/client": "^7.10.1",
@@ -43,7 +46,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.3.0",
-    "@types/node": "^20.11.24",
+    "@types/node": "^22.20.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@typescript/native": "npm:typescript@^7.0.2",
