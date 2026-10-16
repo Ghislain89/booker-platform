@@ -29,7 +29,7 @@ jobs:
         run: npx playwright test
       - name: Run the code examples from the UI slides
         run: npx playwright test --project slides --reporter list
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
