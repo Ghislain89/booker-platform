@@ -5,9 +5,9 @@
  * API of the Booker hotel, the test object for the DeTesters Playwright training. Log in with `admin` / `password123` or `user` / `password123` and click Authorize.
  * OpenAPI spec version: 1.0.0
  */
-import type { BrandingContact } from './brandingContact';
-import type { BrandingMap } from './brandingMap';
-import type { BrandingTheme } from './brandingTheme';
+import type { BrandingContact } from './brandingContact.js';
+import type { BrandingMap } from './brandingMap.js';
+import type { BrandingTheme } from './brandingTheme.js';
 
 export interface Branding {
   id: string;

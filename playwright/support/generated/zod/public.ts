@@ -31,13 +31,13 @@ export const GetApiPublicRoomsQueryParams = zod.object({
   "type": zod.array(zod.enum(['STANDARD', 'DELUXE', 'SUITE'])).optional().describe('One or more room types, comma separated or repeated'),
   "minPrice": zod.number().min(getApiPublicRoomsQueryMinPriceMin).optional(),
   "maxPrice": zod.number().min(getApiPublicRoomsQueryMaxPriceMin).optional(),
-  "capacity": zod.number().int().min(1).optional().describe('Minimum number of guests'),
+  "capacity": zod.int().min(1).optional().describe('Minimum number of guests'),
   "featured": zod.boolean().optional(),
-  "checkIn": zod.string().date().optional(),
-  "checkOut": zod.string().date().optional(),
+  "checkIn": zod.iso.date().optional(),
+  "checkOut": zod.iso.date().optional(),
   "sort": zod.enum(['number', 'price', '-price', 'capacity', '-capacity']).default(getApiPublicRoomsQuerySortDefault),
-  "page": zod.number().int().min(1).default(getApiPublicRoomsQueryPageDefault),
-  "pageSize": zod.number().int().min(1).max(getApiPublicRoomsQueryPageSizeMax).default(getApiPublicRoomsQueryPageSizeDefault)
+  "page": zod.int().min(1).default(getApiPublicRoomsQueryPageDefault),
+  "pageSize": zod.int().min(1).max(getApiPublicRoomsQueryPageSizeMax).default(getApiPublicRoomsQueryPageSizeDefault)
 })
 
 export const GetApiPublicRoomsResponse = zod.object({
@@ -47,20 +47,20 @@ export const GetApiPublicRoomsResponse = zod.object({
   "number": zod.string(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().describe('Price per night'),
-  "capacity": zod.number().int(),
+  "capacity": zod.int(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
   "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
-  "position": zod.number().int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "position": zod.int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 })),
   "meta": zod.object({
-  "page": zod.number().int(),
-  "pageSize": zod.number().int(),
-  "total": zod.number().int(),
-  "totalPages": zod.number().int()
+  "page": zod.int(),
+  "pageSize": zod.int(),
+  "total": zod.int(),
+  "totalPages": zod.int()
 })
 })
 
@@ -78,18 +78,18 @@ export const GetApiPublicRoomsIdResponse = zod.object({
   "number": zod.string(),
   "type": zod.enum(['STANDARD', 'DELUXE', 'SUITE']),
   "price": zod.number().describe('Price per night'),
-  "capacity": zod.number().int(),
+  "capacity": zod.int(),
   "amenities": zod.array(zod.string()),
   "status": zod.enum(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE']),
   "featured": zod.boolean().describe('Shown on the home page'),
   "imageUrl": zod.string().nullable().describe('Photo uploaded with `POST /api/rooms/{id}/image`'),
-  "position": zod.number().int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "position": zod.int().describe('Order in the admin room list; set with `PUT /api/rooms/order`'),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 }).and(zod.object({
   "bookedPeriods": zod.array(zod.object({
-  "checkIn": zod.string().datetime({"offset":true}),
-  "checkOut": zod.string().datetime({"offset":true})
+  "checkIn": zod.iso.datetime({"offset":true}),
+  "checkOut": zod.iso.datetime({"offset":true})
 })).describe('Pending and confirmed bookings that have not ended yet')
 }))
 })
@@ -151,7 +151,7 @@ export const postApiPublicMessagesBodyContentMax = 5000;
 
 export const PostApiPublicMessagesBody = zod.object({
   "name": zod.string().max(postApiPublicMessagesBodyNameMax),
-  "email": zod.string().email(),
+  "email": zod.email(),
   "subject": zod.string().max(postApiPublicMessagesBodySubjectMax),
   "content": zod.string().max(postApiPublicMessagesBodyContentMax)
 })
@@ -166,8 +166,8 @@ export const PostApiPublicMessagesResponse = zod.object({
   "subject": zod.string(),
   "content": zod.string(),
   "status": zod.enum(['UNREAD', 'READ', 'ARCHIVED']),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true}),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true}),
   "user": zod.union([zod.object({
   "id": zod.string(),
   "username": zod.string(),

@@ -60,7 +60,7 @@
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "typescript-eslint": "^8.71.2",
     "vite": "^6.4.4",
-    "zod": "^3.24.2"
+    "zod": "^4.6.7"
   },
   "overrides": {
     "@asyncapi/generator": "3.3.0",

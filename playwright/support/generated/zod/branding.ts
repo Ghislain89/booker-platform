@@ -51,8 +51,8 @@ export const GetApiBrandingResponse = zod.object({
   "primaryColor": zod.string().regex(getApiBrandingResponseDataThemePrimaryColorRegExp).optional(),
   "secondaryColor": zod.string().regex(getApiBrandingResponseDataThemeSecondaryColorRegExp).optional()
 }),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 })
 })
 
@@ -142,8 +142,8 @@ export const PutApiBrandingResponse = zod.object({
   "primaryColor": zod.string().regex(putApiBrandingResponseDataThemePrimaryColorRegExp).optional(),
   "secondaryColor": zod.string().regex(putApiBrandingResponseDataThemeSecondaryColorRegExp).optional()
 }),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 })
 })
 
@@ -189,8 +189,8 @@ export const PostApiBrandingResetResponse = zod.object({
   "primaryColor": zod.string().regex(postApiBrandingResetResponseDataThemePrimaryColorRegExp).optional(),
   "secondaryColor": zod.string().regex(postApiBrandingResetResponseDataThemeSecondaryColorRegExp).optional()
 }),
-  "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "updatedAt": zod.iso.datetime({"offset":true})
 })
 })
 
