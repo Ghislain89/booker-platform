@@ -1,4 +1,4 @@
-import { Booking as DbBooking, Room as DbRoom } from "@prisma/client";
+import { Booking as DbBooking, Room as DbRoom } from "../generated/prisma/client";
 import { prisma } from "../lib/prisma";
 import { badRequest, conflict, forbidden, notFound } from "../lib/http";
 import { isAdmin } from "../middleware/auth";

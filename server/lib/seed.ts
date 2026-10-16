@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/prisma/client";
 
 // Deterministic seed data. Dates are relative to today (UTC) so there are always
 // past, current and future bookings. Running the seed twice gives the same result.
