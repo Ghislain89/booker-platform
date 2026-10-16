@@ -15,7 +15,6 @@ export default defineConfig({
   Zod: {
     input: {
       target: target,
-      validation: false,
     },
     output: {
       mode: "tags",

@@ -1,4 +1,4 @@
-import { Prisma, Room as DbRoom } from "@prisma/client";
+import { Prisma, Room as DbRoom } from "../generated/prisma/client";
 import { prisma } from "../lib/prisma";
 import { badRequest, conflict, notFound } from "../lib/http";
 import { removeUpload } from "../lib/uploads";
