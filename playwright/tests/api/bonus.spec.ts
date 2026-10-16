@@ -4,12 +4,12 @@ import { createRandomRoom } from "../../support/datafactories/room.factory";
 import { createRandomBooking } from "../../support/datafactories/booking.factory";
 import { createRandomUser } from "../../support/datafactories/user.factory";
 import {
-  getApiRoomsResponse,
-  getApiRoomsIdResponse,
+  GetApiRoomsResponse,
+  GetApiRoomsIdResponse,
 } from "../../support/generated/zod/rooms";
 import {
-  getApiBookingsIdResponse,
-  deleteApiBookingsIdResponse,
+  GetApiBookingsIdResponse,
+  DeleteApiBookingsIdResponse,
 } from "../../support/generated/zod/bookings";
 
 test.describe("Bonus: Improve the overall setup", () => {
@@ -97,7 +97,7 @@ test.describe("Bonus: Improve the overall setup", () => {
       );
       expect(statusCode).toBe(200);
       expect(responseBody.success).toBe(true);
-      await expect(responseBody).toMatchSchema(getApiRoomsResponse);
+      await expect(responseBody).toMatchSchema(GetApiRoomsResponse);
     });
 
     await test.step("Create a new room as admin", async () => {
@@ -109,7 +109,7 @@ test.describe("Bonus: Improve the overall setup", () => {
       createdRoom = responseBody.data;
       expect(statusCode).toBe(201);
       expect(responseBody.success).toBe(true);
-      await expect(responseBody).toMatchSchema(getApiRoomsIdResponse);
+      await expect(responseBody).toMatchSchema(GetApiRoomsIdResponse);
     });
 
     await test.step("Verify the newly created room details", async () => {
@@ -119,7 +119,7 @@ test.describe("Bonus: Improve the overall setup", () => {
       );
       expect(statusCode).toBe(200);
       expect(responseBody.success).toBe(true);
-      await expect(responseBody).toMatchSchema(getApiRoomsIdResponse);
+      await expect(responseBody).toMatchSchema(GetApiRoomsIdResponse);
     });
 
     await test.step("Create a new booking for the room", async () => {
@@ -133,7 +133,7 @@ test.describe("Bonus: Improve the overall setup", () => {
       booking = responseBody.data;
       expect(statusCode).toBe(201);
       expect(responseBody.success).toBe(true);
-      await expect(responseBody).toMatchSchema(getApiBookingsIdResponse);
+      await expect(responseBody).toMatchSchema(GetApiBookingsIdResponse);
     });
 
     await test.step("Retrieve the booking details", async () => {
@@ -143,7 +143,7 @@ test.describe("Bonus: Improve the overall setup", () => {
       );
       expect(statusCode).toBe(200);
       expect(responseBody.success).toBe(true);
-      await expect(responseBody).toMatchSchema(getApiBookingsIdResponse);
+      await expect(responseBody).toMatchSchema(GetApiBookingsIdResponse);
     });
 
     await test.step("Cancel the created booking", async () => {
@@ -154,7 +154,7 @@ test.describe("Bonus: Improve the overall setup", () => {
       expect(statusCode).toBe(200);
       expect(responseBody.success).toBe(true);
       expect(responseBody.message).toBe("Booking cancelled successfully");
-      await expect(responseBody).toMatchSchema(deleteApiBookingsIdResponse);
+      await expect(responseBody).toMatchSchema(DeleteApiBookingsIdResponse);
     });
 
     await test.step("Verify the booking status is cancelled", async () => {
