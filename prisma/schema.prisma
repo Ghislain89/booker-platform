@@ -2,9 +2,11 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider     = "prisma-client"
-  output       = "../server/generated/prisma"
-  moduleFormat = "cjs"
+  provider            = "prisma-client"
+  output              = "../server/generated/prisma"
+  moduleFormat        = "cjs"
+  // Bare imports: ts-node (CommonJS) resolves them to the generated .ts files.
+  importFileExtension = ""
 }
 
 // The database URL is in prisma.config.ts.
