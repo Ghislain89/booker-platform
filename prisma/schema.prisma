@@ -5,7 +5,7 @@ generator client {
   provider            = "prisma-client"
   output              = "../server/generated/prisma"
   moduleFormat        = "cjs"
-  // Bare imports: ts-node (CommonJS) resolves them to the generated .ts files.
+  // Bare imports: tsx and TypeScript (nodenext) both resolve them to the .ts files.
   importFileExtension = ""
 }
 
