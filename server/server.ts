@@ -117,7 +117,8 @@ async function attachWebApp(server: http.Server) {
       );
     }
     app.use(express.static(dist, { index: false }));
-    app.get("*", (req, res) => res.sendFile(index));
+    // Express 5 names wildcards; {*splat} also matches "/".
+    app.get("/{*splat}", (req, res) => res.sendFile(index));
     return;
   }
   process.env.VITE_CJS_IGNORE_WARNING = "true";
