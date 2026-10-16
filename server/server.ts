@@ -124,7 +124,10 @@ async function attachWebApp(server: http.Server) {
   const { createServer } = await import("vite");
   const vite = await createServer({
     root: WEB_ROOT,
-    configFile: path.join(WEB_ROOT, "vite.config.ts"),
+    configFile: path.join(WEB_ROOT, "vite.config.mts"),
+    // Import the config directly: the default loader writes a temporary copy, and
+    // `node --watch` (npm run dev) would restart on every one.
+    configLoader: "native",
     server: { middlewareMode: true, hmr: { server } },
     appType: "spa",
   });
