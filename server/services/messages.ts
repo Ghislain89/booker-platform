@@ -1,4 +1,4 @@
-import { Message as DbMessage } from "@prisma/client";
+import { Message as DbMessage } from "../generated/prisma/client";
 import { prisma } from "../lib/prisma";
 import { forbidden, notFound } from "../lib/http";
 import { isAdmin } from "../middleware/auth";

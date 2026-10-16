@@ -1,7 +1,8 @@
 node_modules/
 dist/
-prisma/*.db
-prisma/*.db-journal
+*.db
+*.db-journal
+server/generated/
 playwright-report/
 test-results/
 blob-report/

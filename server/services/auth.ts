@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { Prisma, User as DbUser } from "@prisma/client";
+import { Prisma, User as DbUser } from "../generated/prisma/client";
 import { prisma } from "../lib/prisma";
 import { conflict, HttpError, notFound } from "../lib/http";
 import { removeUpload } from "../lib/uploads";
