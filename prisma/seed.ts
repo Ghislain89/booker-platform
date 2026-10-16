@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../server/lib/prisma";
 import { seedDatabase } from "../server/lib/seed";
-
-const prisma = new PrismaClient();
 
 seedDatabase(prisma)
   .then((counts) => console.log("Seeded:", counts))

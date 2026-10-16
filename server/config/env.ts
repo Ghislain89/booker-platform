@@ -3,6 +3,9 @@ import "dotenv/config";
 export const PORT = Number(process.env.PORT) || 3000;
 export const JWT_SECRET = process.env.JWT_SECRET || "booker-dev-secret";
 
+// The SQLite database, relative to the project root (where npm scripts run).
+export const DATABASE_URL = process.env.DATABASE_URL || "file:./prisma/dev.db";
+
 // DEBUG=booker (or 1/true/*) logs requests and Prisma queries. Request bodies are never logged.
 export const DEBUG = ["1", "true", "booker", "*"].includes(
   (process.env.DEBUG ?? "").trim().toLowerCase(),

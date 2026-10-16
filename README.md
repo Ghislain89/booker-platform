@@ -33,7 +33,7 @@ npx playwright test --ui                     # UI mode
 
 Playwright starts the server for you if it isn't running yet. You can also use the testing panel in VS Code.
 
-`npm run setup` resets the database to its seeded state. Run it whenever you want a clean slate.
+`npm run setup` resets the database to its seeded state. Run it whenever you want a clean slate. Run it in your own terminal: Prisma refuses to reset the database when an AI agent runs the command.
 
 | What | URL |
 | --- | --- |

@@ -1,4 +1,4 @@
-import { Report as DbReport } from "@prisma/client";
+import { Report as DbReport } from "../generated/prisma/client";
 import { prisma } from "../lib/prisma";
 import { notFound } from "../lib/http";
 import { Report, ReportType } from "../types";

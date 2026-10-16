@@ -1,4 +1,4 @@
-import { Branding as DbBranding } from "@prisma/client";
+import { Branding as DbBranding } from "../generated/prisma/client";
 import { prisma } from "../lib/prisma";
 import { Branding, BrandingInput } from "../types";
 
