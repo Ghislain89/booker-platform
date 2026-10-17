@@ -74,5 +74,12 @@
       "glob": "^13.0.6"
     }
   },
-  "private": true
+  "private": true,
+  "allowScripts": {
+    "@prisma/engines@7.10.1": true,
+    "prisma@7.10.1": true,
+    "esbuild@0.28.2": true,
+    "@scarf/scarf": false,
+    "fsevents": false
+  }
 }
